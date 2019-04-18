@@ -1,0 +1,9 @@
+export const exchangeAddresses = {
+  DAI: "0x09cabEC1eAd1c0Ba254B09efb3EE13841712bE14",
+  ULT: "0x28d9353611C5A0d5a026A648c05E5d6523e41CBf"
+}
+
+export const tokenAddresses = {
+  DAI: "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359",
+  ULT: "0x09617F6fD6cF8A71278ec86e23bBab29C04353a7"
+}
