@@ -4,7 +4,7 @@
       <div class="token-name">
         <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
         <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
-        <img v-else src="../assets/dai-logo.png" alt>
+        <img v-else :src="token.src" alt>
         {{token.name}}
       </div>
       <div class="token-amount-container">
@@ -34,9 +34,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getETHPrice: "account/getETHPrice",
-      getULTPrice: "account/getULTPrice",
-      getDAIPrice: "account/getDAIPrice"
+      getPrice: "account/getPrice"
     })
   },
   data: function() {
@@ -51,10 +49,7 @@ export default {
       if (tokenName === "DAI") return `../assets/dai-logo.png`;
     },
     refreshUSDPrices: async function() {
-      let unitPriceInUSD;
-      if (this.token.name === "ULT") unitPriceInUSD = this.getULTPrice;
-      else if (this.token.name === "ETH") unitPriceInUSD = this.getETHPrice;
-
+      let unitPriceInUSD = this.getPrice[this.token.name];
       await this.wait(500);
 
       if (this.token.name !== "DAI")
@@ -71,10 +66,7 @@ export default {
     }
   },
   mounted: async function() {
-    let unitPriceInUSD;
-    if (this.token.name === "ULT") unitPriceInUSD = this.getULTPrice;
-    else if (this.token.name === "ETH") unitPriceInUSD = this.getETHPrice;
-    else unitPriceInUSD = this.getDAIPrice;
+    let unitPriceInUSD = this.getPrice[this.token.name];
     await this.wait(500);
     this.priceInUSD = parseFloat(this.token.balance * unitPriceInUSD).toFixed(
       3
@@ -82,10 +74,7 @@ export default {
     setInterval(this.refreshUSDPrices, 60000);
   },
   updated: async function() {
-    let unitPriceInUSD;
-    if (this.token.name === "ULT") unitPriceInUSD = this.getULTPrice;
-    else if (this.token.name === "ETH") unitPriceInUSD = this.getETHPrice;
-    else unitPriceInUSD = this.getDAIPrice;
+    let unitPriceInUSD = this.getPrice[this.token.name];
     await this.wait(500);
     this.priceInUSD = parseFloat(this.token.balance * unitPriceInUSD).toFixed(
       3

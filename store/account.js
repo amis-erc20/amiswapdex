@@ -1,21 +1,23 @@
 export const state = () => ({
 	account: null,
-	balance: 0,
-	balanceULT: 0,
-	balanceDAI: 0,
-	ethPrice: null,
-	ultPrice: null,
-	daiPrice: null
+	balance: {
+		ETH: 0,
+		ULT: 0,
+		DAI: 0
+	},
+	price: {
+		ETH: null,
+		ULT: null,
+		DAI: null
+	},
+	tokenList: ['ETH', 'ULT', 'DAI', 'FUN', 'BAT']
 })
 
 export const getters = {
 	getAccount: state => state.account,
 	getBalance: state => state.balance,
-	getBalanceULT: state => state.balanceULT,
-	getBalanceDAI: state => state.balanceDAI,
-	getETHPrice: state => state.ethPrice,
-	getULTPrice: state => state.ultPrice,
-	getDAIPrice: state => state.daiPrice
+	getPrice: state => state.price,
+	getTokenList: state => state.tokenList
 }
 
 export const mutations = {
@@ -25,28 +27,21 @@ export const mutations = {
 	removeAccount(state) {
 		state.account = null
 	},
-	updateBalance(state, balance) {
-		state.balance = balance
+	addToken(state, newToken) {
+		state.tokenList.push(newToken)
 	},
-	updateBalanceULT(state, balance) {
-		state.balanceULT = balance
-	},
-	updateBalanceDAI(state, balance) {
-		state.balanceDAI = balance
+	updateBalance(state, payload) {
+		let { symbol, balance } = payload
+		state.balance[symbol] = balance
 	},
 	resetAllBalances(state) {
 		state.balance = 0
 		state.balanceULT = 0
 		state.balanceDAI = 0
 	},
-	updateETHPrice(state, price) {
-		state.ethPrice = price
-	},
-	updateULTPrice(state, price) {
-		state.ultPrice = price
-	},
-	updateDAIPrice(state, price) {
-		state.daiPrice = price
+	updatePrice(state, payload) {
+		let { symbol, price } = payload
+		state.price[symbol] = price
 	}
 }
 
@@ -57,27 +52,16 @@ export const actions = {
 	async removeAccount(store) {
 		store.commit('removeAccount')
 	},
+	addToken(store, payload) {
+		store.commit('addToken', payload)
+	},
 	async updateBalance(store, payload) {
 		store.commit('updateBalance', payload)
-	},
-	async updateBalanceULT(store, payload) {
-		store.commit('updateBalanceULT', payload)
-	},
-	async updateBalanceDAI(store, payload) {
-		store.commit('updateBalanceDAI', payload)
 	},
 	async resetAllBalances(store) {
 		store.commit('resetAllBalances')
 	},
-	async updateETHPrice(store, payload) {
-		store.commit('updateETHPrice', payload)
-	},
-	async updateULTPrice(store, payload) {
-		store.commit('updateULTPrice', payload)
-	},
-	async updateDAIPrice(store, payload) {
-		store.commit('updateDAIPrice', payload)
+	async updatePrice(store, payload) {
+		store.commit('updatePrice', payload)
 	}
 }
-
-// {address: "0xfCF86Ab9FBa9fa9C6849CF0cB4D2eB4C1D0D6cf4", privateKey: "0xe55eca06cdb2f3a669d32a2922609c8fe09f3f0b53c803fd773fdfdd5659a886"}

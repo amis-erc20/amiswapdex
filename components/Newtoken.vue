@@ -1,0 +1,121 @@
+<template>
+  <section class="new-token-container">
+    <b-button
+      variant="outline-danger"
+      id="add-more-token"
+      @click="showModal(`add_more_token_modal`)"
+    >Add More Token</b-button>
+    <!-- add more token modal -->
+    <b-modal
+      ref="add_more_token_modal"
+      id="add_more_token_modal"
+      title="Add Token"
+      :hide-footer="true"
+    >
+      <div>
+        <label for>Please select a token to add</label>
+        <v-select :options="tokenList" label="title">
+          <template slot="option" slot-scope="option">
+            <img :src="option.src" height="20px">
+            {{ option.title }}
+          </template>
+        </v-select>
+      </div>
+      <div>
+        <b-button variant="danger" id="add-token-button">Add Token</b-button>
+      </div>
+    </b-modal>
+  </section>
+</template>
+
+<script>
+import {
+  getHistory,
+  initContracts,
+  getTokenHistory,
+  getULTToUSDPrice,
+  isIos,
+  isInStandaloneMode
+} from "../assets/js/utils";
+
+import { mapActions, mapGetters } from "vuex";
+import "vue-select/dist/vue-select.css";
+import { tokenAddresses } from "../assets/js/token";
+
+export default {
+  data: function() {
+    return {
+      selectedToken: "",
+      options: [
+        {
+          title: "Read the Docs",
+          url: "https://codeclimate.com/github/sagalbot/vue-select"
+        },
+        {
+          title: "View on GitHub",
+          url: "https://codeclimate.com/github/sagalbot/vue-select"
+        },
+        {
+          title: "View on NPM",
+          url: "https://codeclimate.com/github/sagalbot/vue-select"
+        },
+        {
+          title: "View Codepen Examples",
+          src: "https://codeclimate.com/github/sagalbot/vue-select"
+        }
+      ]
+    };
+  },
+  computed: {
+    ...mapGetters({
+      getTokenList: "account/getTokenList"
+    }),
+    tokenList: function() {
+      let symbolList = this.getTokenList;
+      let options = symbolList
+        .filter(symbol => symbol !== "ETH")
+        .map(symbol => {
+          return {
+            title: symbol,
+            src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${tokenAddresses[
+              symbol
+            ].toLowerCase()}.png`
+          };
+        });
+      console.log(options[1].src);
+      return options;
+    }
+  },
+  methods: {
+    ...mapActions({
+      addToken: "account/addToken"
+    }),
+    redirect(url) {
+      this.$router.push(url);
+    },
+    showModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].show();
+    },
+    onSelectToken(token) {
+      this.selectedToken = token;
+      console.log(this.selectedToken);
+    }
+  },
+  created: async function() {
+    console.log(this.tokenList);
+  }
+};
+</script>
+
+<style>
+#add-more-token {
+  margin: 10px auto;
+}
+#add_more_token_modal .modal-body {
+  flex-direction: column;
+}
+#add-token-button {
+  width: 100%;
+  margin: 10px auto;
+}
+</style>

@@ -156,9 +156,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
-      getBalance: "account/getBalance",
-      getBalanceULT: "account/getBalanceULT",
-      getBalanceDAI: "account/getBalanceDAI"
+      getBalance: "account/getBalance"
     }),
     validateTargetAddress() {
       if (this.form.targetAddress.length !== 42) return false;
@@ -170,9 +168,9 @@ export default {
       const isNaN = Number.isNaN(amount);
       if (isNaN || amount <= 0) return false;
       let txFee = this.txFee;
-      let ethBalance = parseFloat(this.getBalance / Math.pow(10, 18));
-      let ultBalance = parseFloat(this.getBalanceULT / Math.pow(10, 18));
-      let daiBalance = parseFloat(this.getBalanceDAI / Math.pow(10, 18));
+      let ethBalance = parseFloat(this.getBalance["ETH"] / Math.pow(10, 18));
+      let ultBalance = parseFloat(this.getBalance["ULT"] / Math.pow(10, 18));
+      let daiBalance = parseFloat(this.getBalance["DAI"] / Math.pow(10, 18));
       if (this.form.currency === "ETH") {
         if (amount + txFee > ethBalance) {
           this.inputErrorMessage = "Not enough ETH balance or transaction fee";
@@ -299,7 +297,7 @@ export default {
           {
             from: this.getAccount.address,
             to: this.form.targetAddress,
-            amount: this.getBalance
+            amount: this.getBalance["ETH"]
           },
           this.web3
         );
@@ -308,11 +306,15 @@ export default {
           (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
         if (this.form.currency === "ETH") {
           this.form.amount =
-            parseFloat(this.getBalance / Math.pow(10, 18)) - this.txFee;
+            parseFloat(this.getBalance["ETH"] / Math.pow(10, 18)) - this.txFee;
         } else if (this.form.currency === "ULT") {
-          this.form.amount = parseFloat(this.getBalanceULT / Math.pow(10, 18));
+          this.form.amount = parseFloat(
+            this.getBalance["ULT"] / Math.pow(10, 18)
+          );
         } else if (this.form.currency === "DAI") {
-          this.form.amount = parseFloat(this.getBalanceDAI / Math.pow(10, 18));
+          this.form.amount = parseFloat(
+            this.getBalance["DAI"] / Math.pow(10, 18)
+          );
         }
       } catch (e) {
         console.log(e);

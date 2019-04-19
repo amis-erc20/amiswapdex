@@ -1,7 +1,7 @@
 {
-  "name": "web-wallet",
+  "name": "uniswapdex",
   "version": "1.0.0",
-  "description": "&#34;web wallet&#34;",
+  "description": "Uniswapdex",
   "author": "thantsintoe",
   "private": true,
   "scripts": {
@@ -43,6 +43,7 @@
     "v-offline": "^1.1.0",
     "vue-qrcode-reader": "^1.4.0",
     "vue-qriously": "^1.1.1",
+    "vue-select": "^3.0.2",
     "vue-spinner": "^1.0.3",
     "web3": "^1.0.0-beta.33"
   },

@@ -110,6 +110,7 @@ export default {
   color: #333;
   position: fixed;
   top: 150px;
+  text-align: center;
 }
 #settingModal .modal-header {
   background: #e91a1c;

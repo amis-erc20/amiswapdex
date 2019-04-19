@@ -118,7 +118,7 @@ export const getBalance = async function(address, web3) {
 		// let response = await axios.get(url)
 		// return parseInt(response.data.result)
 		let balance = await web3.eth.getBalance(address)
-		return balance
+		return parseInt(balance)
 	} catch (e) {
 		console.log(`ERROR - getBalance`)
 		console.log(e)

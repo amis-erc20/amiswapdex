@@ -18,35 +18,31 @@
 <script>
 import Token from "~/components/Token.vue";
 import { mapActions, mapGetters } from "vuex";
+import { tokenAddresses } from "../assets/js/token";
 export default {
   components: { Token },
   computed: {
     ...mapGetters({
       getAccount: "account/getAccount",
+      getTokenList: "account/getTokenList",
       getTransactionList: "transaction/getTransactionList",
       getBalance: "account/getBalance",
-      getBalanceULT: "account/getBalanceULT",
-      getBalanceDAI: "account/getBalanceDAI",
       getActiveToken: "getActiveToken"
     }),
     tokenList: function() {
-      return [
-        {
-          name: "ETH",
-          balance: this.calculateBalance(this.getBalance),
-          balanceUsd: 234.12
-        },
-        {
-          name: "ULT",
-          balance: this.calculateBalance(this.getBalanceULT),
-          balanceUsd: 234.12
-        },
-        {
-          name: "DAI",
-          balance: this.calculateBalance(this.getBalanceDAI),
-          balanceUsd: 234.12
-        }
-      ];
+      let self = this;
+      return this.getTokenList
+        .filter(symbol => symbol !== "ETH")
+        .map(symbol => {
+          return {
+            name: symbol,
+            balance: this.calculateBalance(self.getBalance[symbol]),
+            balanceUsd: 0.0,
+            src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${tokenAddresses[
+              symbol
+            ].toLowerCase()}.png`
+          };
+        });
     }
   },
   methods: {

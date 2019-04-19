@@ -3,6 +3,7 @@
     <Nav/>
     <Header/>
     <Tokenlist/>
+    <Newtoken/>
     <periodic-backup :backupStatus="getBackupStatus()"/>
     <a href="http://bounty.shardus.com:3333/" id="ult-chart-link" target="_blank">
       <font-awesome-icon icon="chart-line" size="lg" color="#333"/>
@@ -36,6 +37,7 @@
 import Vue from "vue";
 import Header from "~/components/Header.vue";
 import Nav from "~/components/Nav.vue";
+import Newtoken from "~/components/Newtoken.vue";
 import Tokenlist from "~/components/Tokenlist.vue";
 import PeriodicBackup from "~/components/PeriodicBackup.vue";
 import BootstrapVue from "bootstrap-vue";
@@ -56,6 +58,8 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import VueQriously from "vue-qriously";
 import Offline from "v-offline";
+import vSelect from "vue-select";
+
 import {
   getHistory,
   initContracts,
@@ -77,6 +81,7 @@ library.add(faHandHoldingUsd);
 library.add(faChevronLeft);
 library.add(faSlidersH);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
+Vue.component("v-select", vSelect);
 
 import { mapActions, mapGetters } from "vuex";
 import { getWeb3, getBalance, getTokenBalance } from "../assets/js/utils";
@@ -89,7 +94,8 @@ export default {
     Tokenlist,
     Nav,
     Offline,
-    PeriodicBackup
+    PeriodicBackup,
+    Newtoken
   },
   data: function() {
     return {
@@ -101,29 +107,25 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
-      getBalanceULT: "account/getBalanceULT",
-      getBalanceDAI: "account/getBalanceDAI",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
-      getCredentials: "getCredentials"
+      getCredentials: "getCredentials",
+      getTokenList: "account/getTokenList"
     })
   },
   methods: {
     ...mapActions({
       addAccount: "account/addAccount",
+      addToken: "account/addToken",
       updateBalance: "account/updateBalance",
-      updateBalanceULT: "account/updateBalanceULT",
-      updateBalanceDAI: "account/updateBalanceDAI",
       updateTransactionList: "transaction/updateTransactionList",
       updateTokenTransactionList: "transaction/updateTokenTransactionList"
     }),
     getBackupStatus() {
       const { Ns } = this.getCredentials;
       const credentials = JSON.parse(localStorage.getItem(Ns));
-      console.log(Ns);
-      console.log(credentials);
       const { backupStatus } = credentials;
       return backupStatus;
     },
@@ -141,7 +143,7 @@ export default {
     },
     async updateUSDPrices() {
       let ultUSD = await getULTToUSDPrice();
-      this.ultInUSD = parseFloat(this.getBalanceULT * ultUSD);
+      this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
     },
     async refresh(web3) {
       if (!this.getSignIn) return;
@@ -151,17 +153,19 @@ export default {
         if (account) {
           // console.log("Refreshing...");
           const balance = await getBalance(account.address, web3);
-          const ultBalance = await getTokenBalance(
-            account.address,
-            "ULT",
-            web3
-          );
-          const daiBalance = await getTokenBalance(
-            account.address,
-            "DAI",
-            web3
-          );
-          // console.log(balance, ultBalance, daiBalance);
+          let tokenBalanceList = [];
+
+          for (let i = 1; i < this.getTokenList.length; i++) {
+            let tokenBalance = await getTokenBalance(
+              account.address,
+              this.getTokenList[i],
+              web3
+            );
+            tokenBalanceList.push({
+              symbol: this.getTokenList[i],
+              balance: tokenBalance
+            });
+          }
           // this.updateUSDPrices();
           let txList = await getHistory(account.address);
           let tokenTxList = await getTokenHistory(account.address);
@@ -169,14 +173,19 @@ export default {
           if (
             txList.length !== this.getTransactionList.length ||
             tokenTxList.length !== this.getTokenTransactionList.length ||
-            balance !== this.getBalance ||
-            ultBalance !== this.getBalanceULT
+            balance !== this.getBalance["ETH"]
           ) {
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
-            if (balance !== undefined) this.updateBalance(balance);
-            if (ultBalance !== undefined) this.updateBalanceULT(ultBalance);
-            if (daiBalance !== undefined) this.updateBalanceDAI(daiBalance);
+            this.updateBalance({
+              symbol: "ETH",
+              balance
+            });
+            for (let i = 0; i < tokenBalanceList.length; i++) {
+              console.log(`Updating for`);
+              console.log(tokenBalanceList[i]);
+              this.updateBalance(tokenBalanceList[i]);
+            }
           }
         }
       } catch (e) {
@@ -187,9 +196,9 @@ export default {
       if (!this.getSignIn) return;
       let self = this;
       let account = this.getAccount;
-      let balance = this.getBalance;
-      let balanceULT = this.getBalanceULT;
-      let balanceDAI = this.getBalanceDAI;
+      let balance = this.getBalance["ETH"];
+      let balanceULT = this.getBalance["ULT"];
+      let balanceDAI = this.getBalance["DAI"];
       try {
         if (
           (account.address && balance > 0) ||
@@ -237,9 +246,9 @@ export default {
         }
       }
     }, 3000);
-    console.log(`ETH Balance: ${this.getBalance}`);
-    console.log(`ULT Balance: ${this.getBalanceULT}`);
-    console.log(`DAI Balance: ${this.getBalanceDAI}`);
+    console.log(`ETH Balance: ${this.getBalance["ETH"]}`);
+    console.log(`ULT Balance: ${this.getBalance["ULT"]}`);
+    console.log(`DAI Balance: ${this.getBalance["DAI"]}`);
   }
 };
 </script>

@@ -86,7 +86,6 @@ export default {
       getConnection: "getConnection",
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
-      getBalanceULT: "account/getBalanceULT",
       getWeb3: "getWeb3",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList"
@@ -111,9 +110,6 @@ export default {
     ...mapActions({
       updateConnection: "updateConnection",
       addAccount: "account/addAccount",
-      updateBalance: "account/updateBalance",
-      updateBalanceULT: "account/updateBalanceULT",
-      updateBalanceDAI: "account/updateBalanceDAI",
       updateTransactionList: "transaction/updateTransactionList",
       updateTokenTransactionList: "transaction/updateTokenTransactionList"
     }),

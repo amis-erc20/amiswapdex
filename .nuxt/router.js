@@ -1,0 +1,164 @@
+import Vue from 'vue'
+import Router from 'vue-router'
+import { interopDefault } from './utils'
+
+const _226b1ea1 = () => interopDefault(import('..\\pages\\about.vue' /* webpackChunkName: "pages_about" */))
+const _beb10044 = () => interopDefault(import('..\\pages\\backup.vue' /* webpackChunkName: "pages_backup" */))
+const _1ee33dd0 = () => interopDefault(import('..\\pages\\privatekey.vue' /* webpackChunkName: "pages_privatekey" */))
+const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* webpackChunkName: "pages_receivetoken" */))
+const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
+const _298bb99c = () => interopDefault(import('..\\pages\\recoverysetup.vue' /* webpackChunkName: "pages_recoverysetup" */))
+const _0eda617e = () => interopDefault(import('..\\pages\\resetpassword.vue' /* webpackChunkName: "pages_resetpassword" */))
+const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
+const _9ac22af6 = () => interopDefault(import('..\\pages\\sendtoken.vue' /* webpackChunkName: "pages_sendtoken" */))
+const _b566ec84 = () => interopDefault(import('..\\pages\\signin.vue' /* webpackChunkName: "pages_signin" */))
+const _8c3a3f98 = () => interopDefault(import('..\\pages\\signup.vue' /* webpackChunkName: "pages_signup" */))
+const _20f0c4da = () => interopDefault(import('..\\pages\\swaptoken.vue' /* webpackChunkName: "pages_swaptoken" */))
+const _439f3b1e = () => interopDefault(import('..\\pages\\tokendetail.vue' /* webpackChunkName: "pages_tokendetail" */))
+const _76bf6dec = () => interopDefault(import('..\\pages\\tos.vue' /* webpackChunkName: "pages_tos" */))
+const _33f1d4f6 = () => interopDefault(import('..\\pages\\welcome.vue' /* webpackChunkName: "pages_welcome" */))
+const _4222f966 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
+
+Vue.use(Router)
+
+if (process.client) {
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual'
+
+    // reset scrollRestoration to auto when leaving page, allowing page reload
+    // and back-navigation from other pages to use the browser to restore the
+    // scrolling position.
+    window.addEventListener('beforeunload', () => {
+      window.history.scrollRestoration = 'auto'
+    })
+
+    // Setting scrollRestoration to manual again when returning to this page.
+    window.addEventListener('load', () => {
+      window.history.scrollRestoration = 'manual'
+    })
+  }
+}
+const scrollBehavior = function (to, from, savedPosition) {
+  // if the returned position is falsy or an empty object,
+  // will retain current scroll position.
+  let position = false
+
+  // if no children detected and scrollToTop is not explicitly disabled
+  if (
+    to.matched.length < 2 &&
+    to.matched.every(r => r.components.default.options.scrollToTop !== false)
+  ) {
+    // scroll to the top of the page
+    position = { x: 0, y: 0 }
+  } else if (to.matched.some(r => r.components.default.options.scrollToTop)) {
+    // if one of the children has scrollToTop option set to true
+    position = { x: 0, y: 0 }
+  }
+
+  // savedPosition is only available for popstate navigations (back button)
+  if (savedPosition) {
+    position = savedPosition
+  }
+
+  return new Promise((resolve) => {
+    // wait for the out transition to complete (if necessary)
+    window.$nuxt.$once('triggerScroll', () => {
+      // coords will be used if no selector is provided,
+      // or if the selector didn't match any element.
+      if (to.hash) {
+        let hash = to.hash
+        // CSS.escape() is not supported with IE and Edge.
+        if (typeof window.CSS !== 'undefined' && typeof window.CSS.escape !== 'undefined') {
+          hash = '#' + window.CSS.escape(hash.substr(1))
+        }
+        try {
+          if (document.querySelector(hash)) {
+            // scroll to anchor by returning the selector
+            position = { selector: hash }
+          }
+        } catch (e) {
+          console.warn('Failed to save scroll position. Please add CSS.escape() polyfill (https://github.com/mathiasbynens/CSS.escape).')
+        }
+      }
+      resolve(position)
+    })
+  })
+}
+
+export function createRouter() {
+  return new Router({
+    mode: 'history',
+    base: '/',
+    linkActiveClass: 'nuxt-link-active',
+    linkExactActiveClass: 'nuxt-link-exact-active',
+    scrollBehavior,
+
+    routes: [{
+      path: "/about",
+      component: _226b1ea1,
+      name: "about"
+    }, {
+      path: "/backup",
+      component: _beb10044,
+      name: "backup"
+    }, {
+      path: "/privatekey",
+      component: _1ee33dd0,
+      name: "privatekey"
+    }, {
+      path: "/receivetoken",
+      component: _3cd07a12,
+      name: "receivetoken"
+    }, {
+      path: "/recovery",
+      component: _6ad3519e,
+      name: "recovery"
+    }, {
+      path: "/recoverysetup",
+      component: _298bb99c,
+      name: "recoverysetup"
+    }, {
+      path: "/resetpassword",
+      component: _0eda617e,
+      name: "resetpassword"
+    }, {
+      path: "/scanner",
+      component: _649afcdc,
+      name: "scanner"
+    }, {
+      path: "/sendtoken",
+      component: _9ac22af6,
+      name: "sendtoken"
+    }, {
+      path: "/signin",
+      component: _b566ec84,
+      name: "signin"
+    }, {
+      path: "/signup",
+      component: _8c3a3f98,
+      name: "signup"
+    }, {
+      path: "/swaptoken",
+      component: _20f0c4da,
+      name: "swaptoken"
+    }, {
+      path: "/tokendetail",
+      component: _439f3b1e,
+      name: "tokendetail"
+    }, {
+      path: "/tos",
+      component: _76bf6dec,
+      name: "tos"
+    }, {
+      path: "/welcome",
+      component: _33f1d4f6,
+      name: "welcome"
+    }, {
+      path: "/",
+      component: _4222f966,
+      name: "index"
+    }],
+
+    fallback: false
+  })
+}

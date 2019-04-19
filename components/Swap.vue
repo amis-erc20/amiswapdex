@@ -233,9 +233,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
-      getBalance: "account/getBalance",
-      getBalanceULT: "account/getBalanceULT",
-      getBalanceDAI: "account/getBalanceDAI"
+      getBalance: "account/getBalance"
     }),
     availableInputTokens() {
       let outputCurrency = this.form.outputCurrency;
@@ -286,9 +284,9 @@ export default {
       if (!this.validateinputValue) return false;
       let amount = parseFloat(this.form.inputValue * 1);
       let txFee = this.txFee;
-      let ethBalance = parseFloat(this.getBalance / Math.pow(10, 18));
-      let ultBalance = parseFloat(this.getBalanceULT / Math.pow(10, 18));
-      let daiBalance = parseFloat(this.getBalanceDAI / Math.pow(10, 18));
+      let ethBalance = parseFloat(this.getBalance["ETH"] / Math.pow(10, 18));
+      let ultBalance = parseFloat(this.getBalance["ULT"] / Math.pow(10, 18));
+      let daiBalance = parseFloat(this.getBalance["DAI"] / Math.pow(10, 18));
       if (this.form.currency === "ETH") {
         if (amount + txFee > ethBalance) {
           this.inputErrorMessage = "Not enough ETH balance or transaction fee";
@@ -375,16 +373,16 @@ export default {
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (this.form.inputCurrency === "ETH") {
-        console.log(this.getBalance / Math.pow(10, 18), this.txFee);
+        console.log(this.getBalance["ETH"] / Math.pow(10, 18), this.txFee);
         this.form.inputValue =
-          parseFloat(this.getBalance / Math.pow(10, 18)) - this.txFee;
+          parseFloat(this.getBalance["ETH"] / Math.pow(10, 18)) - this.txFee;
       } else if (this.form.inputCurrency === "ULT") {
         this.form.inputValue = parseFloat(
-          this.getBalanceULT / Math.pow(10, 18)
+          this.getBalance["ULT"] / Math.pow(10, 18)
         );
       } else if (this.form.inputCurrency === "DAI") {
         this.form.inputValue = parseFloat(
-          this.getBalanceDAI / Math.pow(10, 18)
+          this.getBalance["DAI"] / Math.pow(10, 18)
         );
       }
       this.lastEditedField = "input";

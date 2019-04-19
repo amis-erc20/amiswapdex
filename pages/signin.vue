@@ -133,8 +133,8 @@ export default {
   data() {
     return {
       form: {
-        email: "",
-        password1: "",
+        email: "mr.thantsintoe@gmail.com",
+        password1: "password",
         file: null
       },
       loading: false,
