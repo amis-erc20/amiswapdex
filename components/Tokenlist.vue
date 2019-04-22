@@ -31,18 +31,27 @@ export default {
     }),
     tokenList: function() {
       let self = this;
-      return this.getTokenList
-        .filter(symbol => symbol !== "ETH")
-        .map(symbol => {
-          return {
-            name: symbol,
-            balance: this.calculateBalance(self.getBalance[symbol]),
-            balanceUsd: 0.0,
-            src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${tokenAddresses[
-              symbol
-            ].toLowerCase()}.png`
-          };
-        });
+      return (
+        this.getTokenList
+          // .filter(symbol => symbol !== "ETH")
+          .map(symbol => {
+            if (symbol === "ETH" || symbol === "ULT") {
+              return {
+                name: symbol,
+                balance: this.calculateBalance(self.getBalance[symbol]),
+                balanceUsd: 0.0
+              };
+            }
+            return {
+              name: symbol,
+              balance: this.calculateBalance(self.getBalance[symbol]),
+              balanceUsd: 0.0,
+              src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${tokenAddresses[
+                symbol
+              ].toLowerCase()}.png`
+            };
+          })
+      );
     }
   },
   methods: {

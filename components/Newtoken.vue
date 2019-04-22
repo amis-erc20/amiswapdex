@@ -4,7 +4,7 @@
       variant="outline-danger"
       id="add-more-token"
       @click="showModal(`add_more_token_modal`)"
-    >Add More Token</b-button>
+    >+ Add ERC-20 Token</b-button>
     <!-- add more token modal -->
     <b-modal
       ref="add_more_token_modal"
@@ -14,7 +14,7 @@
     >
       <div>
         <label for>Please select a token to add</label>
-        <v-select :options="tokenList" label="title">
+        <v-select :options="tokenList" label="title" v-model="selectedToken">
           <template slot="option" slot-scope="option">
             <img :src="option.src" height="20px">
             {{ option.title }}
@@ -22,7 +22,12 @@
         </v-select>
       </div>
       <div>
-        <b-button variant="danger" id="add-token-button">Add Token</b-button>
+        <b-button
+          variant="danger"
+          id="add-token-button"
+          @click="onAddToken"
+          :disabled="isTokenValid"
+        >Add Token</b-button>
       </div>
     </b-modal>
   </section>
@@ -71,9 +76,13 @@ export default {
       getTokenList: "account/getTokenList"
     }),
     tokenList: function() {
-      let symbolList = this.getTokenList;
+      let self = this;
+      let symbolList = Object.keys(tokenAddresses);
       let options = symbolList
-        .filter(symbol => symbol !== "ETH")
+        .filter(
+          symbol => symbol !== "ETH" && symbol !== "ULT" && symbol !== "DAI"
+        )
+        .filter(symbol => this.getTokenList.indexOf(symbol) === -1)
         .map(symbol => {
           return {
             title: symbol,
@@ -82,8 +91,13 @@ export default {
             ].toLowerCase()}.png`
           };
         });
-      console.log(options[1].src);
       return options;
+    },
+    isTokenValid: function() {
+      if (this.selectedToken) {
+        if (this.selectedToken.title.length > 0) return false;
+      }
+      return true;
     }
   },
   methods: {
@@ -96,13 +110,17 @@ export default {
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();
     },
-    onSelectToken(token) {
-      this.selectedToken = token;
-      console.log(this.selectedToken);
+    hideModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].hide();
+    },
+    onAddToken() {
+      if (this.getTokenList.indexOf(this.selectedToken.title) !== -1) {
+        return;
+      }
+      this.addToken(this.selectedToken.title);
+      this.hideModal("add_more_token_modal");
+      this.selectedToken = "";
     }
-  },
-  created: async function() {
-    console.log(this.tokenList);
   }
 };
 </script>
@@ -110,9 +128,15 @@ export default {
 <style>
 #add-more-token {
   margin: 10px auto;
+  font-size: 12px;
+  font-weight: bolder;
+  margin-top: 20px;
 }
 #add_more_token_modal .modal-body {
   flex-direction: column;
+}
+#add_more_token_modal header {
+  text-align: center;
 }
 #add-token-button {
   width: 100%;

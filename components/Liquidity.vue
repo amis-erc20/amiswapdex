@@ -2,63 +2,45 @@
   <div>
     <div id="uniswap-convert-section">
       <p style="text-align: center">
-        Buy or Sell
+        Add Liquidity for
         <strong>{{getActiveToken}}</strong>
       </p>
-      <b-form @submit="onSubmit" @reset="onReset">
-        <label>Pay With</label>
+      <b-form @submit="onAddLiquidity" @reset="onReset">
+        <label>Deposit ETH</label>
+        <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
         <b-form-group id="exampleInputGroup1">
-          <b-form-select
-            v-model="form.inputCurrency"
-            :options="availableInputTokens"
-            @change="onCurrencyChange"
-            :disabled="form.inputCurrency === getActiveToken"
-          />
-        </b-form-group>
-
-        <b-button variant="danger" @click="onCurrencySwap" id="currency-swap-button">
-          <font-awesome-icon icon="exchange-alt" size="lg" color="#fff"/>
-        </b-button>
-
-        <b-form-group id="exampleInputGroup1">
-          <label>Receive In</label>
-          <b-form-select
-            v-model="form.outputCurrency"
-            :options="availableOutputTokens"
-            @change="onCurrencyChange"
-            :disabled="form.outputCurrency === getActiveToken"
-          />
-        </b-form-group>
-
-        <b-form-group v-if="this.validateCurrency" prepend="@">
-          <label for>Enter {{form.inputCurrency}} amount to sell</label>
-          <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
           <b-form-input
             id="inputValue"
             type="text"
             v-model="form.inputValue"
             required
-            :state="validateinputValue && validateBalance && validateSlippage"
+            :state="validateinputValue && validateETHBalance"
             @keyup="onAmountChange"
             @focus="onInputFocus"
           />
           <b-form-invalid-feedback
-            :state="validateinputValue && validateBalance && validateSlippage"
+            :state="validateinputValue && validateETHBalance"
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-form-group v-if="this.validateCurrency">
-          <label for>{{form.outputCurrency}} amount to recieve</label>
+        <b-button variant="danger" id="currency-swap-button">
+          <font-awesome-icon icon="plus" size="lg" color="#fff"/>
+        </b-button>
+
+        <b-form-group id="exampleInputGroup1">
+          <label>Deposit {{getActiveToken}}</label>
           <b-form-input
             id="inputValue"
             type="text"
             v-model="form.outputValue"
             required
-            :state="validateOutputAmount"
+            :state="validateOutputAmount && validateTokenBalance"
             @keyup="onAmountChange"
             @focus="onOutputFocus"
           />
-          <b-form-invalid-feedback :state="validateOutputAmount">{{ outputErrorMessage }}</b-form-invalid-feedback>
+          <b-form-invalid-feedback
+            :state="validateOutputAmount && validateTokenBalance"
+          >{{ outputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <div
@@ -69,10 +51,10 @@
             <label for>Exchange Rate</label>
             <p>1 {{form.inputCurrency}} = {{exchangeRate.toFixed(5)}} {{form.outputCurrency}}</p>
           </b-form-group>
-          <b-form-group v-if="form.inputCurrency !== null">
+          <!-- <b-form-group v-if="form.inputCurrency !== null">
             <label for>Slippage</label>
             <p>{{ slippage.toFixed(2) }} %</p>
-          </b-form-group>
+          </b-form-group>-->
         </div>
 
         <b-form-group v-if="form.inputCurrency !== null">
@@ -96,7 +78,7 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button type="submit" variant="danger" :disabled="shouldDisableSwapButton">Swap</b-button>
+          <b-button type="submit" variant="danger" :disabled="shouldDisableSwapButton">Add Liquidity</b-button>
         </div>
       </b-form>
       <!-- Success Modal -->
@@ -172,7 +154,8 @@ import {
   swapTokenToEth,
   unlockToken,
   swapEthToToken,
-  swapTokenToToken
+  swapTokenToToken,
+  addLiquidity
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -285,7 +268,7 @@ export default {
       if (this.form.inputCurrency === this.form.outputCurrency) return false;
       else return true;
     },
-    validateBalance() {
+    validateETHBalance() {
       if (!this.validateinputValue) return false;
       let amount = parseFloat(this.form.inputValue * 1);
       let txFee = this.txFee;
@@ -308,6 +291,18 @@ export default {
       }
       return true;
     },
+    validateTokenBalance() {
+      if (!this.validateOutputAmount) return false;
+      let tokenAmount = parseFloat(this.form.outputValue * 1);
+      let tokenBalance = parseFloat(
+        this.getBalance[this.form.outputCurrency] / Math.pow(10, 18)
+      );
+      if (tokenAmount > tokenBalance) {
+        this.outputErrorMessage = "Not enough token balance";
+        return false;
+      }
+      return true;
+    },
     validateSlippage() {
       if (this.slippage > 10) {
         this.inputErrorMessage =
@@ -322,15 +317,14 @@ export default {
         !this.validateCurrency ||
         !this.validateinputValue ||
         !this.validateOutputAmount ||
-        !this.validateBalance ||
+        !this.validateETHBalance ||
         !this.validateSlippage
       );
     }
   },
   mounted: async function() {
-    this.form.inputCurrency = this.getActiveToken;
-    console.log(this.getActiveToken);
-    console.log(this.form.inputCurrency);
+    this.form.inputCurrency = "ETH";
+    this.form.outputCurrency = this.getActiveToken;
     this.web3 = await getWeb3();
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {
@@ -612,7 +606,7 @@ export default {
           if (this.txHash) console.log(this.txHash);
           if (!this.txHash) {
             this.loading = false;
-            this.showModal("failed_modal_ref");
+            this.showModal("failed_model_ref");
             return;
           }
           this.updateActiveToken(this.form.outputCurrency);
@@ -888,6 +882,77 @@ export default {
             (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
         }
       }
+    },
+    async onAddLiquidity(evt) {
+      evt.preventDefault();
+      this.loading = true;
+      let web3 = this.web3;
+      let inputValue = this.form.inputValue;
+      let inputCurrency = this.form.inputCurrency;
+      let outputValue = this.form.outputValue;
+      let outputCurrency = this.form.outputCurrency;
+      let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
+      let type = this.swapType;
+
+      const blockNumber = await web3.eth.getBlockNumber();
+      const block = await web3.eth.getBlock(blockNumber);
+      const deadline = block.timestamp + 300;
+      const accounts = await web3.eth.getAccounts();
+      let exchangeContract = exchangeContracts[outputCurrency];
+      const contractAddress = exchangeAddresses[outputCurrency];
+
+      let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
+      let tokenAmount = new BigNumber(outputValue).multipliedBy(10 ** 18);
+      let ethReserve = await web3.eth.getBalance(contractAddress);
+
+      const totalLiquidity = await exchangeContract.methods
+        .totalSupply()
+        .call();
+      const liquidityMinted = new BigNumber(totalLiquidity).multipliedBy(
+        ethAmount.dividedBy(ethReserve)
+      );
+
+      console.log(`total liquidity: ${totalLiquidity}`);
+      console.log(`minted liquidity: ${liquidityMinted}`);
+
+      const MAX_LIQUIDITY_SLIPPAGE = 0.025;
+      // const minLiquidity = liquidityMinted.multipliedBy(
+      //   1 - MAX_LIQUIDITY_SLIPPAGE
+      // );
+      const minLiquidity = 0;
+      const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
+
+      await this.updateGasLimitAndTxFee();
+      try {
+        this.txHash = await addLiquidity(
+          {
+            from: this.getAccount.address,
+            ethAmount: ethAmount,
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: parseInt(this.gasLimit),
+            minLiquidity,
+            maxTokens,
+            deadline
+          },
+          exchangeContract,
+          contractAddress,
+          this.getAccount.privateKey,
+          this.web3
+        );
+      } catch (e) {
+        console.log(e);
+        console.log("error occoured while adding liquidity...");
+      }
+      if (this.txHash) console.log(this.txHash);
+      if (!this.txHash) {
+        this.loading = false;
+        this.showModal("failed_model_ref");
+        return;
+      }
+      this.updateActiveToken(this.form.outputCurrency);
+      this.onReset();
+      this.loading = false;
+      this.showModal("success_modal_ref");
     }
   }
 };

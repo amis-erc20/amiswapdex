@@ -23,6 +23,11 @@
             <Swap/>
           </b-card-text>
         </b-tab>
+        <b-tab title="Liquidity">
+          <b-card-text>
+            <Liquidity/>
+          </b-card-text>
+        </b-tab>
       </b-tabs>
     </b-card>
   </div>
@@ -35,9 +40,10 @@ import Nav from "~/components/Nav.vue";
 import Receive from "~/components/Receive.vue";
 import Send from "~/components/Send.vue";
 import Swap from "~/components/Swap.vue";
+import Liquidity from "~/components/Liquidity.vue";
 import { mapGetters, mapActions } from "vuex";
 export default {
-  components: { Transactionlist, Header, Nav, Receive, Send, Swap },
+  components: { Transactionlist, Header, Nav, Receive, Send, Swap, Liquidity },
   computed: {
     ...mapGetters({
       getConnection: "getConnection",

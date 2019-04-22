@@ -10,7 +10,7 @@ export const state = () => ({
 		ULT: null,
 		DAI: null
 	},
-	tokenList: ['ETH', 'ULT', 'DAI', 'FUN', 'BAT']
+	tokenList: ['ETH', 'ULT', 'DAI']
 })
 
 export const getters = {

@@ -354,6 +354,50 @@ export const swapTokenToToken = async function(
 			})
 	})
 }
+export const addLiquidity = async function(
+	tx,
+	exchangeContract,
+	contractAddress,
+	privateKey,
+	web3
+) {
+	console.log({
+		from: tx.from,
+		gasPrice: tx.gasPrice,
+		gasLimit: tx.gasLimit,
+		value: tx.ethAmount.toFixed(0),
+		minLiquidity: tx.minLiquidity.toFixed(0),
+		maxTokens: tx.maxTokens.toFixed(0)
+	})
+	let myAddress = tx.from
+	let count = await web3.eth.getTransactionCount(myAddress)
+	let transaction = await web3.eth.accounts.signTransaction(
+		{
+			from: myAddress,
+			gasPrice: web3.utils.toHex(tx.gasPrice),
+			gasLimit: web3.utils.toHex(tx.gasLimit),
+			to: contractAddress,
+			value: web3.utils.toHex(tx.ethAmount.toFixed(0)),
+			data: exchangeContract.methods
+				.addLiquidity(
+					tx.minLiquidity.toFixed(0),
+					tx.maxTokens.toFixed(0),
+					tx.deadline
+				)
+				.encodeABI(),
+			nonce: web3.utils.toHex(count)
+		},
+		privateKey
+	)
+	return new Promise(resolve => {
+		web3.eth
+			.sendSignedTransaction(transaction.rawTransaction)
+			.on('transactionHash', function(hash) {
+				console.log('Tx hash: ', hash)
+				resolve(hash)
+			})
+	})
+}
 
 export const normaliseText = text => {
 	let normalised

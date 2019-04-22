@@ -100,7 +100,8 @@ export default {
   data: function() {
     return {
       backupCheckInterval: 3 * 60 * 1000,
-      ultInUSD: 0
+      ultInUSD: 0,
+      currentTokenCount: 0
     };
   },
   computed: {
@@ -173,7 +174,8 @@ export default {
           if (
             txList.length !== this.getTransactionList.length ||
             tokenTxList.length !== this.getTokenTransactionList.length ||
-            balance !== this.getBalance["ETH"]
+            balance !== this.getBalance["ETH"] ||
+            this.currentTokenCount !== tokenBalanceList.length
           ) {
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
@@ -182,10 +184,9 @@ export default {
               balance
             });
             for (let i = 0; i < tokenBalanceList.length; i++) {
-              console.log(`Updating for`);
-              console.log(tokenBalanceList[i]);
               this.updateBalance(tokenBalanceList[i]);
             }
+            this.currentTokenCount = tokenBalanceList.length;
           }
         }
       } catch (e) {
@@ -231,7 +232,7 @@ export default {
     let self = this;
     setInterval(() => {
       self.refresh(web3);
-    }, 10000);
+    }, 5000);
     setTimeout(() => {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
