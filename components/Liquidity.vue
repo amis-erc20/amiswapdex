@@ -2,7 +2,7 @@
   <div>
     <div id="uniswap-convert-section">
       <b-form-group id="exampleInputGroup1">
-        <label>Select Add or Remove Liquidity</label>
+        <label>Add Liquidity / Remove Liquidity / Create Exchange</label>
         <b-form-select
           v-model="liquidity"
           :options="[{text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
@@ -228,7 +228,8 @@ import {
   swapTokenToToken,
   addLiquidity,
   getAbsPrice,
-  removeLiquidity
+  removeLiquidity,
+  getExchangeAddress
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -277,7 +278,7 @@ export default {
       inputErrorMessage: "Please input a valid amount",
       outputErrorMessage: "Please input a valid amount",
       slippage: null,
-      liquidity: "add"
+      liquidity: ""
     };
   },
   computed: {
@@ -422,6 +423,8 @@ export default {
     this.gasPrice =
       parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
     await this.updateGasLimitAndTxFee();
+    let DAIExchangeAddress = await getExchangeAddress(tokenAddressess["ULT"]);
+    console.log(DAIExchangeAddress);
   },
   methods: {
     ...mapActions({

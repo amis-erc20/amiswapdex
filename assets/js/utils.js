@@ -1,15 +1,17 @@
 import Web3 from 'web3'
 import axios from 'axios'
-import { exchangeABI, tokenABI, ERC20_ABI } from './abi'
-import { tokenAddresses, exchangeAddresses } from './token'
+import { exchangeABI, tokenABI, ERC20_ABI, factoryABI } from './abi'
+import { tokenAddresses, exchangeAddresses, factoryAddress } from './token'
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
 
 let tokenSymbols = Object.keys(exchangeAddresses)
 let exchangeContracts = {}
 let tokenContracts = {}
+let factoryContract
 
 export const initContracts = async function(web3) {
+  factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
   for (let i = 0; i < tokenSymbols.length; i += 1) {
     exchangeContracts[tokenSymbols[i]] = new web3.eth.Contract(
       exchangeABI,
@@ -39,6 +41,50 @@ export const getWeb3 = function() {
   })
 }
 
+export const getExchangeAddress = async function(tokenAddress) {
+  try {
+    let exchangeAddress = await factoryContract.methods
+      .getExchange(tokenAddress)
+      .call()
+    if (
+      exchangeAddress &&
+      exchangeAddress !== '0x0000000000000000000000000000000000000000'
+    )
+      return exchangeAddress
+  } catch (e) {
+    console.log(`ERROR: cannot get exchange for token address: ${tokenAddress}`)
+    console.log(e)
+  }
+}
+export const createExchange = async function(
+  tx,
+  tokenAddress,
+  privateKey,
+  web3
+) {
+  let myAddress = tx.from
+  let count = await web3.eth.getTransactionCount(myAddress)
+  let transaction = await web3.eth.accounts.signTransaction(
+    {
+      from: myAddress,
+      gasPrice: web3.utils.toHex(tx.gasPrice),
+      gasLimit: web3.utils.toHex(tx.gasLimit),
+      to: factoryAddress,
+      value: '0x0',
+      data: factoryContract.methods.initializeFactory(tokenAddress).encodeABI(),
+      nonce: web3.utils.toHex(count)
+    },
+    privateKey
+  )
+  return new Promise(resolve => {
+    web3.eth
+      .sendSignedTransaction(transaction.rawTransaction)
+      .on('transactionHash', function(hash) {
+        console.log('Tx hash: ', hash)
+        resolve(hash)
+      })
+  })
+}
 export const getULTToUSDPrice = async () => {
   try {
     let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
