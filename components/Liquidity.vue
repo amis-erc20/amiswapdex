@@ -1,11 +1,14 @@
 <template>
   <div>
     <div id="uniswap-convert-section">
-      <p style="text-align: center">
-        Add Liquidity for
-        <strong>{{getActiveToken}}</strong>
-      </p>
-      <b-form @submit="onAddLiquidity" @reset="onReset">
+      <b-form-group id="exampleInputGroup1">
+        <label>Add or Remove Liquidity</label>
+        <b-form-select
+          v-model="liquidity"
+          :options="[{text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
+        />
+      </b-form-group>
+      <b-form @submit="onAddLiquidity" @reset="onReset" v-if="liquidity === `add`">
         <label>Deposit ETH</label>
         <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
         <b-form-group id="exampleInputGroup1">
@@ -79,6 +82,75 @@
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button type="submit" variant="danger" :disabled="shouldDisableSwapButton">Add Liquidity</b-button>
+        </div>
+      </b-form>
+
+      <b-form @submit="onRemoveLiquidity" @reset="onReset" v-if="liquidity === `remove`">
+        <label>Amount of Pool Token</label>
+        <b-form-group id="exampleInputGroup1">
+          <b-form-input
+            id="inputValue"
+            type="text"
+            v-model="form.inputValue"
+            required
+            :state="validateinputValue"
+            @keyup="onRemoveAmountChange"
+            @focus="onInputFocus"
+          />
+        </b-form-group>
+
+        <b-button variant="danger" id="currency-swap-button">
+          <font-awesome-icon icon="plus" size="lg" color="#fff"/>
+        </b-button>
+
+        <b-form-group id="exampleInputGroup1">
+          <label>Withdrawn Amount</label>
+          <p>
+            <span id="withdrawn-eth">---</span> ETH +
+            <span id="withdrawn-token">---</span>
+            {{getActiveToken}}
+          </p>
+          <b-form-invalid-feedback
+            :state="validateOutputAmount && validateTokenBalance"
+          >{{ outputErrorMessage }}</b-form-invalid-feedback>
+        </b-form-group>
+
+        <div
+          class="exchange-info-container"
+          v-if="slippage && exchangeRate && validateinputValue && validateOutputAmount"
+        >
+          <b-form-group v-if="form.inputCurrency !== null">
+            <label for>Exchange Rate</label>
+            <p>1 {{form.inputCurrency}} = {{exchangeRate.toFixed(5)}} {{form.outputCurrency}}</p>
+          </b-form-group>
+          <!-- <b-form-group v-if="form.inputCurrency !== null">
+            <label for>Slippage</label>
+            <p>{{ slippage.toFixed(2) }} %</p>
+          </b-form-group>-->
+        </div>
+
+        <b-form-group v-if="form.inputCurrency !== null">
+          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
+        </b-form-group>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+          <b-form-input
+            type="range"
+            id="range-1"
+            v-model="gasPrice"
+            min="2"
+            max="30"
+            @change="updateGasLimitAndTxFee"
+          />
+          <p>Estimated Tx Fee: {{txFee}} ETH</p>
+        </b-form-group>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
+          <b-form-input type="text" required v-model="gasLimit"/>
+        </b-form-group>
+        <div class="submit-button-group">
+          <b-button type="reset" variant="outline-dark">Reset</b-button>
+          <b-button type="submit" variant="danger">Remove Liquidity</b-button>
         </div>
       </b-form>
       <!-- Success Modal -->
@@ -155,7 +227,9 @@ import {
   unlockToken,
   swapEthToToken,
   swapTokenToToken,
-  addLiquidity
+  addLiquidity,
+  getAbsPrice,
+  removeLiquidity
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -193,9 +267,9 @@ export default {
         approvedAmount: 0
       },
       loading: false,
-      showAdvanced: false,
+      showAdvanced: true,
       gasPrice: 0,
-      gasLimit: 51000,
+      gasLimit: 51000 * 2,
       txFee: 0,
       txHash: "",
       approvedStatus: "",
@@ -203,7 +277,8 @@ export default {
       unlockTxHash: "",
       inputErrorMessage: "Please input a valid amount",
       outputErrorMessage: "Please input a valid amount",
-      slippage: null
+      slippage: null,
+      liquidity: "add"
     };
   },
   computed: {
@@ -420,14 +495,6 @@ export default {
         this.gasLimit = estimatedGas * 2.5;
       console.log(estimatedGas, this.gasPrice, this.gasLimit);
     },
-    onCurrencySwap() {
-      let input = this.form.inputCurrency;
-      let output = this.form.outputCurrency;
-      this.form.inputCurrency = output;
-      this.form.outputCurrency = input;
-      this.lastEditedField === "input";
-      this.onAmountChange();
-    },
     async onAmountChange() {
       if (!this.form.inputCurrency || !this.form.outputCurrency) return;
       if (this.lastEditedField === "input") {
@@ -435,81 +502,74 @@ export default {
           this.form.outputValue = "";
           return;
         }
-        if (this.swapType === "TOKEN_TO_ETH") {
-          let exchangeContract = exchangeContracts[this.form.inputCurrency];
-          let tokenSold = new BigNumber(
-            this.form.inputValue * Math.pow(10, 18)
-          ).toFixed(0);
-          let ethBought = await exchangeContract.methods
-            .getTokenToEthInputPrice(tokenSold)
-            .call();
-          this.form.outputValue = parseFloat(ethBought / Math.pow(10, 18));
-        } else if (this.swapType === "ETH_TO_TOKEN") {
-          let exchangeContract = exchangeContracts[this.form.outputCurrency];
-          let ethSold = new BigNumber(
-            this.form.inputValue * Math.pow(10, 18)
-          ).toFixed(0);
-          let tokenBought = await exchangeContract.methods
-            .getEthToTokenInputPrice(ethSold)
-            .call();
-          this.form.outputValue = parseFloat(tokenBought / Math.pow(10, 18));
-        } else if (this.swapType === "TOKEN_TO_TOKEN") {
-          let exchangeContractA = exchangeContracts[this.form.inputCurrency];
-          let tokenSoldA = new BigNumber(
-            this.form.inputValue * Math.pow(10, 18)
-          ).toFixed(0);
-          let ethBought = await exchangeContractA.methods
-            .getTokenToEthInputPrice(tokenSoldA)
-            .call();
-
-          let ethSold = ethBought;
-          let exchangeContractB = exchangeContracts[this.form.outputCurrency];
-          let tokenBoughtB = await exchangeContractB.methods
-            .getEthToTokenInputPrice(ethSold)
-            .call();
-          this.form.outputValue = parseFloat(tokenBoughtB / Math.pow(10, 18));
-        }
+        const absPrice = await getAbsPrice(
+          this.form.inputCurrency,
+          this.form.outputCurrency,
+          this.web3
+        );
+        this.form.outputValue = absPrice
+          .multipliedBy(this.form.inputValue)
+          .toFixed(8);
       } else if (this.lastEditedField === "output") {
         if (!this.validateOutputAmount) {
           this.form.inputValue = "";
           return;
         }
-        if (this.swapType === "TOKEN_TO_ETH") {
-          let exchangeContract = exchangeContracts[this.form.inputCurrency];
-          let ethBought = new BigNumber(
-            this.form.outputValue * Math.pow(10, 18)
-          ).toFixed(0);
-          let tokenSold = await exchangeContract.methods
-            .getTokenToEthOutputPrice(ethBought)
-            .call();
-          this.form.inputValue = parseFloat(tokenSold / Math.pow(10, 18));
-        } else if (this.swapType === "ETH_TO_TOKEN") {
-          let exchangeContract = exchangeContracts[this.form.outputCurrency];
-          let tokenBought = new BigNumber(
-            this.form.outputValue * Math.pow(10, 18)
-          ).toFixed(0);
-          let ethSold = await exchangeContract.methods
-            .getEthToTokenOutputPrice(tokenBought)
-            .call();
-          this.form.inputValue = parseFloat(ethSold / Math.pow(10, 18));
-        } else if (this.swapType === "TOKEN_TO_TOKEN") {
-          let exchangeContractB = exchangeContracts[this.form.outputCurrency];
-          let tokenSoldB = new BigNumber(
-            this.form.outputValue * Math.pow(10, 18)
-          ).toFixed(0);
-          let ethBought = await exchangeContractB.methods
-            .getTokenToEthInputPrice(tokenSoldB)
-            .call();
-
-          let ethSold = ethBought;
-          let exchangeContractA = exchangeContracts[this.form.inputCurrency];
-          let tokenBoughtA = await exchangeContractA.methods
-            .getEthToTokenInputPrice(ethSold)
-            .call();
-          this.form.inputValue = parseFloat(tokenBoughtA / Math.pow(10, 18));
-        }
+        const absPrice = await getAbsPrice(
+          this.form.inputCurrency,
+          this.form.outputCurrency,
+          this.web3
+        );
+        this.form.inputValue = new BigNumber(this.form.outputValue)
+          .dividedBy(absPrice)
+          .toFixed(8);
       }
       this.updateExchangeRateAndSlippage();
+    },
+    async onRemoveAmountChange() {
+      if (!this.form.inputCurrency || !this.form.outputCurrency) return;
+
+      let web3 = this.web3;
+      let inputValue = this.form.inputValue;
+      let inputCurrency = this.form.inputCurrency;
+      let outputValue = this.form.outputValue;
+      let outputCurrency = this.form.outputCurrency;
+      let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
+      let type = this.swapType;
+
+      const blockNumber = await web3.eth.getBlockNumber();
+      const block = await web3.eth.getBlock(blockNumber);
+      const deadline = block.timestamp + 300;
+      const accounts = await web3.eth.getAccounts();
+      let exchangeContract = exchangeContracts[outputCurrency];
+      const contractAddress = exchangeAddresses[outputCurrency];
+      let tokenContract = tokenContracts[outputCurrency];
+
+      let ethReserve = await web3.eth.getBalance(contractAddress);
+      let tokenReserve = await tokenContract.methods
+        .balanceOf(contractAddress)
+        .call();
+
+      const totalSupply = await exchangeContract.methods.totalSupply().call();
+      const amount = new BigNumber(inputValue * Math.pow(10, 18));
+      const ownership = amount.dividedBy(totalSupply);
+      const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership);
+      const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
+        ownership
+      );
+
+      let ethBalance = await web3.eth.getBalance(this.getAccount.address);
+      ethBalance = new BigNumber(ethBalance);
+      const liquidityBalance = new BigNumber(totalSupply).multipliedBy(
+        ethBalance.dividedBy(ethReserve)
+      );
+
+      document.querySelector(
+        "#withdrawn-eth"
+      ).innerHTML = ethWithdrawn.dividedBy(10 ** 18).toFixed(6);
+      document.querySelector(
+        "#withdrawn-token"
+      ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
     },
     async onUnlock(evt) {
       evt.preventDefault();
@@ -541,212 +601,6 @@ export default {
           self.approvedStatus = true;
         }
       }, 1000);
-    },
-    async onSubmit(evt) {
-      evt.preventDefault();
-      this.loading = true;
-      let web3 = this.web3;
-      let inputValue = this.form.inputValue;
-      let inputCurrency = this.form.inputCurrency;
-      let outputValue = this.form.outputValue;
-      let outputCurrency = this.form.outputCurrency;
-      let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
-      let type = this.swapType;
-
-      try {
-        const blockNumber = await web3.eth.getBlockNumber();
-        const block = await web3.eth.getBlock(blockNumber);
-        const deadline = block.timestamp + 300;
-        const accounts = await web3.eth.getAccounts();
-        let exchangeContract;
-
-        if (type === "ETH_TO_TOKEN") {
-          exchangeContract = exchangeContracts[outputCurrency];
-          const contractAddress = exchangeAddresses[outputCurrency];
-          let minimumTokenBought = new BigNumber(outputValue - 1)
-            .multipliedBy(10 ** 18)
-            .toNumber(0);
-          if (minimumTokenBought <= 0) {
-            minimumTokenBought = new BigNumber(outputValue)
-              .multipliedBy(0.9)
-              .multipliedBy(10 ** 18)
-              .toNumber(0);
-          }
-          const ethSold = new BigNumber(inputValue * Math.pow(10, 18)).toNumber(
-            0
-          );
-          await this.updateGasLimitAndTxFee();
-          console.log({
-            from: this.getAccount.address,
-            ethSold: ethSold,
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            minimumTokenBought,
-            deadline
-          });
-          try {
-            this.txHash = await swapEthToToken(
-              {
-                from: this.getAccount.address,
-                ethSold: ethSold,
-                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-                gasLimit: parseInt(this.gasLimit),
-                minimumTokenBought,
-                deadline
-              },
-              exchangeContract,
-              contractAddress,
-              this.getAccount.privateKey,
-              this.web3
-            );
-          } catch (e) {
-            console.log(e);
-            console.log("error occoured while swapping...");
-          }
-          if (this.txHash) console.log(this.txHash);
-          if (!this.txHash) {
-            this.loading = false;
-            this.showModal("failed_model_ref");
-            return;
-          }
-          this.updateActiveToken(this.form.outputCurrency);
-          this.onReset();
-          this.loading = false;
-          this.showModal("success_modal_ref");
-        } else if (type === "TOKEN_TO_ETH") {
-          exchangeContract = exchangeContracts[inputCurrency];
-          const tokenSold = new BigNumber(inputValue * Math.pow(10, 18));
-          const exchangeRate = parseFloat(outputValue / inputValue);
-          let minEth = new BigNumber(outputValue)
-            .minus(exchangeRate)
-            .multipliedBy(10 ** 18)
-            .toNumber(0);
-          if (minEth <= 0) {
-            minEth = new BigNumber(outputValue)
-              .multipliedBy(0.9)
-              .multipliedBy(10 ** 18)
-              .toNumber(0);
-          }
-          const contractAddress = exchangeAddresses[inputCurrency];
-          await this.updateGasLimitAndTxFee();
-          const allowance = await this.getAllowance(this.form.inputCurrency);
-
-          const input = this.form.inputValue * Math.pow(10, 18);
-          console.log(`Current token allowance is: ${allowance}`);
-          if (input > allowance) {
-            this.loading = false;
-            this.approvedStatus = false;
-            this.form.approvedAmount = this.form.inputValue * 1.5;
-            this.showModal("unlock_request_modal_ref");
-            return;
-          }
-          console.log({
-            from: this.getAccount.address,
-            amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            tokenSold,
-            minEth,
-            deadline
-          });
-          this.txHash = await swapTokenToEth(
-            {
-              from: this.getAccount.address,
-              amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
-              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-              gasLimit: parseInt(this.gasLimit),
-              tokenSold,
-              minEth,
-              deadline
-            },
-            exchangeContract,
-            contractAddress,
-            this.getAccount.privateKey,
-            this.web3
-          );
-          this.updateActiveToken(this.form.outputCurrency);
-          this.onReset();
-          this.loading = false;
-          this.showModal("success_modal_ref");
-        } else if (type === "TOKEN_TO_TOKEN") {
-          exchangeContract = exchangeContracts[inputCurrency];
-          const contractAddress = exchangeAddresses[inputCurrency];
-          const tokenASold = new BigNumber(
-            inputValue * Math.pow(10, 18)
-          ).toNumber(0);
-          const minTokenBBought = new BigNumber(1).toNumber(0);
-          // let exchangeRate;
-          // let minTokenBBought;
-          // if (inputCurrency === "ULT") {
-          //   exchangeRate = parseFloat(outputValue / inputValue);
-          //   minTokenBBought = new BigNumber(outputValue)
-          //     .minus(exchangeRate)
-          //     .multipliedBy(10 ** 18)
-          //     .toNumber(0);
-          // } else if (outputCurrency === "ULT") {
-          //   minTokenBBought = new BigNumber(outputValue)
-          //     .minus(1)
-          //     .multipliedBy(10 ** 18)
-          //     .toNumber(0);
-          // }
-          // if (minTokenBBought <= 0) {
-          //   minTokenBBought = new BigNumber(outputValue)
-          //     .multipliedBy(0.9)
-          //     .multipliedBy(10 ** 18)
-          //     .toNumber(0);
-          // }
-          console.log(`Minimum token bought is ${minTokenBBought}`);
-          const minEth = new BigNumber(1).toNumber(0);
-          const outputTokenAddress = tokenAddressess[outputCurrency];
-          await this.updateGasLimitAndTxFee();
-
-          // check allowance value for input token
-          const allowance = await this.getAllowance(this.form.inputCurrency);
-          const input = this.form.inputValue * Math.pow(10, 18);
-          console.log(`${inputCurrency} token allowance is: ${allowance}`);
-          if (input > allowance) {
-            this.loading = false;
-            this.approvedStatus = false;
-            this.form.approvedAmount = this.form.inputValue * 1.5;
-            this.showModal("unlock_request_modal_ref");
-            return;
-          }
-          console.log({
-            from: this.getAccount.address,
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            tokenASold,
-            minEth,
-            minTokenBBought,
-            deadline,
-            outputTokenAddress
-          });
-          this.txHash = await swapTokenToToken(
-            {
-              from: this.getAccount.address,
-              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-              gasLimit: parseInt(this.gasLimit),
-              tokenASold,
-              minEth,
-              minTokenBBought,
-              deadline,
-              outputTokenAddress
-            },
-            exchangeContract,
-            contractAddress,
-            this.getAccount.privateKey,
-            this.web3
-          );
-          this.updateActiveToken(this.form.outputCurrency);
-          this.onReset();
-          this.loading = false;
-          this.showModal("success_modal_ref");
-        }
-      } catch (e) {
-        console.log(e);
-        this.loading = false;
-        this.showModal("failed_model_ref");
-      }
     },
     async getAllowance(inputCurrency) {
       try {
@@ -789,98 +643,20 @@ export default {
       let mainToken = {
         symbol: "ULT"
       };
-      if (inputCurrency !== "ETH") {
-        if (outputCurrency !== "ETH") {
-          let tokenExchangeAddressA = exchangeAddresses[inputCurrency];
-          let tokenContractA = tokenContracts[inputCurrency];
-          let ethReserveA = await web3.eth.getBalance(tokenExchangeAddressA);
-          let tokenRserveA = await tokenContractA.methods
-            .balanceOf(tokenExchangeAddressA)
-            .call();
-          ethReserveA = new BigNumber(ethReserveA);
-          tokenRserveA = new BigNumber(tokenRserveA);
-          let absPriceA = tokenRserveA.dividedBy(ethReserveA);
-
-          let tokenExchangeAddressB = exchangeAddresses[outputCurrency];
-          let tokenContractB = tokenContracts[outputCurrency];
-          let ethReserveB = await web3.eth.getBalance(tokenExchangeAddressB);
-          let tokenReserveB = await tokenContractB.methods
-            .balanceOf(tokenExchangeAddressB)
-            .call();
-          ethReserveB = new BigNumber(ethReserveB);
-          tokenReserveB = new BigNumber(tokenReserveB);
-          let absPriceB = tokenReserveB.dividedBy(ethReserveB);
-
-          let absPrice = absPriceB.dividedBy(absPriceA);
-          absPrice = absPrice.toFixed(8);
-          console.log(`Abs Price is : ${absPrice}`);
-
-          this.exchangeRate = outputValue / inputValue;
-          this.slippage =
-            (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
-        } else if (outputCurrency === "ETH") {
-          let tokenExchangeAddress = exchangeAddresses[inputCurrency];
-          let tokenContract = tokenContracts[inputCurrency];
-          let ethReserve = await web3.eth.getBalance(tokenExchangeAddress);
-          let tokenRserve = await tokenContract.methods
-            .balanceOf(tokenExchangeAddress)
-            .call();
-          ethReserve = new BigNumber(ethReserve);
-          tokenRserve = new BigNumber(tokenRserve);
-
-          let absPrice = ethReserve.dividedBy(tokenRserve);
-          absPrice = absPrice.toFixed(8);
-
-          this.exchangeRate = outputValue / inputValue;
-          this.slippage =
-            (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
-        }
-      } else if (outputCurrency !== "ETH") {
-        if (inputCurrency !== "ETH") {
-          let tokenExchangeAddressA = exchangeAddresses[inputCurrency];
-          let tokenContractA = tokenContracts[inputCurrency];
-          let ethReserveA = await web3.eth.getBalance(tokenExchangeAddressA);
-          let tokenRserveA = await tokenContractA.methods
-            .balanceOf(tokenExchangeAddressA)
-            .call();
-          ethReserveA = new BigNumber(ethReserveA);
-          tokenRserveA = new BigNumber(tokenRserveA);
-          let absPriceA = tokenRserveA.dividedBy(ethReserveA);
-
-          let tokenExchangeAddressB = exchangeAddresses[outputCurrency];
-          let tokenContractB = tokenContracts[outputCurrency];
-          let ethReserveB = await web3.eth.getBalance(tokenExchangeAddressB);
-          let tokenReserveB = await tokenContractB.methods
-            .balanceOf(tokenExchangeAddressB)
-            .call();
-          ethReserveB = new BigNumber(ethReserveB);
-          tokenReserveB = new BigNumber(tokenReserveB);
-          let absPriceB = tokenReserveB.dividedBy(ethReserveB);
-
-          let absPrice = absPriceB.dividedBy(absPriceA);
-          absPrice = absPrice.toFixed(8);
-
-          this.exchangeRate = outputValue / inputValue;
-          this.slippage =
-            (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
-        } else if (inputCurrency === "ETH") {
-          let tokenExchangeAddress = exchangeAddresses[outputCurrency];
-          let tokenContract = tokenContracts[outputCurrency];
-          let ethReserve = await web3.eth.getBalance(tokenExchangeAddress);
-          let tokenRserve = await tokenContract.methods
-            .balanceOf(tokenExchangeAddress)
-            .call();
-          ethReserve = new BigNumber(ethReserve);
-          tokenRserve = new BigNumber(tokenRserve);
-          let absPrice = tokenRserve.dividedBy(ethReserve);
-          absPrice = absPrice.toFixed(8);
-
-          // let absPrice = await getULTToETHPrice()
-          // absPrice = 1 / absPrice
-          this.exchangeRate = outputValue / inputValue;
-          this.slippage =
-            (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
-        }
+      if (inputCurrency === "ETH") {
+        let tokenExchangeAddress = exchangeAddresses[outputCurrency];
+        let tokenContract = tokenContracts[outputCurrency];
+        let ethReserve = await web3.eth.getBalance(tokenExchangeAddress);
+        let tokenRserve = await tokenContract.methods
+          .balanceOf(tokenExchangeAddress)
+          .call();
+        ethReserve = new BigNumber(ethReserve);
+        tokenRserve = new BigNumber(tokenRserve);
+        let absPrice = tokenRserve.dividedBy(ethReserve);
+        absPrice = absPrice.toFixed(8);
+        this.exchangeRate = absPrice;
+        this.slippage =
+          (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
       }
     },
     async onAddLiquidity(evt) {
@@ -916,15 +692,100 @@ export default {
       console.log(`minted liquidity: ${liquidityMinted}`);
 
       const MAX_LIQUIDITY_SLIPPAGE = 0.025;
-      // const minLiquidity = liquidityMinted.multipliedBy(
-      //   1 - MAX_LIQUIDITY_SLIPPAGE
-      // );
-      const minLiquidity = 0;
+      const minLiquidity = liquidityMinted.multipliedBy(
+        1 - MAX_LIQUIDITY_SLIPPAGE
+      );
       const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
-
-      await this.updateGasLimitAndTxFee();
+      // await this.updateGasLimitAndTxFee();
       try {
         this.txHash = await addLiquidity(
+          {
+            from: this.getAccount.address,
+            ethAmount: ethAmount,
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: parseInt(this.gasLimit),
+            minLiquidity,
+            maxTokens,
+            deadline
+          },
+          exchangeContract,
+          contractAddress,
+          this.getAccount.privateKey,
+          this.web3
+        );
+      } catch (e) {
+        console.log(e);
+        console.log("error occoured while adding liquidity...");
+      }
+      if (this.txHash) console.log(this.txHash);
+      if (!this.txHash) {
+        this.loading = false;
+        this.showModal("failed_model_ref");
+        return;
+      }
+      this.updateActiveToken(this.form.outputCurrency);
+      this.onReset();
+      this.loading = false;
+      this.showModal("success_modal_ref");
+    },
+    async onRemoveLiquidity(evt) {
+      evt.preventDefault();
+      this.loading = true;
+      let web3 = this.web3;
+      let inputValue = this.form.inputValue;
+      let inputCurrency = this.form.inputCurrency;
+      let outputValue = this.form.outputValue;
+      let outputCurrency = this.form.outputCurrency;
+      let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
+      let type = this.swapType;
+
+      const blockNumber = await web3.eth.getBlockNumber();
+      const block = await web3.eth.getBlock(blockNumber);
+      const deadline = block.timestamp + 300;
+      const accounts = await web3.eth.getAccounts();
+      let exchangeContract = exchangeContracts[outputCurrency];
+      const contractAddress = exchangeAddresses[outputCurrency];
+      let tokenContract = tokenContracts[outputCurrency];
+
+      let ethReserve = await web3.eth.getBalance(contractAddress);
+      let tokenReserve = await tokenContract.methods
+        .balanceOf(contractAddress)
+        .call();
+
+      const totalSupply = await exchangeContract.methods.totalSupply().call();
+      const amount = new BigNumber(inputValue * Math.pow(10, 18));
+      const ownership = amount.dividedBy(totalSupply);
+      const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership);
+      const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
+        ownership
+      );
+
+      let ethBalance = await web3.eth.getBalance(this.getAccount.address);
+      ethBalance = new BigNumber(ethBalance);
+      const liquidityBalance = new BigNumber(totalSupply).multipliedBy(
+        ethBalance.dividedBy(ethReserve)
+      );
+
+      console.log(`eth balance: ${ethBalance.dividedBy(10 ** 18).toFixed(6)}`);
+      console.log(
+        `liquidityBalance: ${liquidityBalance.dividedBy(10 ** 18).toFixed(6)}`
+      );
+      console.log(
+        `eth withdrawn: ${ethWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
+      );
+      console.log(
+        `token withdrawn: ${tokenWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
+      );
+
+      document.querySelector(
+        "#withdrawn-eth"
+      ).innerHTML = ethWithdrawn.dividedBy(10 ** 18).toFixed(6);
+      document.querySelector(
+        "#withdrawn-token"
+      ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
+
+      try {
+        this.txHash = await removeLiquidity(
           {
             from: this.getAccount.address,
             ethAmount: ethAmount,

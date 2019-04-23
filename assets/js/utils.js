@@ -142,6 +142,29 @@ export const getTokenBalance = async function(address, currency, web3) {
 		return 0
 	}
 }
+export const getAbsPrice = async function(inputCurrency, outputCurrency, web3) {
+	if (!inputCurrency || !outputCurrency) return
+	if (!tokenContracts[outputCurrency]) {
+		console.log(`Cannot find token contrat for ${currency}. Creating now...`)
+		await initContracts(web3)
+	}
+	try {
+		let tokenExchangeAddress = exchangeAddresses[outputCurrency]
+		let tokenContract = tokenContracts[outputCurrency]
+		let ethReserve = await web3.eth.getBalance(tokenExchangeAddress)
+		let tokenRserve = await tokenContract.methods
+			.balanceOf(tokenExchangeAddress)
+			.call()
+		ethReserve = new BigNumber(ethReserve)
+		tokenRserve = new BigNumber(tokenRserve)
+		let absPrice = tokenRserve.dividedBy(ethReserve)
+		return absPrice
+	} catch (e) {
+		console.log(`ERROR - getAbsPrice`)
+		console.log(e)
+		return 0
+	}
+}
 
 export const estimateGas = async function(transaction, web3) {
 	try {
@@ -367,13 +390,14 @@ export const addLiquidity = async function(
 		gasLimit: tx.gasLimit,
 		value: tx.ethAmount.toFixed(0),
 		minLiquidity: tx.minLiquidity.toFixed(0),
-		maxTokens: tx.maxTokens.toFixed(0)
+		maxTokens: tx.maxTokens.toFixed(0),
+		deadline: tx.deadline
 	})
 	let myAddress = tx.from
 	let count = await web3.eth.getTransactionCount(myAddress)
 	let transaction = await web3.eth.accounts.signTransaction(
 		{
-			from: myAddress,
+			from: tx.from,
 			gasPrice: web3.utils.toHex(tx.gasPrice),
 			gasLimit: web3.utils.toHex(tx.gasLimit),
 			to: contractAddress,
@@ -383,6 +407,53 @@ export const addLiquidity = async function(
 					tx.minLiquidity.toFixed(0),
 					tx.maxTokens.toFixed(0),
 					tx.deadline
+				)
+				.encodeABI(),
+			nonce: web3.utils.toHex(count)
+		},
+		privateKey
+	)
+	return new Promise(resolve => {
+		web3.eth
+			.sendSignedTransaction(transaction.rawTransaction)
+			.on('transactionHash', function(hash) {
+				console.log('Tx hash: ', hash)
+				resolve(hash)
+			})
+	})
+}
+export const removeLiquidity = async function(
+	tx,
+	exchangeContract,
+	contractAddress,
+	privateKey,
+	web3
+) {
+	const SLIPPAGE = 0.02
+	console.log({
+		from: tx.from,
+		gasPrice: tx.gasPrice,
+		gasLimit: tx.gasLimit,
+		value: '0x0',
+		amount: tx.amount.toFixed(0),
+		ethWithdrawn: tx.ethWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0),
+		tokenWithdrawn: tx.tokenWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0)
+	})
+	let myAddress = tx.from
+	let count = await web3.eth.getTransactionCount(myAddress)
+	let transaction = await web3.eth.accounts.signTransaction(
+		{
+			from: tx.from,
+			gasPrice: web3.utils.toHex(tx.gasPrice),
+			gasLimit: web3.utils.toHex(tx.gasLimit),
+			to: contractAddress,
+			value: '0x0',
+			data: exchangeContract.methods
+				.removeLiquidity(
+					tx.amount.toFixed(0),
+					tx.ethWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0),
+					tx.tokenWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0),
+					deadline
 				)
 				.encodeABI(),
 			nonce: web3.utils.toHex(count)
