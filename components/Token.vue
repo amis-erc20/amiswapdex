@@ -20,11 +20,7 @@
 </template>
 
 <script>
-import {
-  getULTToUSDPrice,
-  getETHToUSDPrice,
-  getDAIToUSDPrice
-} from "../assets/js/utils";
+import { getULTToUSDPrice, getETHToUSDPrice } from "../assets/js/utils";
 import { mapGetters, mapActions } from "vuex";
 export default {
   props: {

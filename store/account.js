@@ -28,7 +28,7 @@ export const mutations = {
 		state.account = null
 	},
 	addToken(state, newToken) {
-		state.tokenList.push(newToken)
+		if (state.tokenList.indexOf(newToken) === -1) state.tokenList.push(newToken)
 	},
 	updateBalance(state, payload) {
 		let { symbol, balance } = payload

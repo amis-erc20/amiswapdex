@@ -10,7 +10,7 @@ let exchangeContracts = {}
 let tokenContracts = {}
 let factoryContract
 
-export const initContracts = async function(web3) {
+export const initContracts = async function (web3) {
   factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
   for (let i = 0; i < tokenSymbols.length; i += 1) {
     exchangeContracts[tokenSymbols[i]] = new web3.eth.Contract(
@@ -26,8 +26,8 @@ export const initContracts = async function(web3) {
     )
   }
 }
-export const getWeb3 = function() {
-  return new Promise(function(resolve, reject) {
+export const getWeb3 = function () {
+  return new Promise(function (resolve, reject) {
     try {
       // let web3 = new Web3(new Web3.providers.HttpProvider("mainnet.infura.io/v3/6f70582e339948738835c25da4b9b8a5"));
       let web3 = new Web3(
@@ -41,7 +41,7 @@ export const getWeb3 = function() {
   })
 }
 
-export const getExchangeAddress = async function(tokenAddress) {
+export const getExchangeAddress = async function (tokenAddress) {
   try {
     let exchangeAddress = await factoryContract.methods
       .getExchange(tokenAddress)
@@ -56,7 +56,7 @@ export const getExchangeAddress = async function(tokenAddress) {
     console.log(e)
   }
 }
-export const createExchange = async function(
+export const createNewExchange = async function (
   tx,
   tokenAddress,
   privateKey,
@@ -79,7 +79,7 @@ export const createExchange = async function(
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
@@ -121,19 +121,19 @@ export const getEthAndUltPrice = async () => {
     return { ethUsdPrice, ultUsdPrice }
   }
 }
-export const getDAIToUSDPrice = async () => {
+export const getTokenToUSDPrice = async (symbol) => {
   try {
     let response = await axios.get(
-      `https://min-api.cryptocompare.com/data/price?fsym=DAI&tsyms=USD,JPY,EUR`
+      `https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD,JPY,EUR`
     )
     return response.data.USD
   } catch (e) {
-    console.log(`ERROR - getDAIToUSDPrice`)
+    console.log(`ERROR - getTokenToUSDPrice`)
     console.log(e)
   }
 }
 
-export const getHistory = async function(address) {
+export const getHistory = async function (address) {
   if (!address) return
   try {
     const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&sort=asc&apikey=YourApiKeyToken`
@@ -145,7 +145,7 @@ export const getHistory = async function(address) {
     return
   }
 }
-export const getTokenHistory = async function(address) {
+export const getTokenHistory = async function (address) {
   if (!address) return
   try {
     const url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${address}&tag=latest`
@@ -157,7 +157,7 @@ export const getTokenHistory = async function(address) {
     return
   }
 }
-export const getBalance = async function(address, web3) {
+export const getBalance = async function (address, web3) {
   if (!address) return
   try {
     // let url = `https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest`
@@ -171,7 +171,7 @@ export const getBalance = async function(address, web3) {
     return
   }
 }
-export const getTokenBalance = async function(address, currency, web3) {
+export const getTokenBalance = async function (address, currency, web3) {
   if (!address) return
   if (!tokenContracts[currency]) {
     console.log(`Cannot find token contrat for ${currency}. Creating now...`)
@@ -188,7 +188,7 @@ export const getTokenBalance = async function(address, currency, web3) {
     return 0
   }
 }
-export const getAbsPrice = async function(inputCurrency, outputCurrency, web3) {
+export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) {
   if (!inputCurrency || !outputCurrency) return
   if (!tokenContracts[outputCurrency]) {
     console.log(`Cannot find token contrat for ${currency}. Creating now...`)
@@ -212,7 +212,7 @@ export const getAbsPrice = async function(inputCurrency, outputCurrency, web3) {
   }
 }
 
-export const estimateGas = async function(transaction, web3) {
+export const estimateGas = async function (transaction, web3) {
   try {
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
@@ -224,11 +224,11 @@ export const estimateGas = async function(transaction, web3) {
     return 0
   }
 }
-export const estimateGasPrice = async function(web3) {
+export const estimateGasPrice = async function (web3) {
   let gasPrice = await web3.eth.getGasPrice()
   return gasPrice
 }
-export const signAndSendETH = async function(transaction, privateKey, web3) {
+export const signAndSendETH = async function (transaction, privateKey, web3) {
   let signedTx = await web3.eth.accounts.signTransaction(
     {
       from: transaction.from,
@@ -242,14 +242,14 @@ export const signAndSendETH = async function(transaction, privateKey, web3) {
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(signedTx.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
   })
 }
 
-export const sendToken = async function(tx, currency, privateKey, web3) {
+export const sendToken = async function (tx, currency, privateKey, web3) {
   let myAddress = tx.from
   let toAddress = tx.to
   let amount = web3.utils.toHex(tx.amount)
@@ -273,7 +273,7 @@ export const sendToken = async function(tx, currency, privateKey, web3) {
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
@@ -301,14 +301,14 @@ export const unlockToken = async (tx, tokenSymbol, data) => {
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
   })
 }
 
-export const swapTokenToEth = async function(
+export const swapTokenToEth = async function (
   tx,
   exchangeContract,
   contractAddress,
@@ -335,14 +335,14 @@ export const swapTokenToEth = async function(
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
   })
 }
 
-export const swapEthToToken = async function(
+export const swapEthToToken = async function (
   tx,
   exchangeContract,
   contractAddress,
@@ -371,11 +371,11 @@ export const swapEthToToken = async function(
       )
       web3.eth
         .sendSignedTransaction(transaction.rawTransaction)
-        .on('error', function(error) {
+        .on('error', function (error) {
           console.log(error)
           resolve(false)
         })
-        .on('transactionHash', function(hash) {
+        .on('transactionHash', function (hash) {
           console.log('Tx hash: ', hash)
           resolve(hash)
         })
@@ -385,7 +385,7 @@ export const swapEthToToken = async function(
   })
 }
 
-export const swapTokenToToken = async function(
+export const swapTokenToToken = async function (
   tx,
   exchangeContract,
   contractAddress,
@@ -417,13 +417,13 @@ export const swapTokenToToken = async function(
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
   })
 }
-export const addLiquidity = async function(
+export const addLiquidity = async function (
   tx,
   exchangeContract,
   contractAddress,
@@ -462,13 +462,13 @@ export const addLiquidity = async function(
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })
   })
 }
-export const removeLiquidity = async function(
+export const removeLiquidity = async function (
   tx,
   exchangeContract,
   contractAddress,
@@ -509,7 +509,7 @@ export const removeLiquidity = async function(
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function(hash) {
+      .on('transactionHash', function (hash) {
         console.log('Tx hash: ', hash)
         resolve(hash)
       })

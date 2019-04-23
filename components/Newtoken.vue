@@ -40,7 +40,8 @@ import {
   getTokenHistory,
   getULTToUSDPrice,
   isIos,
-  isInStandaloneMode
+  isInStandaloneMode,
+  getTokenToUSDPrice
 } from "../assets/js/utils";
 
 import { mapActions, mapGetters } from "vuex";
@@ -102,7 +103,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      addToken: "account/addToken"
+      addToken: "account/addToken",
+      updatePrice: "account/updatePrice"
     }),
     redirect(url) {
       this.$router.push(url);
@@ -114,12 +116,23 @@ export default {
       if (this.$refs[ref]) this.$refs[ref].hide();
     },
     onAddToken() {
+      let self = this;
       if (this.getTokenList.indexOf(this.selectedToken.title) !== -1) {
         return;
       }
       this.addToken(this.selectedToken.title);
       this.hideModal("add_more_token_modal");
       this.selectedToken = "";
+      this.getTokenList
+        .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
+        .forEach(async symbol => {
+          let tokenPrice = await getTokenToUSDPrice(symbol);
+          self.updatePrice({
+            symbol: symbol,
+            price: tokenPrice
+          });
+        });
+      localStorage.setItem("tokenList", JSON.stringify(this.getTokenList));
     }
   }
 };

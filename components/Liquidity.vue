@@ -5,7 +5,7 @@
         <label>Add Liquidity / Remove Liquidity / Create Exchange</label>
         <b-form-select
           v-model="liquidity"
-          :options="[{text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
+          :options="[{text: `Select an option to start`, value: ''}, {text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}, {text: `Create Exchange`, value: `create`}]"
           @change="onSelectLiquidityType"
         />
       </b-form-group>
@@ -152,6 +152,30 @@
           >Remove Liquidity</b-button>
         </div>
       </b-form>
+
+      <!-- ADD EXCHANGE FORM -->
+      <b-form @submit="onCreateExchange" @reset="onReset" v-if="liquidity === `create`">
+        <label>Token Address</label>
+        <b-form-group id="exampleInputGroup1">
+          <b-form-input
+            id="inputValue"
+            type="text"
+            v-model="form.tokenAddress"
+            required
+            @focus="onInputFocus"
+          />
+        </b-form-group>
+
+        <div class="submit-button-group">
+          <b-button type="reset" variant="outline-dark">Reset</b-button>
+          <b-button
+            type="submit"
+            variant="danger"
+            :disabled="shouldDisableCreateExchangeButton"
+          >Create Exchange</b-button>
+        </div>
+      </b-form>
+
       <!-- Success Modal -->
       <b-modal
         ref="success_modal_ref"
@@ -229,7 +253,8 @@ import {
   addLiquidity,
   getAbsPrice,
   removeLiquidity,
-  getExchangeAddress
+  getExchangeAddress,
+  createNewExchange
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -264,7 +289,8 @@ export default {
         outputCurrency: null,
         inputValue: "",
         outputValue: "",
-        approvedAmount: 0
+        approvedAmount: 0,
+        tokenAddress: ""
       },
       loading: false,
       showAdvanced: false,
@@ -398,6 +424,9 @@ export default {
     },
     shouldDisableRemoveButton() {
       return this.loading || !this.validateinputValue;
+    },
+    shouldDisableCreateExchangeButton() {
+      return this.loading || this.form.tokenAddress.length !== 42;
     }
   },
   mounted: async function() {
@@ -444,6 +473,24 @@ export default {
     },
     redirect() {
       this.$router.push("/tokendetail");
+    },
+    async validateTokenAddress() {
+      let tokenAddress = this.form.tokenAddress;
+      let exchangeAddress = await getExchangeAddress(tokenAddress);
+      if (
+        exchangeAddress &&
+        exchangeAddress !== "0x0000000000000000000000000000000000000000"
+      ) {
+        this.inputErrorMessage = "Exchange address already existed";
+        return false;
+      } else if (
+        exchangeAddress === "0x0000000000000000000000000000000000000000"
+      ) {
+        return true;
+      } else {
+        this.inputErrorMessage = "Invalid token address";
+        return false;
+      }
     },
     async useAllFunds() {
       const contractAddress = exchangeAddresses[this.form.inputCurrency];
@@ -856,6 +903,27 @@ export default {
     },
     onSelectLiquidityType() {
       if (this.liquidity === "remove") this.updateLiquidityBalance();
+    },
+    async onCreateExchange(e) {
+      e.preventDefault();
+      this.loading = true;
+      let tokenAddress = this.form.tokenAddress;
+      let exchangeAddress = await getExchangeAddress(tokenAddress);
+      if (
+        exchangeAddress &&
+        exchangeAddress !== "0x0000000000000000000000000000000000000000"
+      ) {
+        alert("Exchange address already existed for selected token");
+        console.log(exchangeAddress);
+      } else if (
+        exchangeAddress === "0x0000000000000000000000000000000000000000"
+      ) {
+        // createNewExchange(tokenAddress)
+        alert("Create Exchange will be implemented soon");
+      } else {
+        alert("Invalid token address");
+      }
+      this.loading = false;
     }
   }
 };

@@ -65,7 +65,13 @@ export default {
       this.$router.push("/tokendetail");
     },
     calculateBalance: function(balance) {
-      return parseFloat(balance / Math.pow(10, 18)).toFixed(6);
+      if (!balance || balance === 0) return 0;
+      else {
+        console.log(`Balance before parse: ${balance}`);
+        var parsedBalance = parseFloat(balance / Math.pow(10, 18)).toFixed(6);
+        console.log(parsedBalance);
+        return parsedBalance;
+      }
     }
   }
 };

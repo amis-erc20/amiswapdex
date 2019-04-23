@@ -11,8 +11,8 @@
           {{ calculateBalance(getBalance["ULT"]) }}
           <span>ULT</span>
         </h2>
-        <h2 v-if="currentRoute !== `/` && getActiveToken === 'DAI'">
-          {{ calculateBalance(getBalance["DAI"]) }}
+        <h2 v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
+          {{ calculateBalance(getBalance[getActiveToken]) }}
           <span>DAI</span>
         </h2>
         <img v-if="currentRoute === `/`" src="../assets/logo.svg" alt width="150px" height="200px">
@@ -26,7 +26,7 @@ import { mapGetters, mapActions } from "vuex";
 import {
   getULTToUSDPrice,
   getETHToUSDPrice,
-  getDAIToUSDPrice
+  getTokenToUSDPrice
 } from "../assets/js/utils";
 export default {
   data: function() {
@@ -39,7 +39,8 @@ export default {
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
-      getActiveToken: "getActiveToken"
+      getActiveToken: "getActiveToken",
+      getTokenList: "account/getTokenList"
     }),
     currentRoute() {
       return this.$route.path;
@@ -55,17 +56,21 @@ export default {
       return parseFloat(balance / Math.pow(10, 18)).toFixed(6);
     },
     refreshUSDPrices: async function() {
+      let self = this;
       let unitPriceInUSD;
+      let shouldRefreshPrices = false;
 
-      if (
-        !this.getPrice["ETH"] ||
-        !this.getPrice["ULT"] ||
-        !this.getPrice["DAI"]
-      ) {
-        console.log(`Getting prices from server...`);
+      this.getTokenList.forEach(symbol => {
+        if (!self.getPrice[symbol]) {
+          shouldRefreshPrices = true;
+        }
+      });
+
+      if (shouldRefreshPrices) {
+        console.log(`Getting USD prices from server...`);
         let ultPrice = await getULTToUSDPrice();
         let ethPrice = await getETHToUSDPrice();
-        let daiPrice = await getDAIToUSDPrice();
+
         this.updatePrice({
           symbol: "ULT",
           price: ultPrice
@@ -74,24 +79,24 @@ export default {
           symbol: "ETH",
           price: ethPrice
         });
-        this.updatePrice({
-          symbol: "DAI",
-          price: daiPrice
-        });
+
+        this.getTokenList
+          .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
+          .forEach(async symbol => {
+            let tokenPrice = await getTokenToUSDPrice(symbol);
+            self.updatePrice({
+              symbol: symbol,
+              price: tokenPrice
+            });
+          });
       }
       await this.wait(500);
 
-      if (this.getActiveToken === "ULT") {
-        unitPriceInUSD = this.getPrice["ULT"];
-        this.priceInUSD = parseFloat(
-          this.calculateBalance(this.getBalance["ULT"]) * unitPriceInUSD
-        ).toFixed(3);
-      } else if (this.getActiveToken === "ETH") {
-        unitPriceInUSD = this.getPrice["ETH"];
-        this.priceInUSD = parseFloat(
-          this.calculateBalance(this.getBalance["ETH"]) * unitPriceInUSD
-        ).toFixed(3);
-      }
+      unitPriceInUSD = this.getPrice[this.getActiveToken];
+      this.priceInUSD = parseFloat(
+        this.calculateBalance(this.getBalance[this.getActiveToken]) *
+          unitPriceInUSD
+      ).toFixed(3);
     },
     wait(ms) {
       return new Promise(resolve => {
@@ -102,12 +107,12 @@ export default {
     }
   },
   mounted: async function() {
+    let self = this;
     let unitPriceInUSD;
     if (!this.getPrice["ETH"]) {
       console.log(`Getting prices from remote server...`);
       let ultPrice = await getULTToUSDPrice();
       let ethPrice = await getETHToUSDPrice();
-      let daiPrice = await getDAIToUSDPrice();
       this.updatePrice({
         symbol: "ULT",
         price: ultPrice
@@ -116,27 +121,21 @@ export default {
         symbol: "ETH",
         price: ethPrice
       });
-      this.updatePrice({
-        symbol: "DAI",
-        price: daiPrice
-      });
+      this.getTokenList
+        .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
+        .forEach(async symbol => {
+          let tokenPrice = await getTokenToUSDPrice(symbol);
+          self.updatePrice({
+            symbol: symbol,
+            price: tokenPrice
+          });
+        });
     }
-    if (this.getActiveToken === "ULT") {
-      unitPriceInUSD = this.getPrice["ULT"];
-      this.priceInUSD = parseFloat(
-        this.calculateBalance(this.getBalance["ULT"]) * unitPriceInUSD
-      ).toFixed(3);
-    } else if (this.getActiveToken === "ETH") {
-      unitPriceInUSD = this.getPrice["ETH"];
-      this.priceInUSD = parseFloat(
-        this.calculateBalance(this.getBalance["ETH"]) * unitPriceInUSD
-      ).toFixed(3);
-    } else {
-      unitPriceInUSD = this.getPrice["DAI"];
-      this.priceInUSD = parseFloat(
-        this.calculateBalance(this.getBalance["DAI"]) * unitPriceInUSD
-      ).toFixed(3);
-    }
+    unitPriceInUSD = this.getPrice[this.getActiveToken];
+    this.priceInUSD = parseFloat(
+      this.calculateBalance(this.getBalance[this.getActiveToken]) *
+        unitPriceInUSD
+    ).toFixed(3);
     setInterval(this.refreshUSDPrices, 1000 * 60 * 3);
   }
 };

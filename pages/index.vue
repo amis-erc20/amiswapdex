@@ -154,7 +154,7 @@ export default {
       let account = this.getAccount;
       try {
         if (account) {
-          // console.log("Refreshing...");
+          console.log("Refreshing...");
           const balance = await getBalance(account.address, web3);
           let tokenBalanceList = [];
 
@@ -185,6 +185,7 @@ export default {
               symbol: "ETH",
               balance
             });
+            console.log(tokenBalanceList);
             for (let i = 0; i < tokenBalanceList.length; i++) {
               this.updateBalance(tokenBalanceList[i]);
             }
@@ -238,6 +239,14 @@ export default {
     setTimeout(() => {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
+    try {
+      let savedTokenList = JSON.parse(localStorage.getItem("tokenList"));
+      savedTokenList.forEach(symbol => {
+        self.addToken(symbol);
+      });
+    } catch (e) {
+      console.log("cannot get saved token list");
+    }
   },
   mounted: function() {
     let self = this;
@@ -249,9 +258,6 @@ export default {
         }
       }
     }, 3000);
-    console.log(`ETH Balance: ${this.getBalance["ETH"]}`);
-    console.log(`ULT Balance: ${this.getBalance["ULT"]}`);
-    console.log(`DAI Balance: ${this.getBalance["DAI"]}`);
   }
 };
 </script>
