@@ -2,22 +2,22 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
-const _226b1ea1 = () => interopDefault(import('..\\pages\\about.vue' /* webpackChunkName: "pages_about" */))
-const _beb10044 = () => interopDefault(import('..\\pages\\backup.vue' /* webpackChunkName: "pages_backup" */))
-const _1ee33dd0 = () => interopDefault(import('..\\pages\\privatekey.vue' /* webpackChunkName: "pages_privatekey" */))
-const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* webpackChunkName: "pages_receivetoken" */))
-const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
-const _298bb99c = () => interopDefault(import('..\\pages\\recoverysetup.vue' /* webpackChunkName: "pages_recoverysetup" */))
-const _0eda617e = () => interopDefault(import('..\\pages\\resetpassword.vue' /* webpackChunkName: "pages_resetpassword" */))
-const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
-const _9ac22af6 = () => interopDefault(import('..\\pages\\sendtoken.vue' /* webpackChunkName: "pages_sendtoken" */))
-const _b566ec84 = () => interopDefault(import('..\\pages\\signin.vue' /* webpackChunkName: "pages_signin" */))
-const _8c3a3f98 = () => interopDefault(import('..\\pages\\signup.vue' /* webpackChunkName: "pages_signup" */))
-const _20f0c4da = () => interopDefault(import('..\\pages\\swaptoken.vue' /* webpackChunkName: "pages_swaptoken" */))
-const _439f3b1e = () => interopDefault(import('..\\pages\\tokendetail.vue' /* webpackChunkName: "pages_tokendetail" */))
-const _76bf6dec = () => interopDefault(import('..\\pages\\tos.vue' /* webpackChunkName: "pages_tos" */))
-const _33f1d4f6 = () => interopDefault(import('..\\pages\\welcome.vue' /* webpackChunkName: "pages_welcome" */))
-const _4222f966 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
+const _08306a1b = () => interopDefault(import('../pages/about.vue' /* webpackChunkName: "pages/about" */))
+const _738ba3a4 = () => interopDefault(import('../pages/backup.vue' /* webpackChunkName: "pages/backup" */))
+const _ace19c44 = () => interopDefault(import('../pages/privatekey.vue' /* webpackChunkName: "pages/privatekey" */))
+const _8e3f9d50 = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
+const _7500a177 = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
+const _2f72eb16 = () => interopDefault(import('../pages/recoverysetup.vue' /* webpackChunkName: "pages/recoverysetup" */))
+const _14c192f8 = () => interopDefault(import('../pages/resetpassword.vue' /* webpackChunkName: "pages/resetpassword" */))
+const _5752d68c = () => interopDefault(import('../pages/scanner.vue' /* webpackChunkName: "pages/scanner" */))
+const _557de8ff = () => interopDefault(import('../pages/sendtoken.vue' /* webpackChunkName: "pages/sendtoken" */))
+const _7830ad84 = () => interopDefault(import('../pages/signin.vue' /* webpackChunkName: "pages/signin" */))
+const _e671f80c = () => interopDefault(import('../pages/signup.vue' /* webpackChunkName: "pages/signup" */))
+const _78607958 = () => interopDefault(import('../pages/swaptoken.vue' /* webpackChunkName: "pages/swaptoken" */))
+const _aa8ef9d0 = () => interopDefault(import('../pages/tokendetail.vue' /* webpackChunkName: "pages/tokendetail" */))
+const _72754fe6 = () => interopDefault(import('../pages/tos.vue' /* webpackChunkName: "pages/tos" */))
+const _84dbac20 = () => interopDefault(import('../pages/welcome.vue' /* webpackChunkName: "pages/welcome" */))
+const _27e844e0 = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
 
 Vue.use(Router)
 
@@ -95,67 +95,67 @@ export function createRouter() {
 
     routes: [{
       path: "/about",
-      component: _226b1ea1,
+      component: _08306a1b,
       name: "about"
     }, {
       path: "/backup",
-      component: _beb10044,
+      component: _738ba3a4,
       name: "backup"
     }, {
       path: "/privatekey",
-      component: _1ee33dd0,
+      component: _ace19c44,
       name: "privatekey"
     }, {
       path: "/receivetoken",
-      component: _3cd07a12,
+      component: _8e3f9d50,
       name: "receivetoken"
     }, {
       path: "/recovery",
-      component: _6ad3519e,
+      component: _7500a177,
       name: "recovery"
     }, {
       path: "/recoverysetup",
-      component: _298bb99c,
+      component: _2f72eb16,
       name: "recoverysetup"
     }, {
       path: "/resetpassword",
-      component: _0eda617e,
+      component: _14c192f8,
       name: "resetpassword"
     }, {
       path: "/scanner",
-      component: _649afcdc,
+      component: _5752d68c,
       name: "scanner"
     }, {
       path: "/sendtoken",
-      component: _9ac22af6,
+      component: _557de8ff,
       name: "sendtoken"
     }, {
       path: "/signin",
-      component: _b566ec84,
+      component: _7830ad84,
       name: "signin"
     }, {
       path: "/signup",
-      component: _8c3a3f98,
+      component: _e671f80c,
       name: "signup"
     }, {
       path: "/swaptoken",
-      component: _20f0c4da,
+      component: _78607958,
       name: "swaptoken"
     }, {
       path: "/tokendetail",
-      component: _439f3b1e,
+      component: _aa8ef9d0,
       name: "tokendetail"
     }, {
       path: "/tos",
-      component: _76bf6dec,
+      component: _72754fe6,
       name: "tos"
     }, {
       path: "/welcome",
-      component: _33f1d4f6,
+      component: _84dbac20,
       name: "welcome"
     }, {
       path: "/",
-      component: _4222f966,
+      component: _27e844e0,
       name: "index"
     }],
 

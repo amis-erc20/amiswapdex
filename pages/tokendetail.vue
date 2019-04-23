@@ -61,9 +61,6 @@ export default {
     ...mapActions({
       updateTransactionList: "transaction/updateTransactionList"
     })
-  },
-  mounted: async function() {
-    console.log("component mounted");
   }
 };
 </script>

@@ -51,7 +51,8 @@ import {
   faHandHoldingUsd,
   fachevronLeft,
   faChevronLeft,
-  faSlidersH
+  faSlidersH,
+  faArrowDown
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import "bootstrap/dist/css/bootstrap.css";
@@ -80,6 +81,7 @@ library.add(faShare);
 library.add(faHandHoldingUsd);
 library.add(faChevronLeft);
 library.add(faSlidersH);
+library.add(faArrowDown);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("v-select", vSelect);
 

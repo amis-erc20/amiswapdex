@@ -2,10 +2,11 @@
   <div>
     <div id="uniswap-convert-section">
       <b-form-group id="exampleInputGroup1">
-        <label>Add or Remove Liquidity</label>
+        <label>Select Add or Remove Liquidity</label>
         <b-form-select
           v-model="liquidity"
           :options="[{text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
+          @change="onSelectLiquidityType"
         />
       </b-form-group>
       <b-form @submit="onAddLiquidity" @reset="onReset" v-if="liquidity === `add`">
@@ -54,10 +55,6 @@
             <label for>Exchange Rate</label>
             <p>1 {{form.inputCurrency}} = {{exchangeRate.toFixed(5)}} {{form.outputCurrency}}</p>
           </b-form-group>
-          <!-- <b-form-group v-if="form.inputCurrency !== null">
-            <label for>Slippage</label>
-            <p>{{ slippage.toFixed(2) }} %</p>
-          </b-form-group>-->
         </div>
 
         <b-form-group v-if="form.inputCurrency !== null">
@@ -81,13 +78,18 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button type="submit" variant="danger" :disabled="shouldDisableSwapButton">Add Liquidity</b-button>
+          <b-button type="submit" variant="danger" :disabled="shouldDisableAddButton">Add Liquidity</b-button>
         </div>
       </b-form>
 
+      <!-- REMOVE LIQUIDITY FORM -->
       <b-form @submit="onRemoveLiquidity" @reset="onReset" v-if="liquidity === `remove`">
-        <label>Amount of Pool Token</label>
         <b-form-group id="exampleInputGroup1">
+          <label>Amount of Pool Token</label>
+          <label class="use-all-funds">
+            Liquidity Balance:
+            <span id="liquidity-balance"></span>
+          </label>
           <b-form-input
             id="inputValue"
             type="text"
@@ -100,19 +102,16 @@
         </b-form-group>
 
         <b-button variant="danger" id="currency-swap-button">
-          <font-awesome-icon icon="plus" size="lg" color="#fff"/>
+          <font-awesome-icon icon="arrow-down" size="lg" color="#fff"/>
         </b-button>
 
         <b-form-group id="exampleInputGroup1">
           <label>Withdrawn Amount</label>
           <p>
-            <span id="withdrawn-eth">---</span> ETH +
-            <span id="withdrawn-token">---</span>
+            <span id="withdrawn-eth">0.00</span> ETH +
+            <span id="withdrawn-token">0.00</span>
             {{getActiveToken}}
           </p>
-          <b-form-invalid-feedback
-            :state="validateOutputAmount && validateTokenBalance"
-          >{{ outputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <div
@@ -123,10 +122,6 @@
             <label for>Exchange Rate</label>
             <p>1 {{form.inputCurrency}} = {{exchangeRate.toFixed(5)}} {{form.outputCurrency}}</p>
           </b-form-group>
-          <!-- <b-form-group v-if="form.inputCurrency !== null">
-            <label for>Slippage</label>
-            <p>{{ slippage.toFixed(2) }} %</p>
-          </b-form-group>-->
         </div>
 
         <b-form-group v-if="form.inputCurrency !== null">
@@ -150,7 +145,11 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button type="submit" variant="danger">Remove Liquidity</b-button>
+          <b-button
+            type="submit"
+            variant="danger"
+            :disabled="shouldDisableRemoveButton"
+          >Remove Liquidity</b-button>
         </div>
       </b-form>
       <!-- Success Modal -->
@@ -267,7 +266,7 @@ export default {
         approvedAmount: 0
       },
       loading: false,
-      showAdvanced: true,
+      showAdvanced: false,
       gasPrice: 0,
       gasLimit: 51000 * 2,
       txFee: 0,
@@ -386,7 +385,7 @@ export default {
       }
       return true;
     },
-    shouldDisableSwapButton() {
+    shouldDisableAddButton() {
       return (
         this.loading ||
         !this.validateCurrency ||
@@ -395,6 +394,9 @@ export default {
         !this.validateETHBalance ||
         !this.validateSlippage
       );
+    },
+    shouldDisableRemoveButton() {
+      return this.loading || !this.validateinputValue;
     }
   },
   mounted: async function() {
@@ -570,6 +572,9 @@ export default {
       document.querySelector(
         "#withdrawn-token"
       ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
+      document.querySelector(
+        "#liquidity-balance"
+      ).innerHTML = liquidityBalance.dividedBy(10 ** 18).toFixed(6);
     },
     async onUnlock(evt) {
       evt.preventDefault();
@@ -742,7 +747,7 @@ export default {
       const blockNumber = await web3.eth.getBlockNumber();
       const block = await web3.eth.getBlock(blockNumber);
       const deadline = block.timestamp + 300;
-      const accounts = await web3.eth.getAccounts();
+
       let exchangeContract = exchangeContracts[outputCurrency];
       const contractAddress = exchangeAddresses[outputCurrency];
       let tokenContract = tokenContracts[outputCurrency];
@@ -788,11 +793,11 @@ export default {
         this.txHash = await removeLiquidity(
           {
             from: this.getAccount.address,
-            ethAmount: ethAmount,
             gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
             gasLimit: parseInt(this.gasLimit),
-            minLiquidity,
-            maxTokens,
+            amount,
+            ethWithdrawn,
+            tokenWithdrawn,
             deadline
           },
           exchangeContract,
@@ -814,6 +819,40 @@ export default {
       this.onReset();
       this.loading = false;
       this.showModal("success_modal_ref");
+    },
+    async updateLiquidityBalance() {
+      let web3 = this.web3;
+      let outputCurrency = this.form.outputCurrency;
+      let inputValue = this.form.inputValue;
+
+      let exchangeContract = exchangeContracts[outputCurrency];
+      const contractAddress = exchangeAddresses[outputCurrency];
+      let tokenContract = tokenContracts[outputCurrency];
+
+      let ethReserve = await web3.eth.getBalance(contractAddress);
+      let tokenReserve = await tokenContract.methods
+        .balanceOf(contractAddress)
+        .call();
+
+      const totalSupply = await exchangeContract.methods.totalSupply().call();
+      const amount = new BigNumber(inputValue * Math.pow(10, 18));
+      const ownership = amount.dividedBy(totalSupply);
+      const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership);
+      const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
+        ownership
+      );
+
+      let ethBalance = await web3.eth.getBalance(this.getAccount.address);
+      ethBalance = new BigNumber(ethBalance);
+      const liquidityBalance = new BigNumber(totalSupply).multipliedBy(
+        ethBalance.dividedBy(ethReserve)
+      );
+      document.querySelector(
+        "#liquidity-balance"
+      ).innerHTML = liquidityBalance.dividedBy(10 ** 18).toFixed(6);
+    },
+    onSelectLiquidityType() {
+      if (this.liquidity === "remove") this.updateLiquidityBalance();
     }
   }
 };
@@ -846,7 +885,7 @@ export default {
   position: fixed;
   top: 150px;
 }
-form label {
+label {
   font-weight: bolder;
   font-size: 13px;
 }
@@ -861,7 +900,7 @@ form label {
   width: 100%;
 }
 #currency-swap-button svg {
-  transform: rotateZ(90deg);
+  transform: rotateZ(0deg);
 }
 #currency-swap-button {
   border-radius: 100px !important;

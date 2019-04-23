@@ -329,8 +329,6 @@ export default {
   },
   mounted: async function() {
     this.form.inputCurrency = this.getActiveToken;
-    console.log(this.getActiveToken);
-    console.log(this.form.inputCurrency);
     this.web3 = await getWeb3();
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {

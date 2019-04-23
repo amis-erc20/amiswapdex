@@ -11,9 +11,9 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
-import nuxt_plugin_nuxticons_b427c6d8 from 'nuxt_plugin_nuxticons_b427c6d8' // Source: ./nuxt-icons.js (mode: 'all')
-import nuxt_plugin_bootstrapvue_7a019763 from 'nuxt_plugin_bootstrapvue_7a019763' // Source: ./bootstrap-vue.js (mode: 'all')
-import nuxt_plugin_axios_c801a598 from 'nuxt_plugin_axios_c801a598' // Source: ./axios.js (mode: 'all')
+import nuxt_plugin_nuxticons_e082e56c from 'nuxt_plugin_nuxticons_e082e56c' // Source: ./nuxt-icons.js (mode: 'all')
+import nuxt_plugin_bootstrapvue_cba83a26 from 'nuxt_plugin_bootstrapvue_cba83a26' // Source: ./bootstrap-vue.js (mode: 'all')
+import nuxt_plugin_axios_438aa2be from 'nuxt_plugin_axios_438aa2be' // Source: ./axios.js (mode: 'all')
 
 // Component: <NoSsr>
 Vue.component(NoSsr.name, NoSsr)
@@ -148,9 +148,9 @@ async function createApp(ssrContext) {
 
   // Plugin execution
 
-  if (typeof nuxt_plugin_nuxticons_b427c6d8 === 'function') await nuxt_plugin_nuxticons_b427c6d8(app.context, inject)
-  if (typeof nuxt_plugin_bootstrapvue_7a019763 === 'function') await nuxt_plugin_bootstrapvue_7a019763(app.context, inject)
-  if (typeof nuxt_plugin_axios_c801a598 === 'function') await nuxt_plugin_axios_c801a598(app.context, inject)
+  if (typeof nuxt_plugin_nuxticons_e082e56c === 'function') await nuxt_plugin_nuxticons_e082e56c(app.context, inject)
+  if (typeof nuxt_plugin_bootstrapvue_cba83a26 === 'function') await nuxt_plugin_bootstrapvue_cba83a26(app.context, inject)
+  if (typeof nuxt_plugin_axios_438aa2be === 'function') await nuxt_plugin_axios_438aa2be(app.context, inject)
 
   // If server-side, wait for async component to be resolved first
   if (process.server && ssrContext && ssrContext.url) {
