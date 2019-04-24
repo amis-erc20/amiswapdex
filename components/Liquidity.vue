@@ -95,10 +95,11 @@
             type="text"
             v-model="form.inputValue"
             required
-            :state="validateinputValue"
+            :state="validateLiquidityInput"
             @keyup="onRemoveAmountChange"
             @focus="onInputFocus"
           />
+          <b-form-invalid-feedback :state="validateLiquidityInput">{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <b-button variant="danger" id="currency-swap-button">
@@ -304,7 +305,8 @@ export default {
       inputErrorMessage: "Please input a valid amount",
       outputErrorMessage: "Please input a valid amount",
       slippage: null,
-      liquidity: ""
+      liquidity: "",
+      liquidityBalance: 0.0
     };
   },
   computed: {
@@ -357,6 +359,19 @@ export default {
       let amount = parseFloat(this.form.inputValue * 1);
       const isNaN = Number.isNaN(amount);
       if (isNaN || amount <= 0) return false;
+      return true;
+    },
+    validateLiquidityInput() {
+      let amount = parseFloat(this.form.inputValue * 1);
+      const isNaN = Number.isNaN(amount);
+      if (isNaN || amount <= 0) {
+        this.inputErrorMessage = "Invalid pool token amount";
+        return false;
+      }
+      if (amount > this.liquidityBalance) {
+        this.inputErrorMessage = "You do not have enough pool tokens.";
+        return false;
+      }
       return true;
     },
     validateOutputAmount() {
@@ -423,7 +438,11 @@ export default {
       );
     },
     shouldDisableRemoveButton() {
-      return this.loading || !this.validateinputValue;
+      return (
+        this.loading ||
+        !this.validateinputValue ||
+        this.form.inputValue > this.liquidityBalance
+      );
     },
     shouldDisableCreateExchangeButton() {
       return this.loading || this.form.tokenAddress.length !== 42;
@@ -452,8 +471,6 @@ export default {
     this.gasPrice =
       parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
     await this.updateGasLimitAndTxFee();
-    let DAIExchangeAddress = await getExchangeAddress(tokenAddressess["ULT"]);
-    console.log(DAIExchangeAddress);
   },
   methods: {
     ...mapActions({
@@ -612,9 +629,10 @@ export default {
 
       let ethBalance = await web3.eth.getBalance(this.getAccount.address);
       ethBalance = new BigNumber(ethBalance);
-      const liquidityBalance = new BigNumber(totalSupply).multipliedBy(
-        ethBalance.dividedBy(ethReserve)
-      );
+
+      const liquidityBalance = await exchangeContract.methods
+        .balanceOf(this.getAccount.address)
+        .call();
 
       document.querySelector(
         "#withdrawn-eth"
@@ -622,9 +640,6 @@ export default {
       document.querySelector(
         "#withdrawn-token"
       ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
-      document.querySelector(
-        "#liquidity-balance"
-      ).innerHTML = liquidityBalance.dividedBy(10 ** 18).toFixed(6);
     },
     async onUnlock(evt) {
       evt.preventDefault();
@@ -874,32 +889,15 @@ export default {
       let web3 = this.web3;
       let outputCurrency = this.form.outputCurrency;
       let inputValue = this.form.inputValue;
-
       let exchangeContract = exchangeContracts[outputCurrency];
-      const contractAddress = exchangeAddresses[outputCurrency];
-      let tokenContract = tokenContracts[outputCurrency];
-
-      let ethReserve = await web3.eth.getBalance(contractAddress);
-      let tokenReserve = await tokenContract.methods
-        .balanceOf(contractAddress)
+      let liquidityBalance = await exchangeContract.methods
+        .balanceOf(this.getAccount.address)
         .call();
-
-      const totalSupply = await exchangeContract.methods.totalSupply().call();
-      const amount = new BigNumber(inputValue * Math.pow(10, 18));
-      const ownership = amount.dividedBy(totalSupply);
-      const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership);
-      const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
-        ownership
-      );
-
-      let ethBalance = await web3.eth.getBalance(this.getAccount.address);
-      ethBalance = new BigNumber(ethBalance);
-      const liquidityBalance = new BigNumber(totalSupply).multipliedBy(
-        ethBalance.dividedBy(ethReserve)
-      );
-      document.querySelector(
-        "#liquidity-balance"
-      ).innerHTML = liquidityBalance.dividedBy(10 ** 18).toFixed(6);
+      liquidityBalance = new BigNumber(liquidityBalance)
+        .dividedBy(10 ** 18)
+        .toFixed(6);
+      this.liquidityBalance = liquidityBalance;
+      document.querySelector("#liquidity-balance").innerHTML = liquidityBalance;
     },
     onSelectLiquidityType() {
       if (this.liquidity === "remove") this.updateLiquidityBalance();
