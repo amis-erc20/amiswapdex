@@ -13,7 +13,7 @@
         </h2>
         <h2 v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
           {{ calculateBalance(getBalance[getActiveToken]) }}
-          <span>DAI</span>
+          <span>{{getActiveToken}}</span>
         </h2>
         <img v-if="currentRoute === `/`" src="../assets/logo.svg" alt width="150px" height="200px">
       </div>

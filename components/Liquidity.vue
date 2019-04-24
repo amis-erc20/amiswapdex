@@ -291,6 +291,7 @@ export default {
         inputValue: "",
         outputValue: "",
         approvedAmount: 0,
+        approvedCurrency: "",
         tokenAddress: ""
       },
       loading: false,
@@ -644,6 +645,9 @@ export default {
     async onUnlock(evt) {
       evt.preventDefault();
       this.approvedStatus = "waiting";
+      let currencyToCheck = this.form.approvedCurrency
+        ? this.form.approvedCurrency
+        : this.form.inputCurrency;
       this.unlockTxHash = await unlockToken(
         {
           from: this.getAccount.address,
@@ -651,24 +655,26 @@ export default {
           gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
           gasLimit: parseInt(this.gasLimit)
         },
-        this.form.inputCurrency,
+        currencyToCheck,
         {
           web3: this.web3,
-          exchangeAddress: exchangeAddresses[this.form.inputCurrency],
+          exchangeAddress: exchangeAddresses[currencyToCheck],
           privateKey: this.getAccount.privateKey
         }
       );
 
       // checking allowance
       let self = this;
+
       const check = setInterval(async () => {
-        console.log("Checking allowance...");
-        const allowance = await self.getAllowance(self.form.inputCurrency);
+        console.log(`Checking allowance for ${currencyToCheck} token`);
+        const allowance = await self.getAllowance(currencyToCheck);
         if (
           allowance == parseInt(self.form.approvedAmount * Math.pow(10, 18))
         ) {
           clearInterval(check);
           self.approvedStatus = true;
+          self.form.approvedCurrency = "";
         }
       }, 1000);
     },
@@ -739,6 +745,18 @@ export default {
       let outputCurrency = this.form.outputCurrency;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
+
+      const allowance = await this.getAllowance(this.form.outputCurrency);
+      const input = this.form.outputValue * Math.pow(10, 18);
+      console.log(`Current token allowance is: ${allowance}`);
+      if (input > allowance) {
+        this.loading = false;
+        this.approvedStatus = false;
+        this.form.approvedAmount = this.form.outputValue * 1.5;
+        this.form.approvedCurrency = this.form.outputCurrency;
+        this.showModal("unlock_request_modal_ref");
+        return;
+      }
 
       const blockNumber = await web3.eth.getBlockNumber();
       const block = await web3.eth.getBlock(blockNumber);

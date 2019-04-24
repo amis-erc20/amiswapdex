@@ -23,7 +23,7 @@
             <Swap/>
           </b-card-text>
         </b-tab>
-        <b-tab title="Liquidity">
+        <b-tab title="Pool">
           <b-card-text>
             <Liquidity/>
           </b-card-text>
