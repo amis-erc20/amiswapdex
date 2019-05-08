@@ -16,7 +16,8 @@
         <label for>Please select a token to add</label>
         <v-select :options="tokenList" label="title" v-model="selectedToken">
           <template slot="option" slot-scope="option">
-            <img :src="option.src" height="20px">
+            <img v-if="option.src" :src="option.src" height="20px">
+            <img v-else src="../assets/default-token.png" height="20px">
             {{ option.title }}
           </template>
         </v-select>
@@ -41,57 +42,37 @@ import {
   getULTToUSDPrice,
   isIos,
   isInStandaloneMode,
-  getTokenToUSDPrice
+  getTokenToUSDPrice,
+  getAllListedToken,
+  checkImageExist
 } from "../assets/js/utils";
 
 import { mapActions, mapGetters } from "vuex";
 import "vue-select/dist/vue-select.css";
-import { tokenAddresses } from "../assets/js/token";
+// import { tokenAddresses } from "../assets/js/token";
 
 export default {
   data: function() {
     return {
       selectedToken: "",
-      options: [
-        {
-          title: "Read the Docs",
-          url: "https://codeclimate.com/github/sagalbot/vue-select"
-        },
-        {
-          title: "View on GitHub",
-          url: "https://codeclimate.com/github/sagalbot/vue-select"
-        },
-        {
-          title: "View on NPM",
-          url: "https://codeclimate.com/github/sagalbot/vue-select"
-        },
-        {
-          title: "View Codepen Examples",
-          src: "https://codeclimate.com/github/sagalbot/vue-select"
-        }
-      ]
+      tokenAddresses: []
     };
   },
   computed: {
     ...mapGetters({
-      getTokenList: "account/getTokenList"
+      getTokenList: "account/getTokenList",
+      getAvailableTokenList: "account/getAvailableTokenList"
     }),
     tokenList: function() {
       let self = this;
-      let symbolList = Object.keys(tokenAddresses);
-      let options = symbolList
-        .filter(
-          symbol => symbol !== "ETH" && symbol !== "ULT" && symbol !== "DAI"
-        )
-        .filter(symbol => this.getTokenList.indexOf(symbol) === -1)
-        .map(symbol => {
-          return {
-            title: symbol,
-            src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${tokenAddresses[
-              symbol
-            ].toLowerCase()}.png`
-          };
-        });
+      let symbolList = Object.keys(self.tokenAddresses);
+      let options = self.getAvailableTokenList.map(token => {
+        return {
+          title: token.name,
+          // src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${token.tokenAddress.toLowerCase()}.png`
+          src: token.logo
+        };
+      });
       return options;
     },
     isTokenValid: function() {

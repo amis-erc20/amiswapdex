@@ -1,17 +1,26 @@
 import Web3 from 'web3'
 import axios from 'axios'
 import { exchangeABI, tokenABI, ERC20_ABI, factoryABI } from './abi'
-import { tokenAddresses, exchangeAddresses, factoryAddress } from './token'
+import { factoryAddress } from './token'
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
 
-let tokenSymbols = Object.keys(exchangeAddresses)
+let exchangeAddresses = {}
+let tokenAddresses = {}
+let tokenSymbols
+
 let exchangeContracts = {}
 let tokenContracts = {}
 let factoryContract
 
-export const initContracts = async function (web3) {
+export const initContracts = async function (web3, availableTokens) {
+  tokenSymbols = availableTokens.map(token => token.symbol)
   factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
+
+  availableTokens.forEach(token => {
+    tokenAddresses[token.symbol] = token.tokenAddress
+    exchangeAddresses[token.symbol] = token.exchangeAddress
+  })
   for (let i = 0; i < tokenSymbols.length; i += 1) {
     exchangeContracts[tokenSymbols[i]] = new web3.eth.Contract(
       exchangeABI,
@@ -62,6 +71,7 @@ export const createNewExchange = async function (
   privateKey,
   web3
 ) {
+  console.log(tx)
   let myAddress = tx.from
   let count = await web3.eth.getTransactionCount(myAddress)
   let transaction = await web3.eth.accounts.signTransaction(
@@ -71,7 +81,7 @@ export const createNewExchange = async function (
       gasLimit: web3.utils.toHex(tx.gasLimit),
       to: factoryAddress,
       value: '0x0',
-      data: factoryContract.methods.initializeFactory(tokenAddress).encodeABI(),
+      data: factoryContract.methods.createExchange(tokenAddress).encodeABI(),
       nonce: web3.utils.toHex(count)
     },
     privateKey
@@ -99,8 +109,6 @@ export const getULTToUSDPrice = async () => {
 
 export const getETHToUSDPrice = async () => {
   try {
-    // let response = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD,JPY,EUR`)
-    // return response.data.USD
     let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
     if (response.data.transactions && response.data.transactions.length > 0) {
       let ethUsdPrice = response.data.transactions[0].price_eth_usd
@@ -160,9 +168,6 @@ export const getTokenHistory = async function (address) {
 export const getBalance = async function (address, web3) {
   if (!address) return
   try {
-    // let url = `https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest`
-    // let response = await axios.get(url)
-    // return parseInt(response.data.result)
     let balance = await web3.eth.getBalance(address)
     return parseInt(balance)
   } catch (e) {
@@ -178,10 +183,18 @@ export const getTokenBalance = async function (address, currency, web3) {
     await initContracts(web3)
   }
   try {
-    let tokenBalance = await tokenContracts[currency].methods
-      .balanceOf(address)
-      .call()
-    return parseInt(tokenBalance)
+    // let tokenBalance = await tokenContracts[currency].methods
+    //   .balanceOf(address)
+    //   .call()
+    // return parseInt(tokenBalance)
+
+    // GET TOKEN BALANCE FROM ETHERSCAN API INSTEAD OF USING WEB3
+    let tokenAddress = tokenAddresses[currency]
+    const url = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${tokenAddress}&address=${address}&tag=latest&apikey=Y1C96ES3CDKANT866DQMTJTMF2G52FBBN9`
+    let response = await axios.get(url)
+    if (response.data.status === "1") {
+      return parseInt(response.data.result)
+    }
   } catch (e) {
     console.log(`ERROR - getTokenBalance`)
     console.log(e)
@@ -217,8 +230,9 @@ export const estimateGas = async function (transaction, web3) {
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
       to: transaction.to,
-      value: parseInt(transaction.amount)
-    })
+      value: parseInt(transaction.amount),
+      data: transaction.data
+    }).call()
     return gas
   } catch (e) {
     return 0
@@ -539,4 +553,31 @@ export const needsToSeePWAPrompt = user => {
   }
   let isApple = ['iPhone', 'iPad', 'iPod'].includes(navigator.platform)
   return isApple
+}
+export const checkImageExist = async src => {
+  try {
+    let response = await axios.get(src)
+    if (response.status == 200) return true
+  } catch (e) {
+    return false
+  }
+}
+export const getAllListedToken = async () => {
+  let listedTokens = {}
+  let response = await axios.get(`${CONFIG.uniswapDexServer}api/token`)
+  let tokens = response.data.result
+  tokens.forEach(token => {
+    listedTokens[token.symbol] = {
+      tokenName: token.name,
+      tokenSymbol: token.symbol,
+      tokenAddress: token.tokenAddress
+    }
+  })
+  return tokens
+
+}
+function wait(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 }

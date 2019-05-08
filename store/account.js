@@ -1,3 +1,6 @@
+import {
+	checkImageExist
+} from "../assets/js/utils";
 export const state = () => ({
 	account: null,
 	balance: {
@@ -10,14 +13,16 @@ export const state = () => ({
 		ULT: null,
 		DAI: null
 	},
-	tokenList: ['ETH', 'ULT', 'DAI']
+	tokenList: ['ETH', 'ULT', 'DAI'],
+	availableTokenList: []
 })
 
 export const getters = {
 	getAccount: state => state.account,
 	getBalance: state => state.balance,
 	getPrice: state => state.price,
-	getTokenList: state => state.tokenList
+	getTokenList: state => state.tokenList,
+	getAvailableTokenList: state => state.availableTokenList
 }
 
 export const mutations = {
@@ -42,6 +47,9 @@ export const mutations = {
 	updatePrice(state, payload) {
 		let { symbol, price } = payload
 		state.price[symbol] = price
+	},
+	setAvailableTokenList(state, payload) {
+		state.availableTokenList.push(payload)
 	}
 }
 
@@ -54,6 +62,23 @@ export const actions = {
 	},
 	addToken(store, payload) {
 		store.commit('addToken', payload)
+	},
+	async setAvailableTokenList(store, payload) {
+		payload.forEach(async token => {
+			let logoSrc = `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${token.tokenAddress.toLowerCase()}.png`;
+			const isImageExist = await checkImageExist(logoSrc)
+			if (isImageExist) {
+				store.commit('setAvailableTokenList', {
+					...token,
+					logo: logoSrc
+				})
+			} else {
+				store.commit('setAvailableTokenList', {
+					...token,
+					logo: null
+				})
+			}
+		})
 	},
 	async updateBalance(store, payload) {
 		store.commit('updateBalance', payload)

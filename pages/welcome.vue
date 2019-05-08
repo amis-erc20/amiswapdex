@@ -33,7 +33,8 @@ import {
   getHistory,
   getTokenHistory,
   isIos,
-  isInStandaloneMode
+  isInStandaloneMode,
+  getAllListedToken
 } from "../assets/js/utils";
 
 import BootstrapVue from "bootstrap-vue";
@@ -92,8 +93,10 @@ export default {
     })
   },
   created: async function() {
+    let availableTokens = await getAllListedToken();
+    this.setAvailableTokenList(availableTokens);
     let web3 = await getWeb3();
-    await initContracts(web3);
+    await initContracts(web3, availableTokens);
   },
   mounted: function() {
     let self = this;
@@ -110,6 +113,7 @@ export default {
     ...mapActions({
       updateConnection: "updateConnection",
       addAccount: "account/addAccount",
+      setAvailableTokenList: "account/setAvailableTokenList",
       updateTransactionList: "transaction/updateTransactionList",
       updateTokenTransactionList: "transaction/updateTokenTransactionList"
     }),

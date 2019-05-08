@@ -119,7 +119,12 @@
 import { mapGetters, mapActions } from "vuex";
 import bcrypt from "bcryptjs";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
-import { getWeb3, isIos, isInStandaloneMode } from "../assets/js/utils";
+import {
+  getWeb3,
+  isIos,
+  isInStandaloneMode,
+  getAllListedToken
+} from "../assets/js/utils";
 import sjcl from "../assets/js/sjcl.js";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
 import GDrive from "../assets/js/googleDrive/GDrive.js";
@@ -153,10 +158,10 @@ export default {
   created: async function() {
     this.web3 = await getWeb3();
   },
-  mounted: async function() {},
   methods: {
     ...mapActions({
       addAccount: "account/addAccount",
+      setAvailableTokenList: "account/setAvailableTokenList",
       updateAuthStatus: "updateAuthStatus",
       updateCredentials: "updateCredentials"
     }),

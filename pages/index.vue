@@ -86,8 +86,14 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("v-select", vSelect);
 
 import { mapActions, mapGetters } from "vuex";
-import { getWeb3, getBalance, getTokenBalance } from "../assets/js/utils";
+import {
+  getWeb3,
+  getBalance,
+  getTokenBalance,
+  getAllListedToken
+} from "../assets/js/utils";
 import { setTimeout } from "timers";
+import config from "../config";
 
 export default {
   middleware: "auth",
@@ -115,13 +121,15 @@ export default {
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
       getCredentials: "getCredentials",
-      getTokenList: "account/getTokenList"
+      getTokenList: "account/getTokenList",
+      getAvailableTokenList: "account/getAvailableTokenList"
     })
   },
   methods: {
     ...mapActions({
       addAccount: "account/addAccount",
       addToken: "account/addToken",
+      setAvailableTokenList: "account/setAvailableTokenList",
       updateBalance: "account/updateBalance",
       updateTransactionList: "transaction/updateTransactionList",
       updateTokenTransactionList: "transaction/updateTokenTransactionList"
@@ -185,7 +193,7 @@ export default {
               symbol: "ETH",
               balance
             });
-            console.log(tokenBalanceList);
+            // console.log(tokenBalanceList);
             for (let i = 0; i < tokenBalanceList.length; i++) {
               this.updateBalance(tokenBalanceList[i]);
             }
@@ -231,11 +239,10 @@ export default {
   },
   created: async function() {
     let web3 = await getWeb3();
-    await initContracts(web3);
     let self = this;
     setInterval(() => {
       self.refresh(web3);
-    }, 5000);
+    }, config.refreshInterval);
     setTimeout(() => {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
@@ -248,7 +255,7 @@ export default {
       console.log("cannot get saved token list");
     }
   },
-  mounted: function() {
+  mounted: async function() {
     let self = this;
     setTimeout(() => {
       if (isIos() && !isInStandaloneMode()) {

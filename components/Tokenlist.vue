@@ -18,40 +18,47 @@
 <script>
 import Token from "~/components/Token.vue";
 import { mapActions, mapGetters } from "vuex";
-import { tokenAddresses } from "../assets/js/token";
+import { getAllListedToken } from "../assets/js/utils";
 export default {
   components: { Token },
+  data: function() {
+    return {
+      tokenAddresses: []
+    };
+  },
+  created: async function() {
+    this.tokenAddresses = await getAllListedToken();
+  },
   computed: {
     ...mapGetters({
       getAccount: "account/getAccount",
       getTokenList: "account/getTokenList",
+      getAvailableTokenList: "account/getAvailableTokenList",
       getTransactionList: "transaction/getTransactionList",
       getBalance: "account/getBalance",
       getActiveToken: "getActiveToken"
     }),
     tokenList: function() {
       let self = this;
-      return (
-        this.getTokenList
-          // .filter(symbol => symbol !== "ETH")
-          .map(symbol => {
-            if (symbol === "ETH" || symbol === "ULT") {
-              return {
-                name: symbol,
-                balance: this.calculateBalance(self.getBalance[symbol]),
-                balanceUsd: 0.0
-              };
-            }
-            return {
-              name: symbol,
-              balance: this.calculateBalance(self.getBalance[symbol]),
-              balanceUsd: 0.0,
-              src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${tokenAddresses[
-                symbol
-              ].toLowerCase()}.png`
-            };
-          })
-      );
+      return this.getTokenList.map(symbol => {
+        if (symbol === "ETH" || symbol === "ULT") {
+          return {
+            name: symbol,
+            balance: this.calculateBalance(self.getBalance[symbol]),
+            balanceUsd: 0.0
+          };
+        }
+        let tokenInfo = self.getAvailableTokenList.find(
+          token => symbol === token.symbol
+        );
+        let { logo } = tokenInfo;
+        return {
+          name: symbol,
+          balance: this.calculateBalance(self.getBalance[symbol]),
+          balanceUsd: 0.0,
+          src: logo
+        };
+      });
     }
   },
   methods: {

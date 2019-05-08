@@ -226,16 +226,20 @@ export default {
   computed: {
     ...mapGetters({
       getAccount: "account/getAccount",
+      getAvailableTokenList: "account/getAvailableTokenList",
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance"
     }),
     availableTokens: function() {
-      let options = tokenSymbols.map(symbol => {
-        return {
-          value: symbol,
-          text: symbol
-        };
-      });
+      let options = this.getAvailableTokenList
+        .map(token => token.symbol)
+        .sort()
+        .map(symbol => {
+          return {
+            value: symbol,
+            text: symbol
+          };
+        });
       options.unshift({ value: "ETH", text: "ETH" });
       options.unshift({ value: null, text: "Please select currency" });
       return options;

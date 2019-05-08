@@ -167,6 +167,26 @@
           />
         </b-form-group>
 
+        <b-form-group v-if="form.inputCurrency !== null">
+          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
+        </b-form-group>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+          <b-form-input
+            type="range"
+            id="range-1"
+            v-model="gasPrice"
+            min="2"
+            max="30"
+            @change="updateGasLimitAndTxFee"
+          />
+          <p>Estimated Tx Fee: {{txFee}} ETH</p>
+        </b-form-group>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
+          <b-form-input type="text" required v-model="gasLimit"/>
+        </b-form-group>
+
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
@@ -240,7 +260,11 @@
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import { exchangeABI, tokenABI, ERC20_ABI } from "../assets/js/abi";
-import { tokenAddresses, exchangeAddresses } from "../assets/js/token";
+import {
+  tokenAddresses,
+  exchangeAddresses,
+  factoryAddress
+} from "../assets/js/token";
 import {
   getWeb3,
   estimateGas,
@@ -263,6 +287,7 @@ let tokenSymbols = Object.keys(exchangeAddresses);
 let exchangeContracts = {};
 let tokenAddressess = {};
 let tokenContracts = {};
+let defaultGasLimit = 51000 * 2;
 
 export default {
   data() {
@@ -297,7 +322,7 @@ export default {
       loading: false,
       showAdvanced: false,
       gasPrice: 0,
-      gasLimit: 51000 * 2,
+      gasLimit: defaultGasLimit,
       txFee: 0,
       txHash: "",
       approvedStatus: "",
@@ -918,7 +943,9 @@ export default {
       document.querySelector("#liquidity-balance").innerHTML = liquidityBalance;
     },
     onSelectLiquidityType() {
-      if (this.liquidity === "remove") this.updateLiquidityBalance();
+      if (this.liquidity === "remove") {
+        this.updateLiquidityBalance();
+      }
     },
     async onCreateExchange(e) {
       e.preventDefault();
@@ -932,14 +959,42 @@ export default {
         alert("Exchange address already existed for selected token");
         console.log(exchangeAddress);
       } else if (
+        !exchangeAddress ||
         exchangeAddress === "0x0000000000000000000000000000000000000000"
       ) {
-        // createNewExchange(tokenAddress)
-        alert("Create Exchange will be implemented soon");
+        let estimatedGas = await estimateGas(
+          {
+            from: this.getAccount.address,
+            to: factoryAddress,
+            amount: 1
+          },
+          this.web3
+        );
+        console.log(`Estimate gas: ${estimatedGas}`);
+        this.gasLimit = 51000 * 2;
+        // TODO: implement create new exchange
+        // this.txHash = await createNewExchange(
+        //   {
+        //     from: this.getAccount.address,
+        //     gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+        //     gasLimit: parseInt(this.gasLimit)
+        //   },
+        //   tokenAddress,
+        //   this.getAccount.privateKey,
+        //   this.web3
+        // );
       } else {
         alert("Invalid token address");
       }
+      if (this.txHash) console.log(this.txHash);
+      if (!this.txHash) {
+        this.loading = false;
+        this.showModal("failed_model_ref");
+        return;
+      }
+      this.onReset();
       this.loading = false;
+      this.showModal("success_modal_ref");
     }
   }
 };

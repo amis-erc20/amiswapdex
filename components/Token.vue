@@ -4,7 +4,8 @@
       <div class="token-name">
         <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
         <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
-        <img v-else :src="token.src" alt>
+        <img v-else-if="token.src" :src="token.src" alt>
+        <img v-else src="../assets/default-token.png">
         {{token.name}}
       </div>
       <div class="token-amount-container">
