@@ -126,6 +126,9 @@ export default {
   font-weight: bolder;
   margin-top: 20px;
 }
+#add_more_token_modal {
+  top: 200px;
+}
 #add_more_token_modal .modal-body {
   flex-direction: column;
 }

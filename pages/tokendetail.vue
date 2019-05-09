@@ -127,8 +127,8 @@ export default {
 .nav-pills .show > .nav-link {
   height: 100%;
   background: #ffffff;
-  color: #e91a1c;
-  border-bottom: 2px solid #e91a1c;
+  color: #2752e4;
+  border-bottom: 2px solid #2752e4;
   border-radius: 0px;
   text-align: center;
   margin: 0px;

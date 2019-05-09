@@ -37,7 +37,7 @@ export default {
       return this.$route.path;
     },
     title: function() {
-      if (this.currentRoute === "/") return "Shardus";
+      if (this.currentRoute === "/") return "UniswapDEX";
       if (this.currentRoute === "/receivetoken") return "Receive";
       if (this.currentRoute === "/sendtoken") return "Send";
       if (this.currentRoute === "/swaptoken") return "Swap";
@@ -47,6 +47,8 @@ export default {
       if (this.currentRoute === "/backup") return "Account Backup";
       if (this.currentRoute === "/resetpassword") return "Reset Password";
       if (this.currentRoute === "/privatekey") return "Private Key";
+      if (this.currentRoute === "/signup") return "Create Wallet";
+      if (this.currentRoute === "/signin") return "Sign In";
       else return this.getActiveToken;
     }
   },
@@ -80,7 +82,7 @@ export default {
   display: flex;
   justify-content: center;
   padding: 10px 15px;
-  background: #e91a1c;
+  background: #2851e4;
   color: #fff;
   align-self: center;
   width: 100% !important;
@@ -113,7 +115,7 @@ export default {
   text-align: center;
 }
 #settingModal .modal-header {
-  background: #e91a1c;
+  background: #2851e4;
   text-align: center;
 }
 #settingModal .modal-title {

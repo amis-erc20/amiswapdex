@@ -48,15 +48,12 @@ export default {
             balanceUsd: 0.0
           };
         }
-        let tokenInfo = self.getAvailableTokenList.find(
-          token => symbol === token.symbol
-        );
-        let { logo } = tokenInfo;
+        let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
         return {
           name: symbol,
           balance: this.calculateBalance(self.getBalance[symbol]),
           balanceUsd: 0.0,
-          src: logo
+          src: token.logo ? token.logo : null
         };
       });
     }
@@ -97,8 +94,9 @@ export default {
 .tokenlist-section {
   width: 100%;
   max-width: 500px;
-  margin-top: 25px;
-  border-bottom: 1px solid #d2dde6;
+  margin: 55px auto;
+  margin-bottom: 0px;
+  /* border-bottom: 1px solid #d2dde6; */
 }
 .tokenlist-section .card {
   border: none;

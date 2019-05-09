@@ -1,117 +1,121 @@
 <template>
-  <div id="signin-section">
-    <no-connection/>
-    <img src="../assets/logo.svg" alt>
-    <h4>Sign In</h4>
-    <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
-    <p v-if="loading" class="status-message">{{statusMessage}}</p>
-    <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
+  <div>
+    <Nav/>
+    <div id="signin-section">
+      <no-connection/>
+      <!-- <img src="../assets/logo.svg" alt> -->
+      <!-- <h4>Sign In</h4> -->
+      <h6>Please sign into your wallet.</h6>
+      <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
+      <p v-if="loading" class="status-message">{{statusMessage}}</p>
+      <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
 
-    <b-form-group v-if="downloadMethod !== `local`">
-      <b-form-radio
-        value="remote"
-        v-model="selected"
-        name="some-radios"
-        @change="onSelectRemote"
-      >Download from Google Drive</b-form-radio>
-      <b-form-radio
-        value="upload"
-        v-model="selected"
-        name="some-radios"
-        @change="onSelectUpload"
-      >Import from computer</b-form-radio>
-      <b-form-radio
-        value="local"
-        v-model="selected"
-        name="some-radios"
-        @change="onSelectLocal"
-      >Local Sign In</b-form-radio>
-    </b-form-group>
-
-    <!-- LOCAL SIGN IN -->
-    <b-form @submit="onLocalSignIn " v-if="downloadMethod === 'local'">
-      <b-form-group>
-        <label for>Email</label>
-        <b-form-input type="email" v-model="form.email" required/>
-      </b-form-group>
-      <b-form-group>
-        <label for>Password</label>
-        <b-form-input type="password" v-model="form.password1" required/>
-      </b-form-group>
-      <div class="submit-button-group">
-        <b-button type="submit" variant="danger" id="signin-btn">Sign In</b-button>
-      </div>
-    </b-form>
-
-    <!-- REMOTE SIGN IN -->
-    <b-form @submit="onRemoteSignIn " v-if="downloadMethod === 'remote'">
-      <b-form-group>
-        <label for>Email</label>
-        <b-form-input type="email" v-model="form.email" required/>
-      </b-form-group>
-      <b-form-group>
-        <label for>Password</label>
-        <b-form-input type="password" v-model="form.password1" required/>
+      <b-form-group v-if="downloadMethod !== `local`">
+        <b-form-radio
+          value="remote"
+          v-model="selected"
+          name="some-radios"
+          @change="onSelectRemote"
+        >Download from Google Drive</b-form-radio>
+        <b-form-radio
+          value="upload"
+          v-model="selected"
+          name="some-radios"
+          @change="onSelectUpload"
+        >Import from computer</b-form-radio>
+        <b-form-radio
+          value="local"
+          v-model="selected"
+          name="some-radios"
+          @change="onSelectLocal"
+        >Local Sign In</b-form-radio>
       </b-form-group>
 
-      <div class="submit-button-group">
-        <b-button type="submit" variant="danger" id="signin-btn">Sign In with Google Drive</b-button>
-      </div>
-    </b-form>
-    <!-- FILE UPLOAD -->
-    <b-form @submit="onUploadSignIn " v-if="downloadMethod === 'upload'">
-      <b-form-group>
-        <label for>Email</label>
-        <b-form-input type="email" v-model="form.email" required/>
-      </b-form-group>
-      <b-form-group>
-        <label for>Password</label>
-        <b-form-input type="password" v-model="form.password1" required/>
-      </b-form-group>
-      <b-form-group>
-        <b-form-file
-          v-model="form.file"
-          :state="isFileValid"
-          placeholder="Choose credential file..."
-          drop-placeholder="Drop file here..."
-          accept=".txt"
-          @change="onFileChange"
-        />
-        <!-- <div class="mt-3">Selected file: {{ form.file ? form.file.name : '' }}</div> -->
-        <div class="file-error" v-if="isFileValid">File is valid.</div>
-        <div class="file-error" v-if="!isFileValid">Invalid File</div>
+      <!-- LOCAL SIGN IN -->
+      <b-form @submit="onLocalSignIn " v-if="downloadMethod === 'local'">
+        <b-form-group>
+          <label for>Email</label>
+          <b-form-input type="email" v-model="form.email" required/>
+        </b-form-group>
+        <b-form-group>
+          <label for>Password</label>
+          <b-form-input type="password" v-model="form.password1" required/>
+        </b-form-group>
+        <div class="submit-button-group">
+          <b-button type="submit" variant="primary" id="signin-btn">Sign In</b-button>
+        </div>
+      </b-form>
+
+      <!-- REMOTE SIGN IN -->
+      <b-form @submit="onRemoteSignIn " v-if="downloadMethod === 'remote'">
+        <b-form-group>
+          <label for>Email</label>
+          <b-form-input type="email" v-model="form.email" required/>
+        </b-form-group>
+        <b-form-group>
+          <label for>Password</label>
+          <b-form-input type="password" v-model="form.password1" required/>
+        </b-form-group>
+
+        <div class="submit-button-group">
+          <b-button type="submit" variant="primary" id="signin-btn">Sign In with Google Drive</b-button>
+        </div>
+      </b-form>
+      <!-- FILE UPLOAD -->
+      <b-form @submit="onUploadSignIn " v-if="downloadMethod === 'upload'">
+        <b-form-group>
+          <label for>Email</label>
+          <b-form-input type="email" v-model="form.email" required/>
+        </b-form-group>
+        <b-form-group>
+          <label for>Password</label>
+          <b-form-input type="password" v-model="form.password1" required/>
+        </b-form-group>
+        <b-form-group>
+          <b-form-file
+            v-model="form.file"
+            :state="isFileValid"
+            placeholder="Choose credential file..."
+            drop-placeholder="Drop file here..."
+            accept=".txt"
+            @change="onFileChange"
+          />
+          <!-- <div class="mt-3">Selected file: {{ form.file ? form.file.name : '' }}</div> -->
+          <div class="file-error" v-if="isFileValid">File is valid.</div>
+          <div class="file-error" v-if="!isFileValid">Invalid File</div>
+        </b-form-group>
+
+        <div class="submit-button-group">
+          <b-button
+            type="submit"
+            variant="primary"
+            id="signin-btn"
+            :disabled="!isFileValid"
+          >Import & Sign In</b-button>
+        </div>
+      </b-form>
+
+      <b-form-group class="show-more-option">
+        <b-form-checkbox
+          switch
+          v-model="showMoreOptions"
+          name="check-button"
+          @change="onChangeShowMore"
+        >Show more sign in options</b-form-checkbox>
       </b-form-group>
 
-      <div class="submit-button-group">
-        <b-button
-          type="submit"
-          variant="danger"
-          id="signin-btn"
-          :disabled="!isFileValid"
-        >Import & Sign In</b-button>
-      </div>
-    </b-form>
-
-    <b-form-group class="show-more-option">
-      <b-form-checkbox
-        switch
-        v-model="showMoreOptions"
-        name="check-button"
-        @change="onChangeShowMore"
-      >Show more sign in options</b-form-checkbox>
-    </b-form-group>
-
-    <p v-if="!loading">
-      Don't have an account ? Please
-      <nuxt-link to="/signup">sign up</nuxt-link>. If you forget your password,
-      <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
-    </p>
-    <!-- Install Modal -->
-    <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">
-      Install this web app on your iPhone: tap
-      <strong>share</strong> button and then
-      <strong>Add to Homescreen</strong>
-    </b-modal>
+      <p v-if="!loading">
+        Don't have an account ? Please
+        <nuxt-link to="/signup">sign up</nuxt-link>. If you forget your password,
+        <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
+      </p>
+      <!-- Install Modal -->
+      <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">
+        Install this web app on your iPhone: tap
+        <strong>share</strong> button and then
+        <strong>Add to Homescreen</strong>
+      </b-modal>
+    </div>
   </div>
 </template>
 
@@ -119,6 +123,7 @@
 import { mapGetters, mapActions } from "vuex";
 import bcrypt from "bcryptjs";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
+import Nav from "~/components/Nav.vue";
 import {
   getWeb3,
   isIos,
@@ -133,13 +138,14 @@ import { faExpand } from "@fortawesome/free-solid-svg-icons";
 
 export default {
   components: {
-    ScaleLoader
+    ScaleLoader,
+    Nav
   },
   data() {
     return {
       form: {
-        email: "mr.thantsintoe@gmail.com",
-        password1: "password",
+        email: "",
+        password1: "",
         file: null
       },
       loading: false,

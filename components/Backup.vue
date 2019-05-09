@@ -210,7 +210,7 @@ export default {
   display: flex;
   justify-content: center;
   padding: 10px 15px;
-  background: #e91a1c;
+  background: #2851e4;
   color: #fff;
   align-self: center;
   width: 100% !important;
@@ -242,7 +242,7 @@ export default {
   top: 150px;
 }
 #settingModal .modal-header {
-  background: #e91a1c;
+  background: #2851e4;
   text-align: center;
 }
 #settingModal .modal-title {

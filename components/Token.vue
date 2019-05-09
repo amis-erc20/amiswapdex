@@ -82,7 +82,7 @@ export default {
 </script>
 
 <style>
-.token {
+.tokenlist-section .token {
   display: flex;
   justify-content: space-between;
   color: #fff;

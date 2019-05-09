@@ -1,60 +1,63 @@
 <template>
-  <div id="signup-section">
-    <img src="../assets/logo.svg" alt>
-    <h4>Create New Account</h4>
-    <scale-loader :loading="loading && !success" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
-    <font-awesome-icon v-if="success" icon="check" size="2x" color="green" align="center"/>
-    <p v-if="loading" class="status-message">{{statusMessage}}</p>
-    <nuxt-link to="/backup" v-if="success">
-      <b-button type="button" variant="danger" id="create-account-btn">Backup to Google Drive</b-button>
-    </nuxt-link>
-    <nuxt-link to="/" v-if="success">
-      <b-button type="button" variant="outline-danger" id="create-account-btn">Continue to Wallet</b-button>
-    </nuxt-link>
-    <b-form @submit="onCreate" v-if="loading !== true">
-      <b-form-group>
-        <label for>Email</label>
-        <b-form-input type="email" v-model="form.email" required :state="validateEmail()"/>
-      </b-form-group>
-      <b-form-group>
-        <label for>Password</label>
-        <b-form-input
-          type="password"
-          v-model="form.password1"
-          required
-          :state="validatePassword()"
-        />
-      </b-form-group>
-      <b-form-group>
-        <label for>Retype Your Password</label>
-        <b-form-input
-          type="password"
-          v-model="form.password2"
-          required
-          :state="validatePassword()"
-        />
-        <b-form-invalid-feedback :state="validatePassword()">{{errorMessage}}</b-form-invalid-feedback>
-      </b-form-group>
-      <div class="submit-button-group">
-        <b-button
-          type="submit"
-          variant="danger"
-          id="create-account-btn"
-          :disabled="!validatePassword() || loading"
-        >Create Account</b-button>
-      </div>
-      <p>
-        Already have an account ? Please
-        <nuxt-link to="/signin">sign in</nuxt-link>. If you forget your password,
-        <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
-      </p>
-    </b-form>
-    <!-- Install Modal -->
-    <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">
-      Install this web app on your iPhone: tap
-      <strong>share</strong> button and then
-      <strong>Add to Homescreen</strong>
-    </b-modal>
+  <div>
+    <Nav/>
+    <div id="signup-section">
+      <!-- <img src="../assets/logo.svg" alt> -->
+      <h4>Create New Wallet</h4>
+      <scale-loader :loading="loading && !success" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
+      <font-awesome-icon v-if="success" icon="check" size="2x" color="green" align="center"/>
+      <p v-if="loading" class="status-message">{{statusMessage}}</p>
+      <nuxt-link to="/backup" v-if="success">
+        <b-button type="button" variant="primary" id="create-account-btn">Backup to Google Drive</b-button>
+      </nuxt-link>
+      <nuxt-link to="/" v-if="success">
+        <b-button type="button" variant="outline-primary" id="create-account-btn">Continue to Wallet</b-button>
+      </nuxt-link>
+      <b-form @submit="onCreate" v-if="loading !== true">
+        <b-form-group>
+          <label for>Email</label>
+          <b-form-input type="email" v-model="form.email" required :state="validateEmail()"/>
+        </b-form-group>
+        <b-form-group>
+          <label for>Password</label>
+          <b-form-input
+            type="password"
+            v-model="form.password1"
+            required
+            :state="validatePassword()"
+          />
+        </b-form-group>
+        <b-form-group>
+          <label for>Retype Your Password</label>
+          <b-form-input
+            type="password"
+            v-model="form.password2"
+            required
+            :state="validatePassword()"
+          />
+          <b-form-invalid-feedback :state="validatePassword()">{{errorMessage}}</b-form-invalid-feedback>
+        </b-form-group>
+        <div class="submit-button-group">
+          <b-button
+            type="submit"
+            variant="primary"
+            id="create-account-btn"
+            :disabled="!validatePassword() || loading"
+          >Create Wallet</b-button>
+        </div>
+        <p>
+          Already have an account ? Please
+          <nuxt-link to="/signin">sign in</nuxt-link>. If you forget your password,
+          <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
+        </p>
+      </b-form>
+      <!-- Install Modal -->
+      <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">
+        Install this web app on your iPhone: tap
+        <strong>share</strong> button and then
+        <strong>Add to Homescreen</strong>
+      </b-modal>
+    </div>
   </div>
 </template>
 
@@ -73,10 +76,12 @@ import sjcl from "../assets/js/sjcl.js";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
 import GDrive from "../assets/js/googleDrive/GDrive.js";
 import CONFIG from "../config.js";
+import Nav from "~/components/Nav.vue";
 
 export default {
   components: {
-    ScaleLoader
+    ScaleLoader,
+    Nav
   },
   data() {
     return {

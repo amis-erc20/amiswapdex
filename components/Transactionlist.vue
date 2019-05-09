@@ -74,4 +74,11 @@ export default {
   position: relative;
   /* top: -50px; */
 }
+
+.list-group-flush .list-group-item {
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+  margin-bottom: 5px;
+}
 </style>

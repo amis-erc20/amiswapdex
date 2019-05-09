@@ -1,5 +1,5 @@
 <template>
-  <b-container class="transaction" style="border-width: 0px 0px 1px 0px;" >
+  <b-container class="transaction" style="border-width: 0px 0px 1px 0px;">
     <b-row>
       <b-col cols="1" class="arrow-column">
         <font-awesome-icon :icon="icon" :color="iconColor" size="lg"/>
@@ -125,7 +125,7 @@ export default {
   },
   methods: {
     showTxDetail(ref) {
-      console.log('clicked')
+      console.log("clicked");
       this.$refs[this.transaction.hash].show();
     }
   }
@@ -200,7 +200,7 @@ export default {
   font-size: 12px;
 }
 .transaction .modal .modal-header {
-  background: #e91a1c;
+  background: #2851e4;
   text-align: center;
 }
 .transaction .modal .modal-title {
@@ -210,7 +210,8 @@ export default {
   border: none;
   outline: none;
 }
-.nav-section .btn-outline-light:active, .nav-section .btn-outline-light:focus {
+.nav-section .btn-outline-light:active,
+.nav-section .btn-outline-light:focus {
   border: none;
   outline: none;
   background: transparent;

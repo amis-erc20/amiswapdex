@@ -11,11 +11,13 @@
           {{ calculateBalance(getBalance["ULT"]) }}
           <span>ULT</span>
         </h2>
-        <h2 v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
-          {{ calculateBalance(getBalance[getActiveToken]) }}
-          <span>{{getActiveToken}}</span>
-        </h2>
-        <img v-if="currentRoute === `/`" src="../assets/logo.svg" alt width="150px" height="200px">
+        <h2
+          v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'"
+        >{{ calculateBalance(getBalance[getActiveToken]) }}</h2>
+        <div v-if="currentRoute === `/`" id="total-summary">
+          <h5>Total Value</h5>
+          <h2>$ {{ getTotalValue.toFixed(3) }}</h2>
+        </div>
       </div>
     </div>
   </div>
@@ -40,7 +42,8 @@ export default {
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
       getActiveToken: "getActiveToken",
-      getTokenList: "account/getTokenList"
+      getTokenList: "account/getTokenList",
+      getTotalValue: "account/getTotalValue"
     }),
     currentRoute() {
       return this.$route.path;
@@ -107,36 +110,36 @@ export default {
     }
   },
   mounted: async function() {
-    let self = this;
-    let unitPriceInUSD;
-    if (!this.getPrice["ETH"]) {
-      console.log(`Getting prices from remote server...`);
-      let ultPrice = await getULTToUSDPrice();
-      let ethPrice = await getETHToUSDPrice();
-      this.updatePrice({
-        symbol: "ULT",
-        price: ultPrice
-      });
-      this.updatePrice({
-        symbol: "ETH",
-        price: ethPrice
-      });
-      this.getTokenList
-        .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
-        .forEach(async symbol => {
-          let tokenPrice = await getTokenToUSDPrice(symbol);
-          self.updatePrice({
-            symbol: symbol,
-            price: tokenPrice
-          });
-        });
-    }
-    unitPriceInUSD = this.getPrice[this.getActiveToken];
-    this.priceInUSD = parseFloat(
-      this.calculateBalance(this.getBalance[this.getActiveToken]) *
-        unitPriceInUSD
-    ).toFixed(3);
-    setInterval(this.refreshUSDPrices, 1000 * 60 * 3);
+    // let self = this;
+    // let unitPriceInUSD;
+    // if (!this.getPrice["ETH"]) {
+    //   console.log(`Getting prices from remote server...`);
+    //   let ultPrice = await getULTToUSDPrice();
+    //   let ethPrice = await getETHToUSDPrice();
+    //   this.updatePrice({
+    //     symbol: "ULT",
+    //     price: ultPrice
+    //   });
+    //   this.updatePrice({
+    //     symbol: "ETH",
+    //     price: ethPrice
+    //   });
+    //   this.getTokenList
+    //     .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
+    //     .forEach(async symbol => {
+    //       let tokenPrice = await getTokenToUSDPrice(symbol);
+    //       self.updatePrice({
+    //         symbol: symbol,
+    //         price: tokenPrice
+    //       });
+    //     });
+    // }
+    // unitPriceInUSD = this.getPrice[this.getActiveToken];
+    // this.priceInUSD = parseFloat(
+    //   this.calculateBalance(this.getBalance[this.getActiveToken]) *
+    //     unitPriceInUSD
+    // ).toFixed(3);
+    // setInterval(this.refreshUSDPrices, 1000 * 60 * 3);
   }
 };
 </script>
@@ -199,8 +202,8 @@ export default {
   font-weight: bolder;
 }
 #send-button {
-  border: 2px solid #e91a1c;
-  color: #e91a1c;
+  border: 2px solid #2851e4;
+  color: #2851e4;
   font-weight: bolder;
 }
 #swap-button {
@@ -212,5 +215,18 @@ export default {
 #receive-button:hover,
 #swap-button:hover {
   color: #fff;
+}
+#total-summary {
+  text-align: center;
+}
+#total-summary h2 {
+  font-size: 32px;
+  position: relative;
+  left: 0px;
+  margin: 10px auto;
+  font-weight: bold;
+}
+#total-summary h5 {
+  font-size: 16px;
 }
 </style>

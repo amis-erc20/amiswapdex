@@ -24,12 +24,13 @@ html {
 html,
 body {
   font-family: "Open Sans", sans-serif !important;
-  background-image: linear-gradient(to top, #dfe9f3 0%, white 100%);
+  /* background-image: linear-gradient(to top, #dfe9f3 0%, white 100%); */
   /* background-blend-mode: multiply; */
   background-repeat: no-repeat;
+  background: #eceeef;
 }
 .list-group-item {
-  background-color: #f1f2f3 !important;
+  /* background-color: #f1f2f3 !important; */
 }
 body {
   font-family: "Open Sans", sans-serif;
@@ -91,7 +92,7 @@ body {
   font-size: 14px;
 }
 #no_internet_modal .modal-header {
-  background: #e91a1c;
+  background: #2851e4;
   color: #fff;
   text-align: center;
   height: 40px;
