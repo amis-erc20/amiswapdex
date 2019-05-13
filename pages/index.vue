@@ -40,18 +40,33 @@
             </b-card-text>
             <div class="no-account-container" v-else>
               <div>
-                <p>Please sign in or create a new account to access wallet.</p>
+                <p>
+                  Please sign in or create a new
+                  <strong>uniswapDEX</strong> wallet.
+                </p>
                 <nuxt-link to="/signup">
-                  <b-button type="button" variant="outline-primary" id="backup-btn">Create Account</b-button>
+                  <b-button type="button" variant="outline-primary" id="backup-btn">Create Wallet</b-button>
                 </nuxt-link>
                 <nuxt-link to="/signin">
                   <b-button type="button" variant="primary" id="backup-btn">Sign In</b-button>
                 </nuxt-link>
               </div>
               <div>
-                <p>Use Metamask Extension to access your wallet.</p>
+                <p>
+                  Use
+                  <strong>Metamask</strong> Extension to access your wallet.
+                </p>
                 <nuxt-link to="/metamask">
                   <b-button type="button" variant="outline-primary" id="metamask-btn">Metamask</b-button>
+                </nuxt-link>
+              </div>
+              <div>
+                <p>
+                  Use
+                  <strong>private key</strong> to access your wallet
+                </p>
+                <nuxt-link to="/privatekeysignin">
+                  <b-button type="button" variant="outline-primary" id="metamask-btn">Private Key</b-button>
                 </nuxt-link>
               </div>
             </div>
@@ -259,6 +274,7 @@ export default {
     },
     async checkRemoteBackup(web3) {
       if (!this.getSignIn) return;
+      if (this.getAccount.type !== "credentials") return;
       let self = this;
       let account = this.getAccount;
       let balance = this.getBalance["ETH"];
@@ -436,11 +452,21 @@ export default {
 }
 .no-account-container {
   position: relative;
-  top: 20vh;
+  /* top: 10vh; */
 }
 .no-account-container button {
-  width: 150px;
-  height: 50px;
+  min-width: 110px;
+  height: 40px;
+  font-size: 0.8rem;
+}
+.no-account-container > div {
+  border: 1px solid #dadada;
+  padding: 25px 15px;
+  width: 90%;
+  max-width: 650px;
+  box-shadow: 0px 3px 4px #dcdbdb;
+  border-radius: 10px;
+  margin: 20px auto;
 }
 div {
   outline: none;

@@ -1,29 +1,20 @@
 <template>
   <div>
     <Nav/>
-    <div id="metamask-section">
+    <div id="signin-section">
       <no-connection/>
-      <h6>Please use MyEtherWallet on a secure (SSL/HTTPS) connection to connect.</h6>
+      <h6>Please provide your private key to access your wallet</h6>
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
 
-      <!-- ACCESS METAMASK -->
-      <b-form @submit="onAccessMetamask">
+      <!-- PRIVATE KEY SIGN IN -->
+      <b-form @submit="onSubmitPrivateKey">
         <b-form-group>
-          <b-form-checkbox
-            id="accept-checkbox"
-            v-model="isAccepted"
-            name="accept-checkbox"
-          >I accept the terms and use to access my wallet</b-form-checkbox>
+          <b-form-input type="text" v-model="form.privateKey" placeholder="Private Key" required/>
         </b-form-group>
         <div class="submit-button-group">
-          <b-button
-            type="submit"
-            variant="primary"
-            id="signin-btn"
-            :disabled="!isAccepted"
-          >Access Metamask</b-button>
+          <b-button type="submit" variant="primary" id="signin-btn">Access Wallet</b-button>
         </div>
       </b-form>
     </div>
@@ -32,13 +23,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import Web3 from "web3";
 import bcrypt from "bcryptjs";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import Nav from "~/components/Nav.vue";
 import {
   getWeb3,
-  getWeb3Metamask,
   isIos,
   isInStandaloneMode,
   getAllListedToken
@@ -57,23 +46,19 @@ export default {
   data() {
     return {
       form: {
-        email: "",
-        password1: "",
-        file: null
+        privateKey: ""
       },
       loading: false,
       errorMessage: "",
       web3: null,
       statusMessage: "",
       credentials: null,
-      isAccepted: false
+      Ns: null
     };
   },
   computed: {},
   created: async function() {
-    this.web3 = await getWeb3Metamask();
-    // this.web3 = await getWeb3();
-    // this.web3 = new Web3(Web3.givenProvider || "wss://mainnet.infura.io/ws");
+    this.web3 = await getWeb3();
   },
   methods: {
     ...mapActions({
@@ -90,66 +75,33 @@ export default {
         address,
         privateKey
       } = await this.web3.eth.accounts.privateKeyToAccount(key);
-      const account = { address, privateKey, balance: 0 };
+      const account = { address, privateKey, balance: 0, type: "private_key" };
       return account;
     },
-    async isLoggedIn() {
-      let accounts;
-      try {
-        accounts = await this.web3.eth.getAccounts();
-        console.log(accounts);
-      } catch (e) {
-        console.log(e);
-        console.log("Cannot get wallet account. Please log into metamask");
-        return false;
-      }
-      if (accounts && accounts.length > 0) return accounts[0];
-      else return false;
-    },
-    async initiateMetamsk() {
-      try {
-        await window.ethereum.enable();
-        return true;
-      } catch (error) {
-        console.log(error);
-        return false;
-      }
-    },
-    async onAccessMetamask(evt) {
+    async onSubmitPrivateKey(evt) {
       evt.preventDefault();
       this.loading = true;
       await this.wait(100);
-      try {
-        this.statusMessage = "Requesting Metamask Access...";
-        let isInitiated = await this.initiateMetamsk();
-        if (isInitiated) {
-          let metamaskAddress = await this.isLoggedIn();
-          console.log(`Metamask Address is: ${metamaskAddress}`);
-
-          if (metamaskAddress) {
-            this.signIn(metamaskAddress);
-          } else {
-            alert("NO METAMASK ACCOUNT");
-          }
-        }
-      } catch (e) {
-        console.log(e);
-        this.loading = false;
-        this.errorMessage = "Cannot access Meatamask extension";
-        return;
-      }
+      this.statusMessage = "Retrieving your wallet using your private key...";
+      await this.signIn();
       this.loading = false;
     },
-    async signIn(metamaskAddress) {
-      const account = {
-        address: metamaskAddress,
-        privateKey: null,
-        balance: 0,
-        type: "metamask"
-      };
-      this.updateAuthStatus(true);
-      this.addAccount(account);
-      this.redirect("/");
+    async signIn() {
+      try {
+        const account = await this.getAccountFromPrivateKey(
+          this.form.privateKey
+        );
+        account.type = "private_key";
+        this.addAccount(account);
+        this.updateAuthStatus(true);
+        this.redirect("/");
+      } catch (e) {
+        console.log(e);
+        console.log(`Invalid Private Key`);
+        this.form.privateKey = "";
+        this.loading = false;
+        this.errorMessage = "Invalid Private Key. Try Again";
+      }
     },
     showModal(ref) {
       this.$refs[ref].show();
@@ -169,7 +121,7 @@ export default {
 </script>
 
 <style>
-#metamask-section {
+#signin-section {
   width: 100%;
   max-width: 650px;
   min-height: 100vh;
@@ -182,22 +134,22 @@ export default {
   justify-content: center;
   align-items: center;
 }
-#metamask-section img {
+#signin-section img {
   width: 120px;
   text-align: center;
   animation: rotateLogo 14s infinite linear;
 }
-#metamask-section h4 {
+#signin-section h4 {
   margin: 30px auto;
 }
-#metamask-section form label {
+#signin-section form label {
   font-weight: bolder;
   font-size: 13px;
 }
-#metamask-section form {
+#signin-section form {
   width: 90%;
 }
-#metamask-section p {
+#signin-section p {
   font-size: 12px;
   margin-top: 10px;
 }

@@ -523,7 +523,7 @@ export default {
 }
 #recovery-section {
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
   min-height: 100vh;
   overflow: hidden;
   width: 90vw;

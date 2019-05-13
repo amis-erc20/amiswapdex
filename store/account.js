@@ -36,7 +36,10 @@ export const mutations = {
 	updateBalance(state, payload) {
 		let { symbol, balance } = payload
 		state.balance[symbol] = balance
-		state.totalValue += (balance / Math.pow(10, 18)) * state.price[symbol]
+		state.totalValue = 0
+		for (let key in state.balance) {
+			state.totalValue += (state.balance[key] / Math.pow(10, 18)) * state.price[key]
+		}
 	},
 	resetAllBalances(state) {
 		for (var tokenName in state.balance) {

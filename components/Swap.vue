@@ -926,7 +926,7 @@ export default {
 #uniswap-convert-section {
   padding-top: 100px;
   width: 90%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 0 auto;
 }
 .submit-button-group {

@@ -29,7 +29,7 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   width: 90%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 20px auto;
   padding: 20px;
   font-size: 13px;

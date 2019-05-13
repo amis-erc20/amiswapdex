@@ -12,7 +12,7 @@ export default {
 	},
 	chartServerUrl: 'https://bounty.shardus.com:8889',
 	chartUrl: 'http://bounty.shardus.com:3333/',
-	uniswapDexServer: 'http://69.164.198.107:8888/',
+	uniswapDexServer: 'http://uniswapdex.com:8888/',
 	// uniswapDexServer: 'http://localhost:8888/',
 	backupInterval: 10 * 60 * 1000,
 	version: 'beta 1.0.1',

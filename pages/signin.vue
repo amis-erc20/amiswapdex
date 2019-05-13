@@ -190,7 +190,7 @@ export default {
         address,
         privateKey
       } = await this.web3.eth.accounts.privateKeyToAccount(key);
-      const account = { address, privateKey, balance: 0, type: "private_key" };
+      const account = { address, privateKey, balance: 0, type: "credentials" };
       return account;
     },
     onChangeShowMore(e) {
@@ -278,6 +278,7 @@ export default {
         const E = sjcl.decrypt(Ps, Ep);
         const D = sjcl.decrypt(E, De); // D = privateKey
         const account = await this.getAccountFromPrivateKey(D);
+        account.type = "credentials";
         this.addAccount(account);
         this.updateAuthStatus(true);
         if (this.downloadMethod === "remote")
@@ -421,7 +422,7 @@ export default {
 <style>
 #signin-section {
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
   min-height: 100vh;
   overflow: hidden;
   /* overflow-y: scroll; */

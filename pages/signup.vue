@@ -281,7 +281,7 @@ export default {
 <style>
 #signup-section {
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
   min-height: 100vh;
   overflow: hidden;
   /* overflow-y: scroll; */

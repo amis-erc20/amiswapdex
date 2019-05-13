@@ -231,9 +231,11 @@ export default {
     },
     async updateGasLimitAndTxFee() {
       let estimatedGas = await this.getEstimatedGas();
+      console.log(`Estimated Gas is: ${estimatedGas}`);
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
+      console.log(`Gas Limit is: ${this.gasLimit}`);
       this.txFee =
-        (1.6 * estimatedGas * parseInt(this.gasPrice) * 1000000000) /
+        (1.6 * this.gasLimit * parseInt(this.gasPrice) * 1000000000) /
         Math.pow(10, 18);
     },
     async onSubmit(evt) {
@@ -241,7 +243,7 @@ export default {
       this.loading = true;
       let web3 = this.web3;
       let txHash;
-
+      // If user sign in with metamask
       if (this.getAccount.type === "metamask") {
         if (this.form.currency === "ETH") {
           this.txHash = await metamaskSendEth({
@@ -267,44 +269,45 @@ export default {
           this.loading = false;
           this.showModal("success_modal_ref");
         }
-      }
-      return;
-      try {
-        if (this.form.currency === "ETH")
-          txHash = await signAndSendETH(
-            {
-              from: this.getAccount.address,
-              to: this.form.targetAddress,
-              amount: parseInt(this.form.amount * Math.pow(10, 18)),
-              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-              gasLimit: this.gasLimit
-            },
-            this.getAccount.privateKey,
-            web3
-          );
-        else
-          txHash = await sendToken(
-            {
-              from: this.getAccount.address,
-              to: this.form.targetAddress,
-              amount: parseInt(this.form.amount) * Math.pow(10, 18),
-              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-              gasLimit: this.gasLimit
-            },
-            this.form.currency,
-            this.getAccount.privateKey,
-            web3
-          );
-        this.loading = false;
-        this.txHash = txHash;
+        // If user sign in with credentials or private key
+      } else {
+        try {
+          if (this.form.currency === "ETH")
+            txHash = await signAndSendETH(
+              {
+                from: this.getAccount.address,
+                to: this.form.targetAddress,
+                amount: parseInt(this.form.amount * Math.pow(10, 18)),
+                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                gasLimit: this.gasLimit
+              },
+              this.getAccount.privateKey,
+              web3
+            );
+          else
+            txHash = await sendToken(
+              {
+                from: this.getAccount.address,
+                to: this.form.targetAddress,
+                amount: parseInt(this.form.amount) * Math.pow(10, 18),
+                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                gasLimit: this.gasLimit > 42000 ? this.gasLimit : 42000
+              },
+              this.form.currency,
+              this.getAccount.privateKey,
+              web3
+            );
+          this.loading = false;
+          this.txHash = txHash;
 
-        this.updateActiveToken(this.form.currency);
-        this.onReset();
-        this.showModal("success_modal_ref");
-      } catch (e) {
-        this.loading = false;
-        alert(`Error while trying to submit transaction`);
-        console.log(e);
+          this.updateActiveToken(this.form.currency);
+          this.onReset();
+          this.showModal("success_modal_ref");
+        } catch (e) {
+          this.loading = false;
+          alert(`Error while trying to submit transaction`);
+          console.log(e);
+        }
       }
     },
     onReset(evt) {
@@ -385,7 +388,7 @@ export default {
 .send-section {
   color: #333;
   width: 90%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 30px auto;
   text-align: center;
   padding-top: 65px;

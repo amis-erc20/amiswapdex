@@ -38,7 +38,6 @@ export const initContracts = async function (web3, availableTokens) {
 export const getWeb3 = function () {
   return new Promise(function (resolve, reject) {
     try {
-      // let web3 = new Web3(new Web3.providers.HttpProvider("mainnet.infura.io/v3/6f70582e339948738835c25da4b9b8a5"));
       let web3 = new Web3(
         'wss://mainnet.infura.io/ws/v3/6f70582e339948738835c25da4b9b8a5'
       )
@@ -239,6 +238,7 @@ export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) 
 }
 
 export const estimateGas = async function (transaction, web3) {
+  console.log(web3)
   try {
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
@@ -248,6 +248,7 @@ export const estimateGas = async function (transaction, web3) {
     }).call()
     return gas
   } catch (e) {
+    console.log(e)
     return 0
   }
 }
@@ -256,6 +257,7 @@ export const estimateGasPrice = async function (web3) {
   return gasPrice
 }
 export const signAndSendETH = async function (transaction, privateKey, web3) {
+  console.log(transaction)
   let signedTx = await web3.eth.accounts.signTransaction(
     {
       from: transaction.from,
@@ -277,6 +279,7 @@ export const signAndSendETH = async function (transaction, privateKey, web3) {
 }
 
 export const sendToken = async function (tx, currency, privateKey, web3) {
+  console.log(tx)
   let myAddress = tx.from
   let toAddress = tx.to
   let amount = web3.utils.toHex(tx.amount)

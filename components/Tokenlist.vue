@@ -93,7 +93,7 @@ export default {
 }
 .tokenlist-section {
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 55px auto;
   margin-bottom: 0px;
   /* border-bottom: 1px solid #d2dde6; */

@@ -6,6 +6,7 @@ const _04028ce6 = () => interopDefault(import('../pages/about.vue' /* webpackChu
 const _1c044b8e = () => interopDefault(import('../pages/backup.vue' /* webpackChunkName: "pages/backup" */))
 const _c65468b0 = () => interopDefault(import('../pages/metamask.vue' /* webpackChunkName: "pages/metamask" */))
 const _bfabd41a = () => interopDefault(import('../pages/privatekey.vue' /* webpackChunkName: "pages/privatekey" */))
+const _ad089756 = () => interopDefault(import('../pages/privatekeysignin.vue' /* webpackChunkName: "pages/privatekeysignin" */))
 const _7452642d = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
 const _1fbf86cc = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
 const _3b71da3e = () => interopDefault(import('../pages/recoverysetup.vue' /* webpackChunkName: "pages/recoverysetup" */))
@@ -110,6 +111,10 @@ export function createRouter() {
       path: "/privatekey",
       component: _bfabd41a,
       name: "privatekey"
+    }, {
+      path: "/privatekeysignin",
+      component: _ad089756,
+      name: "privatekeysignin"
     }, {
       path: "/receivetoken",
       component: _7452642d,

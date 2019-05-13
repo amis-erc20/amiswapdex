@@ -24,7 +24,9 @@
         </div>
       </div>
       <div class="exchangelist-title">
+        <div class="title-order">No</div>
         <div class="title-name">Name</div>
+        <div class="title-price">24H Change</div>
         <div class="title-price">Price</div>
         <div class="title-volume">24H Volume</div>
         <div class="title-liquidity">Liquidity Depth</div>
@@ -33,6 +35,9 @@
         <b-list-group flush>
           <b-list-group-item v-for="token in tokenList" :key="token.tokenAddress">
             <div class="token">
+              <div class="token-order-container">
+                <p class="token-order">{{ token.order }}.</p>
+              </div>
               <div class="token-name">
                 <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
                 <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
@@ -40,20 +45,22 @@
                 <img v-else src="../assets/default-token.png">
                 <p>{{token.name}}</p>
               </div>
-
               <div class="token-price-container">
                 <p
-                  v-if="token.price > 100000 "
-                  class="token-price-usd"
-                >${{ (token.price / 1000).toFixed(2) }} K</p>
-                <p v-else class="token-price-usd">${{ token.price.toFixed(3) }}</p>
+                  v-if="token.change > 0"
+                  class="token-price-usd positive-change"
+                >+{{ (token.change * 1000).toFixed(2) }}%</p>
+                <p
+                  v-if="token.change < 0"
+                  class="token-price-usd negative-change"
+                >-{{ (Math.abs(token.change) * 1000).toFixed(2) }}%</p>
+                <p v-if="token.change == 0" class="token-price-usd zero-change">0.00%</p>
+              </div>
+              <div class="token-price-container">
+                <p class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
               </div>
               <div class="token-volume-container">
-                <p
-                  v-if="token.volume > 100000"
-                  class="token-volume"
-                >${{ numberWithCommas((token.volume / 1000).toFixed(2)) }} K</p>
-                <p v-else class="token-volume">${{ numberWithCommas(token.volume.toFixed(2)) }}</p>
+                <p class="token-volume">${{ numberWithCommas(token.volume.toFixed(0)) }}</p>
               </div>
               <div class="token-liquidity-container">
                 <p class="token-liquidity-usd">${{ numberWithCommas(token.liquidity.toFixed(0)) }}</p>
@@ -119,7 +126,9 @@ export default {
             liquidity: 0,
             volume: 0,
             price: 0,
-            src: token.logo
+            src: token.logo,
+            order: "-",
+            change: 0
           };
         return {
           name: token.symbol,
@@ -127,7 +136,9 @@ export default {
           liquidity: summaryInfo.liquidity * ethToUsd,
           volume: summaryInfo.volume_eth_1D * ethToUsd,
           price: summaryInfo.price_last_1H * ethToUsd,
-          src: token.logo
+          src: token.logo,
+          order: summaryInfo.order || "-",
+          change: summaryInfo.price_change_24h || 0
         };
       });
       let symbol;
@@ -196,7 +207,7 @@ export default {
 #exchange-container {
   min-height: 100vh;
   width: 95%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 70px auto;
 }
 .main-tab > .card > .tabs .card-body {
@@ -237,7 +248,11 @@ export default {
 }
 
 .exchangelist-title .title-volume {
-  left: 20px;
+  left: 10px;
+  position: relative;
+}
+.exchangelist-title .title-price {
+  left: -20px;
   position: relative;
 }
 
@@ -251,7 +266,7 @@ export default {
 
 .exchangelist-section .token {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   background: #fff;
   color: #333;
   padding-top: 10px;
@@ -263,6 +278,7 @@ export default {
 }
 .exchangelist-section .token .token-liquidity-usd,
 .exchangelist-section .token .token-price-usd,
+.exchangelist-section .token .token-order,
 .exchangelist-section .token .token-volume {
   font-size: 12px;
   margin: 0;
@@ -274,12 +290,15 @@ export default {
 .exchangelist-section .token .token-liquidity-usd,
 .exchangelist-section .token .token-price-usd,
 .exchangelist-section .token .token-volume {
-  /* flex-basis: 25%;
-  flex-grow: 1; */
   width: 85px;
 }
 .exchangelist-section .token .token-name {
   width: 65px;
+}
+.exchangelist-section .token .token-order {
+  /* width: 60px; */
+  /* padding: 20px 20px; */
+  text-align: center;
 }
 .token-name img {
   width: 30px;
@@ -303,5 +322,23 @@ export default {
 }
 .exchangelist-section .list-group-flush .list-group-item token > div {
   padding-top: 10px;
+}
+
+.token-price-usd {
+  color: #2752e4;
+  font-weight: bolder;
+}
+
+.positive-change {
+  color: green;
+  font-weight: 400;
+}
+.negative-change {
+  color: red;
+  font-weight: 400;
+}
+.zero-change {
+  color: #666;
+  font-weight: 400;
 }
 </style>

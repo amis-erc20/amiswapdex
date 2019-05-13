@@ -100,7 +100,7 @@ export default {
 .token-detail-section .card-footer {
   text-align: center;
   width: 90%;
-  max-width: 500px;
+  max-width: 650px;
   margin: 0 auto;
   padding-top: 55px;
   height: calc(100vh - 64px);
