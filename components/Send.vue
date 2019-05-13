@@ -108,7 +108,9 @@ import {
   estimateGas,
   estimateGasPrice,
   sendToken,
-  signAndSendETH
+  signAndSendETH,
+  metamaskSendEth,
+  metamaskSendToken
 } from "../assets/js/utils";
 import Vue from "vue";
 import VueQrcodeReader from "vue-qrcode-reader";
@@ -239,6 +241,34 @@ export default {
       this.loading = true;
       let web3 = this.web3;
       let txHash;
+
+      if (this.getAccount.type === "metamask") {
+        if (this.form.currency === "ETH") {
+          this.txHash = await metamaskSendEth({
+            from: this.getAccount.address,
+            to: this.form.targetAddress,
+            value: parseInt(this.form.amount * Math.pow(10, 18)),
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: this.gasLimit
+          });
+        } else {
+          this.txHash = await metamaskSendToken({
+            from: this.getAccount.address,
+            to: this.form.targetAddress,
+            value: parseInt(this.form.amount * Math.pow(10, 18)),
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: this.gasLimit,
+            currency: this.form.currency
+          });
+        }
+        if (this.txHash) {
+          this.updateActiveToken(this.form.outputCurrency);
+          this.onReset();
+          this.loading = false;
+          this.showModal("success_modal_ref");
+        }
+      }
+      return;
       try {
         if (this.form.currency === "ETH")
           txHash = await signAndSendETH(

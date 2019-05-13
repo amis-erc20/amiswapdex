@@ -49,6 +49,7 @@ export default {
       if (this.currentRoute === "/privatekey") return "Private Key";
       if (this.currentRoute === "/signup") return "Create Wallet";
       if (this.currentRoute === "/signin") return "Sign In";
+      if (this.currentRoute === "/metamask") return "Access by MetaMask";
       else return this.getActiveToken;
     }
   },
@@ -67,7 +68,7 @@ export default {
       this.resetTransactionList();
       this.resetTokenTransactionList();
       // localStorage.removeItem("credentials");
-      this.$router.push("/welcome");
+      this.$router.push("/");
     },
     redirect(url) {
       this.$router.push(url);

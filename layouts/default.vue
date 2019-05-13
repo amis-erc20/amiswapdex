@@ -28,6 +28,7 @@ body {
   /* background-blend-mode: multiply; */
   background-repeat: no-repeat;
   background: #eceeef;
+  line-height: 1 !important;
 }
 .list-group-item {
   /* background-color: #f1f2f3 !important; */

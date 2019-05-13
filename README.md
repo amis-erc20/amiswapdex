@@ -31,5 +31,4 @@ TODO:
 - show pending transaction after submitted to network
 - get internal tx list
 
-- use output_token - 0.9 \* output_token as minimum token bought when submitting tx
-- show private key and it's qr code
+- metamask transfer tx does not return tx hash after submit. It retruns tx detail after tx is confirmed on blockchain

@@ -39,13 +39,21 @@
               </b-modal>
             </b-card-text>
             <div class="no-account-container" v-else>
-              <p>Please sign in or create a new account to access wallet.</p>
-              <nuxt-link to="/signup">
-                <b-button type="button" variant="outline-primary" id="backup-btn">Create Account</b-button>
-              </nuxt-link>
-              <nuxt-link to="/signin">
-                <b-button type="button" variant="primary" id="backup-btn">Sign In</b-button>
-              </nuxt-link>
+              <div>
+                <p>Please sign in or create a new account to access wallet.</p>
+                <nuxt-link to="/signup">
+                  <b-button type="button" variant="outline-primary" id="backup-btn">Create Account</b-button>
+                </nuxt-link>
+                <nuxt-link to="/signin">
+                  <b-button type="button" variant="primary" id="backup-btn">Sign In</b-button>
+                </nuxt-link>
+              </div>
+              <div>
+                <p>Use Metamask Extension to access your wallet.</p>
+                <nuxt-link to="/metamask">
+                  <b-button type="button" variant="outline-primary" id="metamask-btn">Metamask</b-button>
+                </nuxt-link>
+              </div>
             </div>
           </b-tab>
         </b-tabs>
@@ -96,7 +104,8 @@ import {
   getULTToUSDPrice,
   isIos,
   isInStandaloneMode,
-  getETHToUSDPrice
+  getETHToUSDPrice,
+  getWeb3Metamask
 } from "../assets/js/utils";
 
 Vue.use(VueQriously);
@@ -173,10 +182,14 @@ export default {
     }),
     getBackupStatus() {
       if (!this.getSignIn) return false;
-      const { Ns } = this.getCredentials;
-      const credentials = JSON.parse(localStorage.getItem(Ns));
-      const { backupStatus } = credentials;
-      return backupStatus;
+      try {
+        const { Ns } = this.getCredentials;
+        const credentials = JSON.parse(localStorage.getItem(Ns));
+        const { backupStatus } = credentials;
+        return backupStatus;
+      } catch (e) {
+        return false;
+      }
     },
     onHideInstallModal() {
       localStorage.setItem("isInstallMessageShown", "true");
@@ -195,7 +208,9 @@ export default {
       this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
     },
     async refresh(web3) {
-      if (!this.getSignIn) return;
+      if (!this.getSignIn) {
+        return;
+      }
       let self = this;
       let account = this.getAccount;
       try {
@@ -302,13 +317,30 @@ export default {
   created: async function() {
     let self = this;
     let web3 = await getWeb3();
+    let metamaskWeb3 = await getWeb3Metamask();
     let availableTokens = await getAllListedToken();
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
     await this.updateTokenPrices();
 
-    setInterval(() => {
-      self.refresh(web3);
+    if (self.getSignIn) {
+      let accountType = self.getAccount.type;
+      if (accountType === "metamask") {
+        self.refresh(metamaskWeb3);
+      } else {
+        self.refresh(web3);
+      }
+    }
+
+    setInterval(async () => {
+      if (self.getSignIn) {
+        let accountType = self.getAccount.type;
+        if (accountType === "metamask") {
+          self.refresh(metamaskWeb3);
+        } else {
+          self.refresh(web3);
+        }
+      }
     }, config.refreshInterval);
     setTimeout(() => {
       self.checkRemoteBackup(web3);
@@ -409,5 +441,8 @@ export default {
 .no-account-container button {
   width: 150px;
   height: 50px;
+}
+div {
+  outline: none;
 }
 </style>

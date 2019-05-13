@@ -53,10 +53,14 @@ export default {
       removeAccount: "account/removeAccount"
     }),
     getBackupStatus() {
-      const { Ns } = this.getCredentials;
-      const credentials = JSON.parse(localStorage.getItem(Ns));
-      const { backupStatus } = credentials;
-      return backupStatus;
+      try {
+        const { Ns } = this.getCredentials;
+        const credentials = JSON.parse(localStorage.getItem(Ns));
+        const { backupStatus } = credentials;
+        return backupStatus;
+      } catch (e) {
+        return false;
+      }
     },
     redirect(url) {
       this.$router.push(url);

@@ -190,7 +190,7 @@ export default {
         address,
         privateKey
       } = await this.web3.eth.accounts.privateKeyToAccount(key);
-      const account = { address, privateKey, balance: 0 };
+      const account = { address, privateKey, balance: 0, type: "private_key" };
       return account;
     },
     onChangeShowMore(e) {

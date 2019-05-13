@@ -172,7 +172,8 @@ import {
   swapTokenToEth,
   unlockToken,
   swapEthToToken,
-  swapTokenToToken
+  swapTokenToToken,
+  metamaskSwap
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -560,105 +561,112 @@ export default {
       let outputCurrency = this.form.outputCurrency;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
-
-      try {
-        const blockNumber = await web3.eth.getBlockNumber();
-        const block = await web3.eth.getBlock(blockNumber);
-        const deadline = block.timestamp + 300;
-        const accounts = await web3.eth.getAccounts();
-        let exchangeContract;
-
-        if (type === "ETH_TO_TOKEN") {
-          exchangeContract = exchangeContracts[outputCurrency];
-          const contractAddress = exchangeAddresses[outputCurrency];
-          let minimumTokenBought = new BigNumber(outputValue - 1)
-            .multipliedBy(10 ** 18)
-            .toNumber(0);
-          if (minimumTokenBought <= 0) {
-            minimumTokenBought = new BigNumber(outputValue)
-              .multipliedBy(0.9)
-              .multipliedBy(10 ** 18)
-              .toNumber(0);
-          }
-          const ethSold = new BigNumber(inputValue * Math.pow(10, 18)).toNumber(
-            0
-          );
-          await this.updateGasLimitAndTxFee();
-          console.log({
-            from: this.getAccount.address,
-            ethSold: ethSold,
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            minimumTokenBought,
-            deadline
-          });
-          try {
-            this.txHash = await swapEthToToken(
-              {
-                from: this.getAccount.address,
-                ethSold: ethSold,
-                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-                gasLimit: parseInt(this.gasLimit),
-                minimumTokenBought,
-                deadline
-              },
-              exchangeContract,
-              contractAddress,
-              this.getAccount.privateKey,
-              this.web3
-            );
-          } catch (e) {
-            console.log(e);
-            console.log("error occoured while swapping...");
-          }
-          if (this.txHash) console.log(this.txHash);
-          if (!this.txHash) {
-            this.loading = false;
-            this.showModal("failed_modal_ref");
-            return;
-          }
+      let exchangeContract = exchangeContracts[outputCurrency];
+      console.log(this.getAccount);
+      if (this.getAccount.type === "metamask") {
+        this.txHash = await metamaskSwap({
+          inputValue,
+          inputCurrency,
+          outputValue,
+          outputCurrency,
+          type,
+          exchangeContract
+        });
+        if (this.txHash) {
           this.updateActiveToken(this.form.outputCurrency);
           this.onReset();
           this.loading = false;
           this.showModal("success_modal_ref");
-        } else if (type === "TOKEN_TO_ETH") {
-          exchangeContract = exchangeContracts[inputCurrency];
-          const tokenSold = new BigNumber(inputValue * Math.pow(10, 18));
-          const exchangeRate = parseFloat(outputValue / inputValue);
-          let minEth = new BigNumber(outputValue)
-            .minus(exchangeRate)
-            .multipliedBy(10 ** 18)
-            .toNumber(0);
-          if (minEth <= 0) {
-            minEth = new BigNumber(outputValue)
-              .multipliedBy(0.9)
+        }
+      } else {
+        try {
+          const blockNumber = await web3.eth.getBlockNumber();
+          const block = await web3.eth.getBlock(blockNumber);
+          const deadline = block.timestamp + 300;
+          const accounts = await web3.eth.getAccounts();
+          let exchangeContract;
+
+          if (type === "ETH_TO_TOKEN") {
+            exchangeContract = exchangeContracts[outputCurrency];
+            const contractAddress = exchangeAddresses[outputCurrency];
+            let minimumTokenBought = new BigNumber(outputValue - 1)
               .multipliedBy(10 ** 18)
               .toNumber(0);
-          }
-          const contractAddress = exchangeAddresses[inputCurrency];
-          await this.updateGasLimitAndTxFee();
-          const allowance = await this.getAllowance(this.form.inputCurrency);
-
-          const input = this.form.inputValue * Math.pow(10, 18);
-          console.log(`Current token allowance is: ${allowance}`);
-          if (input > allowance) {
+            if (minimumTokenBought <= 0) {
+              minimumTokenBought = new BigNumber(outputValue)
+                .multipliedBy(0.9)
+                .multipliedBy(10 ** 18)
+                .toNumber(0);
+            }
+            const ethSold = new BigNumber(
+              inputValue * Math.pow(10, 18)
+            ).toNumber(0);
+            await this.updateGasLimitAndTxFee();
+            console.log({
+              from: this.getAccount.address,
+              ethSold: ethSold,
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit),
+              minimumTokenBought,
+              deadline
+            });
+            try {
+              this.txHash = await swapEthToToken(
+                {
+                  from: this.getAccount.address,
+                  ethSold: ethSold,
+                  gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                  gasLimit: parseInt(this.gasLimit),
+                  minimumTokenBought,
+                  deadline
+                },
+                exchangeContract,
+                contractAddress,
+                this.getAccount.privateKey,
+                this.web3
+              );
+            } catch (e) {
+              console.log(e);
+              console.log("error occoured while swapping...");
+            }
+            if (this.txHash) console.log(this.txHash);
+            if (!this.txHash) {
+              this.loading = false;
+              this.showModal("failed_modal_ref");
+              return;
+            }
+            this.updateActiveToken(this.form.outputCurrency);
+            this.onReset();
             this.loading = false;
-            this.approvedStatus = false;
-            this.form.approvedAmount = this.form.inputValue * 1.5;
-            this.showModal("unlock_request_modal_ref");
-            return;
-          }
-          console.log({
-            from: this.getAccount.address,
-            amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            tokenSold,
-            minEth,
-            deadline
-          });
-          this.txHash = await swapTokenToEth(
-            {
+            this.showModal("success_modal_ref");
+          } else if (type === "TOKEN_TO_ETH") {
+            exchangeContract = exchangeContracts[inputCurrency];
+            const tokenSold = new BigNumber(inputValue * Math.pow(10, 18));
+            const exchangeRate = parseFloat(outputValue / inputValue);
+            let minEth = new BigNumber(outputValue)
+              .minus(exchangeRate)
+              .multipliedBy(10 ** 18)
+              .toNumber(0);
+            if (minEth <= 0) {
+              minEth = new BigNumber(outputValue)
+                .multipliedBy(0.9)
+                .multipliedBy(10 ** 18)
+                .toNumber(0);
+            }
+            const contractAddress = exchangeAddresses[inputCurrency];
+            await this.updateGasLimitAndTxFee();
+            const allowance = await this.getAllowance(this.form.inputCurrency);
+
+            const input = this.form.inputValue * Math.pow(10, 18);
+            console.log(`Current token allowance is: ${allowance}`);
+            if (input > allowance) {
+              this.loading = false;
+              this.approvedStatus = false;
+              this.form.approvedAmount = this.form.inputValue * 1.5;
+              this.showModal("unlock_request_modal_ref");
+              return;
+            }
+            console.log({
               from: this.getAccount.address,
               amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
@@ -666,71 +674,70 @@ export default {
               tokenSold,
               minEth,
               deadline
-            },
-            exchangeContract,
-            contractAddress,
-            this.getAccount.privateKey,
-            this.web3
-          );
-          this.updateActiveToken(this.form.outputCurrency);
-          this.onReset();
-          this.loading = false;
-          this.showModal("success_modal_ref");
-        } else if (type === "TOKEN_TO_TOKEN") {
-          exchangeContract = exchangeContracts[inputCurrency];
-          const contractAddress = exchangeAddresses[inputCurrency];
-          const tokenASold = new BigNumber(
-            inputValue * Math.pow(10, 18)
-          ).toNumber(0);
-          const minTokenBBought = new BigNumber(1).toNumber(0);
-          // let exchangeRate;
-          // let minTokenBBought;
-          // if (inputCurrency === "ULT") {
-          //   exchangeRate = parseFloat(outputValue / inputValue);
-          //   minTokenBBought = new BigNumber(outputValue)
-          //     .minus(exchangeRate)
-          //     .multipliedBy(10 ** 18)
-          //     .toNumber(0);
-          // } else if (outputCurrency === "ULT") {
-          //   minTokenBBought = new BigNumber(outputValue)
-          //     .minus(1)
-          //     .multipliedBy(10 ** 18)
-          //     .toNumber(0);
-          // }
-          // if (minTokenBBought <= 0) {
-          //   minTokenBBought = new BigNumber(outputValue)
-          //     .multipliedBy(0.9)
-          //     .multipliedBy(10 ** 18)
-          //     .toNumber(0);
-          // }
-          console.log(`Minimum token bought is ${minTokenBBought}`);
-          const minEth = new BigNumber(1).toNumber(0);
-          const outputTokenAddress = tokenAddressess[outputCurrency];
-          await this.updateGasLimitAndTxFee();
-
-          // check allowance value for input token
-          const allowance = await this.getAllowance(this.form.inputCurrency);
-          const input = this.form.inputValue * Math.pow(10, 18);
-          console.log(`${inputCurrency} token allowance is: ${allowance}`);
-          if (input > allowance) {
+            });
+            this.txHash = await swapTokenToEth(
+              {
+                from: this.getAccount.address,
+                amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
+                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                gasLimit: parseInt(this.gasLimit),
+                tokenSold,
+                minEth,
+                deadline
+              },
+              exchangeContract,
+              contractAddress,
+              this.getAccount.privateKey,
+              this.web3
+            );
+            this.updateActiveToken(this.form.outputCurrency);
+            this.onReset();
             this.loading = false;
-            this.approvedStatus = false;
-            this.form.approvedAmount = this.form.inputValue * 1.5;
-            this.showModal("unlock_request_modal_ref");
-            return;
-          }
-          console.log({
-            from: this.getAccount.address,
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            tokenASold,
-            minEth,
-            minTokenBBought,
-            deadline,
-            outputTokenAddress
-          });
-          this.txHash = await swapTokenToToken(
-            {
+            this.showModal("success_modal_ref");
+          } else if (type === "TOKEN_TO_TOKEN") {
+            exchangeContract = exchangeContracts[inputCurrency];
+            const contractAddress = exchangeAddresses[inputCurrency];
+            const tokenASold = new BigNumber(
+              inputValue * Math.pow(10, 18)
+            ).toNumber(0);
+            const minTokenBBought = new BigNumber(1).toNumber(0);
+            // let exchangeRate;
+            // let minTokenBBought;
+            // if (inputCurrency === "ULT") {
+            //   exchangeRate = parseFloat(outputValue / inputValue);
+            //   minTokenBBought = new BigNumber(outputValue)
+            //     .minus(exchangeRate)
+            //     .multipliedBy(10 ** 18)
+            //     .toNumber(0);
+            // } else if (outputCurrency === "ULT") {
+            //   minTokenBBought = new BigNumber(outputValue)
+            //     .minus(1)
+            //     .multipliedBy(10 ** 18)
+            //     .toNumber(0);
+            // }
+            // if (minTokenBBought <= 0) {
+            //   minTokenBBought = new BigNumber(outputValue)
+            //     .multipliedBy(0.9)
+            //     .multipliedBy(10 ** 18)
+            //     .toNumber(0);
+            // }
+            console.log(`Minimum token bought is ${minTokenBBought}`);
+            const minEth = new BigNumber(1).toNumber(0);
+            const outputTokenAddress = tokenAddressess[outputCurrency];
+            await this.updateGasLimitAndTxFee();
+
+            // check allowance value for input token
+            const allowance = await this.getAllowance(this.form.inputCurrency);
+            const input = this.form.inputValue * Math.pow(10, 18);
+            console.log(`${inputCurrency} token allowance is: ${allowance}`);
+            if (input > allowance) {
+              this.loading = false;
+              this.approvedStatus = false;
+              this.form.approvedAmount = this.form.inputValue * 1.5;
+              this.showModal("unlock_request_modal_ref");
+              return;
+            }
+            console.log({
               from: this.getAccount.address,
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: parseInt(this.gasLimit),
@@ -739,21 +746,33 @@ export default {
               minTokenBBought,
               deadline,
               outputTokenAddress
-            },
-            exchangeContract,
-            contractAddress,
-            this.getAccount.privateKey,
-            this.web3
-          );
-          this.updateActiveToken(this.form.outputCurrency);
-          this.onReset();
+            });
+            this.txHash = await swapTokenToToken(
+              {
+                from: this.getAccount.address,
+                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                gasLimit: parseInt(this.gasLimit),
+                tokenASold,
+                minEth,
+                minTokenBBought,
+                deadline,
+                outputTokenAddress
+              },
+              exchangeContract,
+              contractAddress,
+              this.getAccount.privateKey,
+              this.web3
+            );
+            this.updateActiveToken(this.form.outputCurrency);
+            this.onReset();
+            this.loading = false;
+            this.showModal("success_modal_ref");
+          }
+        } catch (e) {
+          console.log(e);
           this.loading = false;
-          this.showModal("success_modal_ref");
+          this.showModal("failed_model_ref");
         }
-      } catch (e) {
-        console.log(e);
-        this.loading = false;
-        this.showModal("failed_model_ref");
       }
     },
     async getAllowance(inputCurrency) {

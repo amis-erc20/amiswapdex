@@ -68,8 +68,7 @@ export default {
       let symbolList = Object.keys(self.tokenAddresses);
       let options = self.getAvailableTokenList.map(token => {
         return {
-          title: token.name,
-          // src: `https://raw.githubusercontent.com/TrustWallet/tokens/master/tokens/${token.tokenAddress.toLowerCase()}.png`
+          title: token.symbol,
           src: token.logo
         };
       });

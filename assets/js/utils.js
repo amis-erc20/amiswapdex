@@ -49,6 +49,19 @@ export const getWeb3 = function () {
     }
   })
 }
+export const getWeb3Metamask = function () {
+  return new Promise(function (resolve, reject) {
+    try {
+      // let web3 = new Web3(Web3.givenProvider || "wss://mainnet.infura.io/ws");
+      let web3 = new Web3(Web3.givenProvider);
+      resolve(web3)
+    } catch (e) {
+      console.log(e)
+      console.log('Cannot get web3 instance for metamask')
+      reject('Cannot get web3 instance for metamask')
+    }
+  })
+}
 
 export const getExchangeAddress = async function (tokenAddress) {
   try {
@@ -489,15 +502,15 @@ export const removeLiquidity = async function (
   privateKey,
   web3
 ) {
-  const SLIPPAGE = 0.02
+  const ALLOWED_SLIPPAGE = 0.02
   console.log({
     from: tx.from,
     gasPrice: tx.gasPrice,
     gasLimit: tx.gasLimit,
     value: '0x0',
     amount: tx.amount.toFixed(0),
-    ethWithdrawn: tx.ethWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0),
-    tokenWithdrawn: tx.tokenWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0)
+    ethWithdrawn: tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+    tokenWithdrawn: tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
   })
   let myAddress = tx.from
   let count = await web3.eth.getTransactionCount(myAddress)
@@ -511,8 +524,8 @@ export const removeLiquidity = async function (
       data: exchangeContract.methods
         .removeLiquidity(
           tx.amount.toFixed(0),
-          tx.ethWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0),
-          tx.tokenWithdrawn.multipliedBy(1 - SLIPPAGE).toFixed(0),
+          tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+          tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
           tx.deadline
         )
         .encodeABI(),
@@ -530,12 +543,150 @@ export const removeLiquidity = async function (
   })
 }
 
+export const metamaskSwap = async function (data) {
+  const ALLOWED_SLIPPAGE = 0.02
+  let web3Metamask = await getWeb3Metamask()
+  let { inputValue, inputCurrency, outputValue, outputCurrency, type } = data
+  const blockNumber = await web3Metamask.eth.getBlockNumber()
+  const block = await web3Metamask.eth.getBlock(blockNumber)
+  const deadline = block.timestamp + 300;
+  const accounts = await web3Metamask.eth.getAccounts()
+  let exchangeContract
+  if (type === 'ETH_TO_TOKEN') {
+    exchangeContract = new web3Metamask.eth.Contract(
+      exchangeABI,
+      exchangeAddresses[outputCurrency]
+    )
+    const min_token = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    // const min_token = new BigNumber(outputValue).minus(1).multipliedBy(10 ** 18).toFixed(0)
+    console.log(`Minimum required token is: ${min_token} ${outputCurrency}`)
+    const amount = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
+
+    exchangeContract.methods.ethToTokenSwapInput(min_token, deadline)
+      .send({ from: accounts[0], value: amount }, (err, data) => {
+        if (err) console.log(err)
+        else {
+          console.log(`TxId is ${JSON.stringify(data)}`)
+          const txUrl = `https://etherscan.io/tx/${data}`
+          console.log(txUrl)
+        }
+      })
+  } else if (type === 'TOKEN_TO_ETH') {
+    exchangeContract = new web3Metamask.eth.Contract(
+      exchangeABI,
+      exchangeAddresses[inputCurrency]
+    )
+    const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
+    const minEth = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    const exchangeRate = parseFloat(outputValue / inputValue)
+    // const minEth = new BigNumber(outputValue).minus(exchangeRate).multipliedBy(10 ** 18).toFixed(0)
+    console.log(`Minimum required ETH is: ${minEth / Math.pow(10, 18)} ${outputCurrency}`)
+    exchangeContract.methods.tokenToEthSwapInput(tokenSold, minEth, deadline)
+      .send({ from: accounts[0] }, (err, data) => {
+        if (err) {
+          console.log(`Transaction is not submitted`)
+          console.log(err)
+        }
+        else {
+          console.log(`TxId is ${JSON.stringify(data)}`)
+          const txUrl = `https://etherscan.io/tx/${data}`
+          console.log(txUrl)
+        }
+      })
+  } else if (type === 'TOKEN_TO_TOKEN') {
+    exchangeContract = new web3Metamask.eth.Contract(
+      exchangeABI,
+      exchangeAddresses[inputCurrency]
+    )
+    const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
+    const minToken = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    let exchangeRate
+    const minEth = new BigNumber(1).toFixed(0)
+    const outputTokenAddress = tokenAddresses[outputCurrency]
+    console.log(`Minimum required token is: ${minToken / Math.pow(10, 18)} ${outputCurrency}`)
+    exchangeContract.methods.tokenToTokenSwapInput(
+      tokenSold,
+      minToken,
+      minEth,
+      deadline,
+      outputTokenAddress
+    ).send({ from: accounts[0] }, (err, data) => {
+      if (err) console.log(err)
+      else {
+        console.log(`TxId is ${JSON.stringify(data)}`)
+        const txUrl = `https://etherscan.io/tx/${data}`
+        console.log(txUrl)
+      }
+    })
+  }
+}
+export const metamaskSendEth = async function (data) {
+  let { from, to, value, gasPrice, gasLimit } = data
+  const ethereum = window.ethereum;
+  let web3 = await getWeb3Metamask()
+  let accounts = await ethereum.enable()
+  web3.setProvider(ethereum);
+  let selectedAddress = ethereum.selectedAddress
+  const transactionParameters = {
+    gasPrice: web3.utils.toHex(gasPrice),
+    gasLimit: web3.utils.toHex(gasLimit),
+    from: selectedAddress,
+    to,
+    value: web3.utils.toHex(value),
+    data: ''
+  }
+
+  try {
+    let result = await web3.eth.sendTransaction(transactionParameters)
+    let transactionHash = result.transactionHash
+    console.log(transactionHash)
+    return transactionHash
+  } catch (e) {
+    console.log('Error while trying to transfer using metamask extension')
+    console.log(e)
+  }
+}
+
 export const normaliseText = text => {
   let normalised
   if (!text || text.length === 0) return ''
   normalised = text.toLowerCase()
   normalised = normalised.replace(/\s/g, '')
   return normalised
+}
+
+export const metamaskSendToken = async function (data) {
+  const { from, to, value, gasPrice, gasLimit, currency } = data
+  const ethereum = window.ethereum;
+  let web3 = await getWeb3Metamask()
+  let accounts = await ethereum.enable()
+  web3.setProvider(ethereum);
+  let selectedAddress = ethereum.selectedAddress
+  let amount = web3.utils.toHex(value)
+  let count = await web3.eth.getTransactionCount(from)
+  let contractAddress = tokenAddresses[currency]
+  let contract = new web3.eth.Contract(tokenABI, contractAddress, {
+    from: from
+  })
+  const transactionParameters = {
+    // gasPrice: web3.utils.toHex(gasPrice),
+    // gasLimit: web3.utils.toHex(gasLimit),
+    from: selectedAddress,
+    to: contractAddress,
+    value: '0x0',
+    data: contract.methods.transfer(to, amount).encodeABI(),
+    nonce: web3.utils.toHex(count)
+  }
+  console.log(transactionParameters)
+  try {
+    let result = await web3.eth.sendTransaction(transactionParameters)
+    let transactionHash = result.transactionHash
+    console.log(transactionHash)
+    return transactionHash
+  } catch (e) {
+    console.log('Error while trying to transfer using metamask extension')
+    console.log(e)
+  }
 }
 
 // Detects if device is on iOS
