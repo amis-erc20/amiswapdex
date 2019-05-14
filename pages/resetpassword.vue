@@ -10,7 +10,7 @@
       <font-awesome-icon v-if="success" icon="check" size="2x" color="green"/>
       <p v-if="loading || success" class="status-message">{{statusMessage}}</p>
       <nuxt-link to="/" v-if="success">
-        <b-button type="button" variant="danger" id="create-account-btn">Go Back</b-button>
+        <b-button type="button" variant="primary" id="create-account-btn">Go Back</b-button>
       </nuxt-link>
 
       <!-- New Password Form -->
@@ -19,7 +19,7 @@
           v-if="resetErrorMessage.length > 0"
           show
           fade
-          variant="danger"
+          variant="primary"
         >{{resetErrorMessage}}</b-alert>
         <!-- <b-form-group>
           <label for>Email</label>
@@ -51,7 +51,7 @@
         <div class="submit-button-group">
           <b-button
             type="submit"
-            variant="danger"
+            variant="primary"
             id="create-account-btn"
             :disabled="!validatePassword() || loading"
           >Reset Password</b-button>

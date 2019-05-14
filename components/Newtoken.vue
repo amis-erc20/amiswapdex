@@ -24,7 +24,7 @@
       </div>
       <div>
         <b-button
-          variant="danger"
+          variant="primary"
           id="add-token-button"
           @click="onAddToken"
           :disabled="isTokenValid"

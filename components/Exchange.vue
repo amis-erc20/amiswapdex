@@ -12,7 +12,7 @@
       </b-form-group>
     </b-form>
 
-    <b-button variant="primary" @click="showListToken">List Token</b-button>
+    <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
 
     <div class="exchangelist-section">
       <div class="exchange-list-order">

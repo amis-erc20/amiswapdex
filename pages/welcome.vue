@@ -5,7 +5,7 @@
     <h2 class="welcome-title">Shardus</h2>
     <div>
       <b-button type="submit" variant="outline-danger" @click="redirect('/signup')">Register</b-button>
-      <b-button type="submit" variant="danger" @click="redirect('/signin')">Sign In</b-button>
+      <b-button type="submit" variant="primary" @click="redirect('/signin')">Sign In</b-button>
     </div>
     <!-- Install Modal -->
     <b-modal

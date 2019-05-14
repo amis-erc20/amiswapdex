@@ -16,7 +16,7 @@
           />
         </b-form-group>
 
-        <b-button variant="danger" @click="onCurrencySwap" id="currency-swap-button">
+        <b-button variant="primary" @click="onCurrencySwap" id="currency-swap-button">
           <font-awesome-icon icon="exchange-alt" size="lg" color="#fff"/>
         </b-button>
 
@@ -96,7 +96,7 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button type="submit" variant="danger" :disabled="shouldDisableSwapButton">Swap</b-button>
+          <b-button type="submit" variant="primary" :disabled="shouldDisableSwapButton">Swap</b-button>
         </div>
       </b-form>
       <!-- Success Modal -->

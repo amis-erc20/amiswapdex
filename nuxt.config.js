@@ -58,8 +58,8 @@ module.exports = {
 	],
 	// workbox: {},
 	manifest: {
-		name: 'Shardus Wallet',
-		short_name: 'Shardus',
+		name: 'UniswapDEX',
+		short_name: 'UniDEX',
 		lang: 'en',
 		display: 'standalone',
 		start_url: '/welcome?utm_source=a2hs',

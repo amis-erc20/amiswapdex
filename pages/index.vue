@@ -23,7 +23,7 @@
                 :hide-footer="true"
               >
                 <p>Please activate remote backup to avoid losing your login credentials and private key</p>
-                <b-button variant="danger" @click="redirect(`/backup`)">Go to Remote Backup</b-button>
+                <b-button variant="primary" @click="redirect(`/backup`)">Go to Remote Backup</b-button>
               </b-modal>
               <!-- Install Modal -->
               <b-modal

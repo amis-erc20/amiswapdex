@@ -9,7 +9,7 @@
         :paused="!scanning"
         :camera="camera"
       />
-      <b-button variant="danger" @click="hideScanner" class="cancel-scanner-btn">Cancel</b-button>
+      <b-button variant="primary" @click="hideScanner" class="cancel-scanner-btn">Cancel</b-button>
     </div>
     <div class="send-section" v-else>
       <div v-if="form.currency">
@@ -33,7 +33,7 @@
               placeholder="Enter receiver address"
               :state="validateTargetAddress"
             />
-            <b-button variant="danger" id="qr-toggle-btn" @click="toggleScanner">
+            <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
               <font-awesome-icon icon="qrcode" size="lg" color="#fff"/>
             </b-button>
           </div>
@@ -77,7 +77,7 @@
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
             type="submit"
-            variant="danger"
+            variant="primary"
             :disabled="loading || !validateTargetAddress || !validateAmount"
           >Submit</b-button>
         </div>

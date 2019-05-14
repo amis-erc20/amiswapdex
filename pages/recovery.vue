@@ -26,7 +26,7 @@
           <b-form-input type="email" required v-model="form.email"/>
         </b-form-group>
         <div class="submit-button-group">
-          <b-button type="submit" variant="danger" id="signin-btn">Sign Into Google Account</b-button>
+          <b-button type="submit" variant="primary" id="signin-btn">Sign Into Google Account</b-button>
         </div>
       </b-form>
       <p v-if="!loading">
@@ -42,13 +42,13 @@
       <font-awesome-icon v-if="success" icon="check" size="2x" color="green"/>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <nuxt-link to="/" v-if="success">
-        <b-button type="button" variant="danger" id="create-account-btn">Continue to Wallet</b-button>
+        <b-button type="button" variant="primary" id="create-account-btn">Continue to Wallet</b-button>
       </nuxt-link>
 
       <!--Common Question Form -->
       <b-form @submit="onSubmitCommonAnswers" v-if="loading !== true && this.step === 'common'">
         <h4>Common Questions</h4>
-        <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
+        <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
         <b-alert v-if="succssMessage.length > 0" show fade variant="success">{{successMessage}}</b-alert>
         <!-- Common Question 1 -->
         <b-form-group>
@@ -62,7 +62,7 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button @click="redirect(`/welcome`)" variant="outline-dark">Cancel</b-button>
-          <b-button type="submit" variant="danger" :disabled="!isAnswersValid || loading">Submit</b-button>
+          <b-button type="submit" variant="primary" :disabled="!isAnswersValid || loading">Submit</b-button>
         </div>
         <p>
           If you know your password, please
@@ -73,7 +73,7 @@
       <!-- User Selected Question Form -->
       <b-form v-if="loading !== true && this.step === 'user'" @submit="onSubmitUserAnswers">
         <h4>User Selected Questions</h4>
-        <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
+        <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
         <b-alert v-if="succssMessage.length > 0" show fade variant="success">{{successMessage}}</b-alert>
         <b-form-group>
           <label for>{{ form.userQuestion1.q }}</label>
@@ -122,7 +122,7 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button @click="redirect(`/welcome`)" variant="outline-dark">Cancel</b-button>
-          <b-button type="submit" variant="danger" :disabled="!isAnswersValid || loading">Submit</b-button>
+          <b-button type="submit" variant="primary" :disabled="!isAnswersValid || loading">Submit</b-button>
         </div>
         <p>
           If you know your password, please
@@ -154,7 +154,7 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button @click="redirect(`/welcome`)" variant="outline-dark">Cancel</b-button>
-          <b-button type="submit" variant="danger" :disabled="!validatePassword() || loading">Reset</b-button>
+          <b-button type="submit" variant="primary" :disabled="!validatePassword() || loading">Reset</b-button>
         </div>
       </b-form>
     </div>

@@ -530,6 +530,41 @@ export const addLiquidity = async function (
       })
   })
 }
+export const metamaskAddLiquidity = async function (
+  tx,
+  exchangeContract,
+  contractAddress,
+  privateKey,
+  web3
+) {
+  console.log({
+    from: tx.from,
+    gasPrice: tx.gasPrice,
+    gasLimit: tx.gasLimit,
+    value: tx.ethAmount.toFixed(0),
+    minLiquidity: tx.minLiquidity.toFixed(0),
+    maxTokens: tx.maxTokens.toFixed(0),
+    deadline: tx.deadline
+  })
+  let myAddress = tx.from
+  return new Promise((resolve, reject) => {
+    exchangeContract.methods.addLiquidity(
+      tx.minLiquidity.toFixed(0),
+      tx.maxTokens.toFixed(0),
+      tx.deadline)
+      .send({
+        from: myAddress,
+        value: tx.ethAmount.toFixed(0)
+      }, (err, data) => {
+        if (err) {
+          console.log(err)
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      });
+  })
+}
 export const removeLiquidity = async function (
   tx,
   exchangeContract,
@@ -577,6 +612,60 @@ export const removeLiquidity = async function (
       })
   })
 }
+export const metamaskRemoveLiquidity = async function (
+  tx,
+  exchangeContract,
+  contractAddress,
+  privateKey,
+  web3
+) {
+  const ALLOWED_SLIPPAGE = 0.02
+  console.log({
+    from: tx.from,
+    gasPrice: tx.gasPrice,
+    gasLimit: tx.gasLimit,
+    value: '0x0',
+    amount: tx.amount.toFixed(0),
+    ethWithdrawn: tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+    tokenWithdrawn: tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+  })
+  let myAddress = tx.from
+  // let count = await web3.eth.getTransactionCount(myAddress)
+  // let transaction = await web3.eth.accounts.signTransaction(
+  //   {
+  //     from: tx.from,
+  //     gasPrice: web3.utils.toHex(tx.gasPrice),
+  //     gasLimit: web3.utils.toHex(tx.gasLimit),
+  //     to: contractAddress,
+  //     value: '0x0',
+  //     data: exchangeContract.methods
+  //       .removeLiquidity(
+  //         tx.amount.toFixed(0),
+  //         tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+  //         tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+  //         tx.deadline
+  //       )
+  //       .encodeABI(),
+  //     nonce: web3.utils.toHex(count)
+  //   },
+  //   privateKey
+  // )
+  return new Promise((resolve, reject) => {
+    exchangeContract.methods.removeLiquidity(
+      tx.amount.toFixed(0),
+      tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+      tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
+      tx.deadline,
+    ).send({ from: myAddress }, (err, data) => {
+      if (err) {
+        console.log(e)
+        reject(err)
+      } else {
+        resolve(data)
+      }
+    });
+  })
+}
 
 export const metamaskSwap = async function (data) {
   const ALLOWED_SLIPPAGE = 0.02
@@ -593,19 +682,19 @@ export const metamaskSwap = async function (data) {
       exchangeAddresses[outputCurrency]
     )
     const min_token = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
-    // const min_token = new BigNumber(outputValue).minus(1).multipliedBy(10 ** 18).toFixed(0)
-    console.log(`Minimum required token is: ${min_token} ${outputCurrency}`)
     const amount = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
 
-    exchangeContract.methods.ethToTokenSwapInput(min_token, deadline)
-      .send({ from: accounts[0], value: amount }, (err, data) => {
-        if (err) console.log(err)
-        else {
-          console.log(`TxId is ${JSON.stringify(data)}`)
-          const txUrl = `https://etherscan.io/tx/${data}`
-          console.log(txUrl)
-        }
-      })
+    return new Promise((resolve, reject) => {
+      exchangeContract.methods.ethToTokenSwapInput(min_token, deadline)
+        .send({ from: accounts[0], value: amount }, (err, data) => {
+          if (err) {
+            console.log(err)
+            reject(err)
+          } else {
+            resolve(data)
+          }
+        })
+    })
   } else if (type === 'TOKEN_TO_ETH') {
     exchangeContract = new web3Metamask.eth.Contract(
       exchangeABI,
@@ -638,19 +727,21 @@ export const metamaskSwap = async function (data) {
     const minEth = new BigNumber(1).toFixed(0)
     const outputTokenAddress = tokenAddresses[outputCurrency]
     console.log(`Minimum required token is: ${minToken / Math.pow(10, 18)} ${outputCurrency}`)
-    exchangeContract.methods.tokenToTokenSwapInput(
-      tokenSold,
-      minToken,
-      minEth,
-      deadline,
-      outputTokenAddress
-    ).send({ from: accounts[0] }, (err, data) => {
-      if (err) console.log(err)
-      else {
-        console.log(`TxId is ${JSON.stringify(data)}`)
-        const txUrl = `https://etherscan.io/tx/${data}`
-        console.log(txUrl)
-      }
+    return new Promise((resolve, reject) => {
+      exchangeContract.methods.tokenToTokenSwapInput(
+        tokenSold,
+        minToken,
+        minEth,
+        deadline,
+        outputTokenAddress
+      ).send({ from: accounts[0] }, (err, data) => {
+        if (err) {
+          console.log(err)
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      })
     })
   }
 }

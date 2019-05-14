@@ -10,10 +10,10 @@
       <font-awesome-icon v-if="success" icon="check" size="2x" color="green"/>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <nuxt-link to="/" v-if="success">
-        <b-button type="button" variant="danger" id="create-account-btn">Continue</b-button>
+        <b-button type="button" variant="primary" id="create-account-btn">Continue</b-button>
       </nuxt-link>
       <b-form @submit="onSetupRecovery" v-if="loading !== true">
-        <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
+        <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
         <!-- Common Question 1 -->
         <b-form-group>
           <label for>{{ form.commonQuestion1 }}</label>
@@ -123,7 +123,7 @@
           />
         </b-form-group>
         <b-form-group>
-          <b-button variant="danger" @click="increaseUserQuestionCount" id="add-button">
+          <b-button variant="primary" @click="increaseUserQuestionCount" id="add-button">
             <font-awesome-icon icon="plus" color="#dc3545"/>
           </b-button>
           <!-- Unlock Request -->
@@ -138,14 +138,14 @@
                 <label>Your Custom Question</label>
                 <b-form-input type="text" v-model="form.newQuestion"/>
               </b-form-group>
-              <b-button type="submit" variant="danger">Add Custion Q & A</b-button>
+              <b-button type="submit" variant="primary">Add Custion Q & A</b-button>
             </b-form>
           </b-modal>
         </b-form-group>
         <div class="submit-button-group">
           <b-button
             type="submit"
-            variant="danger"
+            variant="primary"
             id="create-account-btn"
             :disabled="!isAnswersValid || loading"
           >Submit</b-button>
@@ -162,7 +162,7 @@
         <p>Please activate remote backup before setting up your recovery information.</p>
         <b-button
           type="button"
-          variant="danger"
+          variant="primary"
           id="create-account-btn"
           @click="redirect(`/backup`)"
         >Go to Remote Backup</b-button>

@@ -11,11 +11,11 @@
       v-if="!success && !loading"
     >Please activate automatic account backup to store your account credentials periodically to google drive</p>
     <nuxt-link to="/" v-if="success">
-      <b-button type="button" variant="danger" id="backup-btn">Contiue</b-button>
+      <b-button type="button" variant="primary" id="backup-btn">Contiue</b-button>
     </nuxt-link>
     <b-form @submit="onBackup" v-if="loading !== true">
       <div class="submit-button-group">
-        <b-button type="submit" variant="danger" id="backup-btn" :disabled="loading">
+        <b-button type="submit" variant="primary" id="backup-btn" :disabled="loading">
           <font-awesome-icon icon="upload" size="lg" color="#fff" id="upload-icon"/>Activate Automatic Backup
         </b-button>
       </div>

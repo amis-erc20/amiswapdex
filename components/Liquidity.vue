@@ -5,7 +5,7 @@
         <label>Add Liquidity / Remove Liquidity / Create Exchange</label>
         <b-form-select
           v-model="liquidity"
-          :options="[{text: `Select an option to start`, value: ''}, {text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}, {text: `Create Exchange`, value: `create`}]"
+          :options="[{text: `Select an option to start`, value: ''}, {text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
           @change="onSelectLiquidityType"
         />
       </b-form-group>
@@ -27,7 +27,7 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button variant="danger" id="currency-swap-button">
+        <b-button variant="primary" id="currency-swap-button">
           <font-awesome-icon icon="plus" size="lg" color="#fff"/>
         </b-button>
 
@@ -78,7 +78,7 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button type="submit" variant="danger" :disabled="shouldDisableAddButton">Add Liquidity</b-button>
+          <b-button type="submit" variant="primary" :disabled="shouldDisableAddButton">Add Liquidity</b-button>
         </div>
       </b-form>
 
@@ -102,7 +102,7 @@
           <b-form-invalid-feedback :state="validateLiquidityInput">{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button variant="danger" id="currency-swap-button">
+        <b-button variant="primary" id="currency-swap-button">
           <font-awesome-icon icon="arrow-down" size="lg" color="#fff"/>
         </b-button>
 
@@ -148,7 +148,7 @@
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
             type="submit"
-            variant="danger"
+            variant="primary"
             :disabled="shouldDisableRemoveButton"
           >Remove Liquidity</b-button>
         </div>
@@ -191,7 +191,7 @@
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
             type="submit"
-            variant="danger"
+            variant="primary"
             :disabled="shouldDisableCreateExchangeButton"
           >Create Exchange</b-button>
         </div>
@@ -279,7 +279,10 @@ import {
   getAbsPrice,
   removeLiquidity,
   getExchangeAddress,
-  createNewExchange
+  createNewExchange,
+  getWeb3Metamask,
+  metamaskAddLiquidity,
+  metamaskRemoveLiquidity
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -477,7 +480,11 @@ export default {
   mounted: async function() {
     this.form.inputCurrency = "ETH";
     this.form.outputCurrency = this.getActiveToken;
-    this.web3 = await getWeb3();
+    if (this.getAccount.type === "metamask") {
+      this.web3 = await getWeb3Metamask();
+    } else {
+      this.web3 = await getWeb3();
+    }
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       exchangeContracts[tokenSymbols[i]] = new this.web3.eth.Contract(
@@ -623,7 +630,6 @@ export default {
     },
     async onRemoveAmountChange() {
       if (!this.form.inputCurrency || !this.form.outputCurrency) return;
-
       let web3 = this.web3;
       let inputValue = this.form.inputValue;
       let inputCurrency = this.form.inputCurrency;
@@ -811,21 +817,39 @@ export default {
       const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
       // await this.updateGasLimitAndTxFee();
       try {
-        this.txHash = await addLiquidity(
-          {
-            from: this.getAccount.address,
-            ethAmount: ethAmount,
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            minLiquidity,
-            maxTokens,
-            deadline
-          },
-          exchangeContract,
-          contractAddress,
-          this.getAccount.privateKey,
-          this.web3
-        );
+        if (this.getAccount.type === "metamask") {
+          this.txHash = await metamaskAddLiquidity(
+            {
+              from: this.getAccount.address,
+              ethAmount: ethAmount,
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit),
+              minLiquidity,
+              maxTokens,
+              deadline
+            },
+            exchangeContract,
+            contractAddress,
+            null,
+            this.web3
+          );
+        } else {
+          this.txHash = await addLiquidity(
+            {
+              from: this.getAccount.address,
+              ethAmount: ethAmount,
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit),
+              minLiquidity,
+              maxTokens,
+              deadline
+            },
+            exchangeContract,
+            contractAddress,
+            this.getAccount.privateKey,
+            this.web3
+          );
+        }
       } catch (e) {
         console.log(e);
         console.log("error occoured while adding liquidity...");
@@ -898,21 +922,39 @@ export default {
       ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
 
       try {
-        this.txHash = await removeLiquidity(
-          {
-            from: this.getAccount.address,
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit),
-            amount,
-            ethWithdrawn,
-            tokenWithdrawn,
-            deadline
-          },
-          exchangeContract,
-          contractAddress,
-          this.getAccount.privateKey,
-          this.web3
-        );
+        if (this.getAccount.type === "metamask") {
+          this.txHash = await metamaskRemoveLiquidity(
+            {
+              from: this.getAccount.address,
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit),
+              amount,
+              ethWithdrawn,
+              tokenWithdrawn,
+              deadline
+            },
+            exchangeContract,
+            contractAddress,
+            null,
+            this.web3
+          );
+        } else {
+          this.txHash = await removeLiquidity(
+            {
+              from: this.getAccount.address,
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit),
+              amount,
+              ethWithdrawn,
+              tokenWithdrawn,
+              deadline
+            },
+            exchangeContract,
+            contractAddress,
+            this.getAccount.privateKey,
+            this.web3
+          );
+        }
       } catch (e) {
         console.log(e);
         console.log("error occoured while adding liquidity...");
