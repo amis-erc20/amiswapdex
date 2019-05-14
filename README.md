@@ -32,3 +32,13 @@ TODO:
 - get internal tx list
 
 - metamask transfer tx does not return tx hash after submit. It retruns tx detail after tx is confirmed on blockchain
+- Detect that the current account has changed for metamask
+
+let account = getAccount();
+let accountInterval = setInterval(() => {
+  if (getAccount() !== account) {
+    account = getAccount();
+    // update UI, state, pull data
+    updateEverything();
+  }
+}, 1000);

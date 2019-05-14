@@ -12,6 +12,8 @@
       </b-form-group>
     </b-form>
 
+    <b-button variant="primary" @click="showListToken">List Token</b-button>
+
     <div class="exchangelist-section">
       <div class="exchange-list-order">
         <div class="order-by">Order By</div>
@@ -71,6 +73,35 @@
         <b-button variant="primary" id="add-token-button" @click="loadMoreToken">Load More Tokens</b-button>
       </b-card>
     </div>
+
+    <!-- LIST TOKEN MODAL -->
+    <b-modal ref="list_token_modal" id="list_token_modal" title="List A Token" :hide-footer="true">
+      <b-form @submit="onListToken">
+        <b-alert v-if="infoMessage.length > 0" show fade variant="primary">{{infoMessage}}</b-alert>
+        <b-form-group id="exampleInputGroup1">
+          <label>Token Address</label>
+          <b-form-input type="text" v-model="form.tokenAddress"/>
+        </b-form-group>
+        <b-button type="submit" variant="primary">List Token</b-button>
+      </b-form>
+    </b-modal>
+
+    <!-- Success Modal -->
+    <b-modal
+      ref="success_modal_ref"
+      id="success_modal"
+      title="Transaction Submitted"
+      :hide-footer="true"
+      @hide="redirect"
+    >
+      <p>Your transaction is successfully submitted to Ethereum Network. Click link below to view your transaction on etherscan.io</p>
+      <a
+        id="txUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        :href="`https://etherscan.io/tx/${txHash}`"
+      >View tx on etherscan.io</a>
+    </b-modal>
   </section>
 </template>
 
@@ -81,11 +112,17 @@ import Token from "~/components/Token.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
+  getWeb3Metamask,
   getBalance,
   getTokenBalance,
   getAllListedToken,
-  getETHToUSDPrice
+  getETHToUSDPrice,
+  getExchangeAddress,
+  estimateGas,
+  createNewExchange,
+  metamaskCreateNewExchange
 } from "../assets/js/utils";
+import { factoryAddress } from "../assets/js/token";
 import { setTimeout } from "timers";
 import config from "../config";
 
@@ -94,12 +131,15 @@ export default {
   data: function() {
     return {
       form: {
-        query: ""
+        query: "",
+        tokenAddress: ""
       },
       summary: [],
       showLimit: 20,
       orderBy: "Liquidity",
-      ethToUsd: 0
+      ethToUsd: 0,
+      infoMessage: "",
+      txHash: ""
     };
   },
   computed: {
@@ -109,8 +149,8 @@ export default {
       getPrice: "account/getPrice",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
-      getTransactionList: "transaction/getTransactionList",
-      getTokenTransactionList: "transaction/getTokenTransactionList",
+      getTransactionListToken: "transaction/getTransactionListToken",
+      getTokenTransactionListToken: "transaction/getTokenTransactionListToken",
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
       getAvailableTokenList: "account/getAvailableTokenList"
@@ -165,8 +205,9 @@ export default {
       addToken: "account/addToken",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateBalance: "account/updateBalance",
-      updateTransactionList: "transaction/updateTransactionList",
-      updateTokenTransactionList: "transaction/updateTokenTransactionList"
+      updateTransactionListToken: "transaction/updateTransactionListToken",
+      updateTokenTransactionListToken:
+        "transaction/updateTokenTransactionListToken"
     }),
     numberWithCommas(x) {
       var parts = x.toString().split(".");
@@ -182,12 +223,70 @@ export default {
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();
     },
+    hideModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].hide();
+    },
     async updateUSDPrices() {
       let ultUSD = await getULTToUSDPrice();
       this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
     },
     loadMoreToken() {
       this.showLimit += 20;
+    },
+    showListToken() {
+      this.showModal("list_token_modal");
+    },
+    async onListToken(e) {
+      e.preventDefault();
+      this.loading = true;
+      let tokenAddress = this.form.tokenAddress;
+      let exchangeAddress = await getExchangeAddress(tokenAddress);
+      try {
+        if (
+          exchangeAddress &&
+          exchangeAddress !== "0x0000000000000000000000000000000000000000"
+        ) {
+          console.log("Exchange address already existed for selected token");
+          console.log(exchangeAddress);
+          this.infoMessage = `Exchange address (${exchangeAddress}) already existed for selected token address !`;
+          this.form.tokenAddress = "";
+        } else if (
+          !exchangeAddress ||
+          exchangeAddress === "0x0000000000000000000000000000000000000000"
+        ) {
+          let accountType = this.getAccount.type;
+          if (accountType === "metamask") {
+            this.txHash = await metamaskCreateNewExchange(
+              {
+                from: this.getAccount.address
+              },
+              tokenAddress
+            );
+          } else {
+            this.txHash = await createNewExchange(
+              {
+                from: this.getAccount.address
+              },
+              tokenAddress,
+              this.getAccount.privateKey,
+              this.web3
+            );
+          }
+          this.form.tokenAddress = "";
+          this.loading = false;
+          if (this.txHash) {
+            this.hideModal("list_token_modal");
+            this.showModal("success_modal_ref");
+          }
+        } else {
+          console.log("Invalid token address");
+          console.log(exchangeAddress);
+          this.infoMessage = "Invalid Token Address";
+        }
+      } catch (e) {
+        this.infoMessage = "Invalid Token Address";
+        console.log(e);
+      }
     }
   },
   created: async function() {
@@ -198,6 +297,8 @@ export default {
       ethPrice = await getETHToUSDPrice();
     }
     this.ethToUsd = ethPrice;
+    this.web3 = await getWeb3();
+    this.web3Metamask = await getWeb3Metamask();
   },
   mounted: async function() {}
 };
@@ -340,5 +441,11 @@ export default {
 .zero-change {
   color: #666;
   font-weight: 400;
+}
+
+#list_token_modal,
+#success_modal {
+  position: fixed;
+  top: 150px;
 }
 </style>

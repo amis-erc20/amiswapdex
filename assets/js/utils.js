@@ -77,36 +77,7 @@ export const getExchangeAddress = async function (tokenAddress) {
     console.log(e)
   }
 }
-export const createNewExchange = async function (
-  tx,
-  tokenAddress,
-  privateKey,
-  web3
-) {
-  console.log(tx)
-  let myAddress = tx.from
-  let count = await web3.eth.getTransactionCount(myAddress)
-  let transaction = await web3.eth.accounts.signTransaction(
-    {
-      from: myAddress,
-      gasPrice: web3.utils.toHex(tx.gasPrice),
-      gasLimit: web3.utils.toHex(tx.gasLimit),
-      to: factoryAddress,
-      value: '0x0',
-      data: factoryContract.methods.createExchange(tokenAddress).encodeABI(),
-      nonce: web3.utils.toHex(count)
-    },
-    privateKey
-  )
-  return new Promise(resolve => {
-    web3.eth
-      .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function (hash) {
-        console.log('Tx hash: ', hash)
-        resolve(hash)
-      })
-  })
-}
+
 export const getULTToUSDPrice = async () => {
   try {
     let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
@@ -238,12 +209,11 @@ export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) 
 }
 
 export const estimateGas = async function (transaction, web3) {
-  console.log(web3)
   try {
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
       to: transaction.to,
-      value: parseInt(transaction.amount),
+      value: transaction.value,
       data: transaction.data
     }).call()
     return gas
@@ -276,6 +246,68 @@ export const signAndSendETH = async function (transaction, privateKey, web3) {
         resolve(hash)
       })
   })
+}
+
+export const createNewExchange = async function (
+  tx,
+  tokenAddress,
+  privateKey
+) {
+
+  console.log(tx)
+  let web3 = await getWeb3()
+  let myAddress = tx.from
+  let count = await web3.eth.getTransactionCount(myAddress)
+  let gasPrice = await estimateGasPrice(web3)
+  let transactionParameters = {
+    from: myAddress,
+    gasPrice: web3.utils.toHex(gasPrice),
+    to: factoryAddress,
+    value: '0x0',
+    data: factoryContract.methods.createExchange(tokenAddress).encodeABI(),
+    nonce: web3.utils.toHex(count)
+  }
+
+  let estimatedGas = await estimateGas(transactionParameters)
+
+  if (!estimatedGas || estimatedGas <= 0) {
+    transactionParameters.gasLimit = web3.utils.toHex(500590)
+  } else {
+    transactionParameters.gasLimit = web3.utils.toHex(estimatedGas)
+  }
+
+  console.log(`Estimate gas: ${estimatedGas}`);
+  console.log(`Estimate gas price: ${gasPrice}`);
+  console.log(transactionParameters)
+
+  let transaction = await web3.eth.accounts.signTransaction(
+    transactionParameters,
+    privateKey
+  )
+  return new Promise(resolve => {
+    web3.eth
+      .sendSignedTransaction(transaction.rawTransaction)
+      .on('transactionHash', function (hash) {
+        console.log('Tx hash: ', hash)
+        resolve(hash)
+      })
+  })
+}
+export const metamaskCreateNewExchange = async function (
+  tx,
+  tokenAddress
+) {
+  let web3 = await getWeb3Metamask()
+  let myAddress = tx.from
+  try {
+    let count = await web3.eth.getTransactionCount(myAddress)
+    let factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
+    let txId = await factoryContract.methods.createExchange(tokenAddress).send({ from: myAddress })
+    return txId
+  } catch (e) {
+    console.log('Error while submitting createExchange using Metamask')
+    console.log(e)
+  }
 }
 
 export const sendToken = async function (tx, currency, privateKey, web3) {
@@ -582,20 +614,19 @@ export const metamaskSwap = async function (data) {
     const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
     const minEth = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
     const exchangeRate = parseFloat(outputValue / inputValue)
-    // const minEth = new BigNumber(outputValue).minus(exchangeRate).multipliedBy(10 ** 18).toFixed(0)
-    console.log(`Minimum required ETH is: ${minEth / Math.pow(10, 18)} ${outputCurrency}`)
-    exchangeContract.methods.tokenToEthSwapInput(tokenSold, minEth, deadline)
-      .send({ from: accounts[0] }, (err, data) => {
-        if (err) {
-          console.log(`Transaction is not submitted`)
-          console.log(err)
-        }
-        else {
-          console.log(`TxId is ${JSON.stringify(data)}`)
-          const txUrl = `https://etherscan.io/tx/${data}`
-          console.log(txUrl)
-        }
-      })
+    return new Promise((resolve, reject) => {
+      exchangeContract.methods.tokenToEthSwapInput(tokenSold, minEth, deadline)
+        .send({ from: accounts[0] }, (err, data) => {
+          if (err) {
+            console.log(`Transaction is not submitted`)
+            console.log(err)
+            reject(err)
+          }
+          else {
+            resolve(data)
+          }
+        })
+    })
   } else if (type === 'TOKEN_TO_TOKEN') {
     exchangeContract = new web3Metamask.eth.Contract(
       exchangeABI,
@@ -640,10 +671,12 @@ export const metamaskSendEth = async function (data) {
   }
 
   try {
-    let result = await web3.eth.sendTransaction(transactionParameters)
-    let transactionHash = result.transactionHash
-    console.log(transactionHash)
-    return transactionHash
+    return new Promise((resolve, reject) => {
+      web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
+        console.log('Tx hash: ', hash)
+        resolve(hash)
+      })
+    })
   } catch (e) {
     console.log('Error while trying to transfer using metamask extension')
     console.log(e)
@@ -672,20 +705,19 @@ export const metamaskSendToken = async function (data) {
     from: from
   })
   const transactionParameters = {
-    // gasPrice: web3.utils.toHex(gasPrice),
-    // gasLimit: web3.utils.toHex(gasLimit),
     from: selectedAddress,
     to: contractAddress,
     value: '0x0',
     data: contract.methods.transfer(to, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   }
-  console.log(transactionParameters)
   try {
-    let result = await web3.eth.sendTransaction(transactionParameters)
-    let transactionHash = result.transactionHash
-    console.log(transactionHash)
-    return transactionHash
+    return new Promise((resolve, reject) => {
+      web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
+        console.log('Tx hash: ', hash)
+        resolve(hash)
+      })
+    })
   } catch (e) {
     console.log('Error while trying to transfer using metamask extension')
     console.log(e)

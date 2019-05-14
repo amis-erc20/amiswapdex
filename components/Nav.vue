@@ -10,7 +10,7 @@
     </b-button>
 
     <b-modal ref="settingModal_ref" id="settingModal" title="Wallet Setting" :hide-footer="true">
-      <b-list-group>
+      <b-list-group v-if="getSignIn">
         <b-list-group-item @click="redirect('/backup')">Remote Backup to Google Drive</b-list-group-item>
         <b-list-group-item @click="redirect('/recoverysetup')">Setup Recovery Q & A</b-list-group-item>
         <b-list-group-item @click="redirect('/resetpassword')">Change Password</b-list-group-item>
@@ -19,6 +19,7 @@
         <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
         <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
       </b-list-group>
+      <p v-else>Please sign into your wallet first.</p>
     </b-modal>
     <no-connection/>
   </div>
@@ -31,7 +32,8 @@ export default {
   computed: {
     ...mapGetters({
       getActiveToken: "getActiveToken",
-      getCredentials: "getCredentials"
+      getCredentials: "getCredentials",
+      getSignIn: "getSignIn"
     }),
     currentRoute: function() {
       return this.$route.path;
@@ -124,6 +126,9 @@ export default {
 }
 #settingModal .modal-body {
   padding: 0px;
+}
+#settingModal .modal-body p {
+  padding: 20px 10px;
 }
 .nav-section .btn-outline-light {
   border: none;
