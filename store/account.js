@@ -34,6 +34,7 @@ export const mutations = {
 		if (state.tokenList.indexOf(newToken) === -1) state.tokenList.push(newToken)
 	},
 	updateBalance(state, payload) {
+		if (state.account === null) return
 		let { symbol, balance } = payload
 		state.balance[symbol] = balance
 		state.totalValue = 0
@@ -45,6 +46,7 @@ export const mutations = {
 		for (var tokenName in state.balance) {
 			state.balance[tokenName] = 0
 		}
+		state.totalValue = 0
 	},
 	updatePrice(state, payload) {
 		let { symbol, price } = payload

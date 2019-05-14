@@ -166,18 +166,18 @@ export const getTokenBalance = async function (address, currency, web3) {
     await initContracts(web3)
   }
   try {
-    // let tokenBalance = await tokenContracts[currency].methods
-    //   .balanceOf(address)
-    //   .call()
-    // return parseInt(tokenBalance)
+    let tokenBalance = await tokenContracts[currency].methods
+      .balanceOf(address)
+      .call()
+    return parseInt(tokenBalance)
 
     // GET TOKEN BALANCE FROM ETHERSCAN API INSTEAD OF USING WEB3
-    let tokenAddress = tokenAddresses[currency]
-    const url = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${tokenAddress}&address=${address}&tag=latest&apikey=Y1C96ES3CDKANT866DQMTJTMF2G52FBBN9`
-    let response = await axios.get(url)
-    if (response.data.status === "1") {
-      return parseInt(response.data.result)
-    }
+    // let tokenAddress = tokenAddresses[currency]
+    // const url = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${tokenAddress}&address=${address}&tag=latest&apikey=Y1C96ES3CDKANT866DQMTJTMF2G52FBBN9`
+    // let response = await axios.get(url)
+    // if (response.data.status === "1") {
+    //   return parseInt(response.data.result)
+    // }
   } catch (e) {
     console.log(`ERROR - getTokenBalance`)
     console.log(e)
@@ -630,26 +630,6 @@ export const metamaskRemoveLiquidity = async function (
     tokenWithdrawn: tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
   })
   let myAddress = tx.from
-  // let count = await web3.eth.getTransactionCount(myAddress)
-  // let transaction = await web3.eth.accounts.signTransaction(
-  //   {
-  //     from: tx.from,
-  //     gasPrice: web3.utils.toHex(tx.gasPrice),
-  //     gasLimit: web3.utils.toHex(tx.gasLimit),
-  //     to: contractAddress,
-  //     value: '0x0',
-  //     data: exchangeContract.methods
-  //       .removeLiquidity(
-  //         tx.amount.toFixed(0),
-  //         tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
-  //         tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
-  //         tx.deadline
-  //       )
-  //       .encodeABI(),
-  //     nonce: web3.utils.toHex(count)
-  //   },
-  //   privateKey
-  // )
   return new Promise((resolve, reject) => {
     exchangeContract.methods.removeLiquidity(
       tx.amount.toFixed(0),

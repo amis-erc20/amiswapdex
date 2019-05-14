@@ -51,11 +51,11 @@
                 <p
                   v-if="token.change > 0"
                   class="token-price-usd positive-change"
-                >+{{ (token.change * 1000).toFixed(2) }}%</p>
+                >+{{ (token.change * 100).toFixed(2) }}%</p>
                 <p
                   v-if="token.change < 0"
                   class="token-price-usd negative-change"
-                >-{{ (Math.abs(token.change) * 1000).toFixed(2) }}%</p>
+                >-{{ (Math.abs(token.change) * 100).toFixed(2) }}%</p>
                 <p v-if="token.change == 0" class="token-price-usd zero-change">0.00%</p>
               </div>
               <div class="token-price-container">
@@ -447,5 +447,8 @@ export default {
 #success_modal {
   position: fixed;
   top: 150px;
+}
+#list_token_modal button[type="submit"] {
+  width: 100%;
 }
 </style>

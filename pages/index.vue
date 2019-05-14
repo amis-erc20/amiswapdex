@@ -5,12 +5,12 @@
     <div class="main-tab">
       <b-card no-body>
         <b-tabs pills card justified>
-          <b-tab title="Exchange" active>
+          <b-tab title="Exchange" :active="activeTab === `exchange`">
             <b-card-text>
               <Exchange/>
             </b-card-text>
           </b-tab>
-          <b-tab title="Wallet">
+          <b-tab title="Wallet" :active="activeTab === `wallet`">
             <b-card-text v-if="getSignIn">
               <Header/>
               <Newtoken/>
@@ -169,7 +169,8 @@ export default {
     return {
       backupCheckInterval: 3 * 60 * 1000,
       ultInUSD: 0,
-      currentTokenCount: 0
+      currentTokenCount: 0,
+      activeTab: "exchange"
     };
   },
   computed: {
@@ -348,13 +349,18 @@ export default {
       }
     }
 
-    setInterval(async () => {
+    let refreshInterval = setInterval(async () => {
       if (self.getSignIn) {
         let accountType = self.getAccount.type;
         if (accountType === "metamask") {
           self.refresh(metamaskWeb3);
         } else {
           self.refresh(web3);
+        }
+      } else {
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+          refreshInterval = null;
         }
       }
     }, config.refreshInterval);
@@ -373,6 +379,7 @@ export default {
   },
   mounted: async function() {
     let self = this;
+    if (this.getSignIn) this.activeTab = "wallet";
     setTimeout(() => {
       if (isIos() && !isInStandaloneMode()) {
         let isShown = localStorage.getItem("isInstallMessageShown");

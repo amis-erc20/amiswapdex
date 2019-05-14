@@ -11,10 +11,22 @@
 
     <b-modal ref="settingModal_ref" id="settingModal" title="Wallet Setting" :hide-footer="true">
       <b-list-group v-if="getSignIn">
-        <b-list-group-item @click="redirect('/backup')">Remote Backup to Google Drive</b-list-group-item>
-        <b-list-group-item @click="redirect('/recoverysetup')">Setup Recovery Q & A</b-list-group-item>
-        <b-list-group-item @click="redirect('/resetpassword')">Change Password</b-list-group-item>
-        <b-list-group-item @click="redirect('/privatekey')">Show Private Key</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/backup')"
+        >Remote Backup to Google Drive</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/recoverysetup')"
+        >Setup Recovery Q & A</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/resetpassword')"
+        >Change Password</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/privatekey')"
+        >Show Private Key</b-list-group-item>
         <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
         <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
         <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
@@ -33,7 +45,8 @@ export default {
     ...mapGetters({
       getActiveToken: "getActiveToken",
       getCredentials: "getCredentials",
-      getSignIn: "getSignIn"
+      getSignIn: "getSignIn",
+      getAccount: "account/getAccount"
     }),
     currentRoute: function() {
       return this.$route.path;
