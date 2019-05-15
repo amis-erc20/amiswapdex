@@ -75,14 +75,21 @@
     </div>
 
     <!-- LIST TOKEN MODAL -->
-    <b-modal ref="list_token_modal" id="list_token_modal" title="List A Token" :hide-footer="true">
+    <b-modal
+      ref="list_token_modal"
+      id="list_token_modal"
+      title="List A Token"
+      :hide-footer="true"
+      @hidden="onHideModal"
+    >
       <b-form @submit="onListToken">
-        <b-alert v-if="infoMessage.length > 0" show fade variant="primary">{{infoMessage}}</b-alert>
+        <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
+        <b-alert v-if="infoMessage.length > 0" show fade variant="info">{{infoMessage}}</b-alert>
         <b-form-group id="exampleInputGroup1">
           <label>Token Address</label>
           <b-form-input type="text" v-model="form.tokenAddress"/>
         </b-form-group>
-        <b-button type="submit" variant="primary">List Token</b-button>
+        <b-button type="submit" variant="primary" :disabled="loading">List Token</b-button>
       </b-form>
     </b-modal>
 
@@ -122,7 +129,11 @@ import {
   createNewExchange,
   metamaskCreateNewExchange
 } from "../assets/js/utils";
-import { factoryAddress } from "../assets/js/token";
+import {
+  factoryAddress,
+  tokenAddresses,
+  exchangeAddresses
+} from "../assets/js/token";
 import { setTimeout } from "timers";
 import config from "../config";
 
@@ -138,8 +149,10 @@ export default {
       showLimit: 20,
       orderBy: "Liquidity",
       ethToUsd: 0,
+      errorMessage: "",
       infoMessage: "",
-      txHash: ""
+      txHash: "",
+      loading: false
     };
   },
   computed: {
@@ -226,6 +239,11 @@ export default {
     hideModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].hide();
     },
+    onHideModal() {
+      this.form.tokenAddress = "";
+      this.errorMessage = "";
+      this.infoMessage = "";
+    },
     async updateUSDPrices() {
       let ultUSD = await getULTToUSDPrice();
       this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
@@ -239,23 +257,41 @@ export default {
     async onListToken(e) {
       e.preventDefault();
       this.loading = true;
-      let tokenAddress = this.form.tokenAddress;
+      if (!this.getSignIn) {
+        this.resetMessages();
+        this.errorMessage = `Please sign into wallet to create a new exchange`;
+        this.form.tokenAddress = "";
+        this.loading = false;
+        return;
+      }
+      let tokenAddress = this.form.tokenAddress.toLowerCase();
       let exchangeAddress = await getExchangeAddress(tokenAddress);
+      console.log(`Exchange address: ${exchangeAddress}`);
+      if (!exchangeAddress) {
+        this.resetMessages();
+        this.errorMessage = `Invalid Token Address. Failed to calculate exchange address from provided token address!`;
+        this.form.tokenAddress = "";
+        this.loading = false;
+        return;
+      }
       try {
         if (
           exchangeAddress &&
           exchangeAddress !== "0x0000000000000000000000000000000000000000"
         ) {
           console.log("Exchange address already existed for selected token");
-          console.log(exchangeAddress);
-          this.infoMessage = `Exchange address (${exchangeAddress}) already existed for selected token address !`;
+          this.resetMessages();
+          this.errorMessage = `Exchange address (${exchangeAddress}) already existed for selected token address.`;
           this.form.tokenAddress = "";
+          this.loading = false;
         } else if (
-          !exchangeAddress ||
           exchangeAddress === "0x0000000000000000000000000000000000000000"
         ) {
           let accountType = this.getAccount.type;
           if (accountType === "metamask") {
+            this.resetMessages();
+            this.infoMessage =
+              "Please confirm your transaction on Metamask Wallet.";
             this.txHash = await metamaskCreateNewExchange(
               {
                 from: this.getAccount.address
@@ -279,14 +315,22 @@ export default {
             this.showModal("success_modal_ref");
           }
         } else {
+          this.loading = false;
           console.log("Invalid token address");
-          console.log(exchangeAddress);
-          this.infoMessage = "Invalid Token Address";
+          this.resetMessages();
+          this.errorMessage = "Invalid Token Address";
+          return;
         }
       } catch (e) {
-        this.infoMessage = "Invalid Token Address";
+        this.loading = false;
+        this.resetMessages();
+        this.errorMessage = `Unexpected error while trying to create exchange!`;
         console.log(e);
       }
+    },
+    resetMessages() {
+      this.infoMessage = "";
+      this.errorMessage = "";
     }
   },
   created: async function() {
@@ -447,6 +491,12 @@ export default {
 #success_modal {
   position: fixed;
   top: 150px;
+}
+#list_token_modal .alert {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-width: 100% !important;
+  text-align: left;
 }
 #list_token_modal button[type="submit"] {
   width: 100%;

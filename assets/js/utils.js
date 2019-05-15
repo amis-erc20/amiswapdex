@@ -40,6 +40,7 @@ export const getWeb3 = function () {
     try {
       let web3 = new Web3(
         'wss://mainnet.infura.io/ws/v3/6f70582e339948738835c25da4b9b8a5'
+        // 'wss://mainnet.infura.io/ws'
       )
       resolve(web3)
     } catch (e) {
@@ -67,14 +68,14 @@ export const getExchangeAddress = async function (tokenAddress) {
     let exchangeAddress = await factoryContract.methods
       .getExchange(tokenAddress)
       .call()
-    if (
-      exchangeAddress &&
-      exchangeAddress !== '0x0000000000000000000000000000000000000000'
-    )
-      return exchangeAddress
+    console.log(exchangeAddress)
+    // 0x0000000000000000000000000000000000000000
+    if (exchangeAddress) return exchangeAddress
+    else return false
   } catch (e) {
     console.log(`ERROR: cannot get exchange for token address: ${tokenAddress}`)
     console.log(e)
+    return false
   }
 }
 
