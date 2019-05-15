@@ -15,7 +15,7 @@ export default {
 	uniswapDexServer: 'http://uniswapdex.com:8888/',
 	// uniswapDexServer: 'http://localhost:8888/',
 	backupInterval: 10 * 60 * 1000,
-	version: 'beta 1.0.1',
+	version: 'beta 2.0.0',
 	etherscanApiKey: "Y1C96ES3CDKANT866DQMTJTMF2G52FBBN9",
 	refreshInterval: 10000
 }

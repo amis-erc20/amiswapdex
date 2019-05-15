@@ -388,11 +388,6 @@ export default {
         }
       }
     }, 3000);
-
-    // let url = `https://etherscan.io/tokenholdingsHandler.ashx?&a=0x4a8c1337ecb8a7666f413178f93148889377ea76&q=&p=1&f=0&h=0&sort=total_price_usd&order=desc&pUsd24hrs=195.99&pBtc24hrs=0.02518&pUsd=217.97&fav=&langMsg=AtotalofXXtokenSSfound&langFilter=FilteredbyXX&langFirst=First&langPage=PageXofY&langLast=Last`;
-
-    // let response = await axios.get(url);
-    // console.log(response);
   }
 };
 </script>
