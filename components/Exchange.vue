@@ -13,19 +13,34 @@
     </b-form>
 
     <div class="exchangelist-section">
-      <!-- <div class="exchange-list-order">
-        <div class="order-by">Order By</div>
-        <div class="ordery-choice">
-          <b-dropdown id="dropdown-right" right :text="orderBy" variant="outline-primary">
-            <b-dropdown-item href="#" @click="changeOrder('Liquidity')">Liquidity</b-dropdown-item>
-            <b-dropdown-item href="#" @click="changeOrder('Volume')">24H Volume</b-dropdown-item>
-          </b-dropdown>
-        </div>
-      </div>-->
       <div class="exchangelist-title">
         <div class="title-order">No</div>
-        <div class="title-name">Name</div>
-        <div class="title-price">24H Change</div>
+        <div class="title-name" @click="changeOrder(`name`)">
+          Name
+          <font-awesome-icon
+            v-if="orderBy[0] === 'name' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-right"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'name' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-left"
+            size="xs"
+          />
+        </div>
+        <div class="title-price" @click="changeOrder(`price`)">
+          24H Change
+          <font-awesome-icon
+            v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-right"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'change' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-left"
+            size="xs"
+          />
+        </div>
         <div class="title-price" @click="changeOrder(`price`)">
           Price
           <font-awesome-icon
@@ -77,6 +92,11 @@
                 <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
                 <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
                 <img v-else-if="token.src" :src="token.src" alt>
+                <!-- <img
+                  v-else-if="token.tokenAddress"
+                  :src="`http://uniswapdex.com:8888/static/${token.tokenAddress.toLowerCase()}.png`"
+                  alt
+                >-->
                 <img v-else src="../assets/default-token.png">
                 <p>{{token.name}}</p>
               </div>
@@ -247,16 +267,33 @@ export default {
       }
       let orderyProperty = this.orderBy[0] || "Liquidity";
       let orderDir = this.orderBy[1] || "desc";
-      let sortedList = filteredList.sort((a, b) => {
-        if (orderDir === "desc")
-          return (
-            b[orderyProperty.toLowerCase()] - a[orderyProperty.toLowerCase()]
-          );
-        else if (orderDir === "asc")
-          return (
-            a[orderyProperty.toLowerCase()] - b[orderyProperty.toLowerCase()]
-          );
-      });
+      let sortedList;
+
+      if (orderyProperty === "name" && orderDir === "asc") {
+        sortedList = filteredList.sort(function(a, b) {
+          var textA = a.name.toUpperCase();
+          var textB = b.name.toUpperCase();
+          return textA < textB ? -1 : textA > textB ? 1 : 0;
+        });
+      } else if (orderyProperty === "name" && orderDir === "desc") {
+        sortedList = filteredList.sort(function(a, b) {
+          var textA = a.name.toUpperCase();
+          var textB = b.name.toUpperCase();
+          return textB < textA ? -1 : textB > textA ? 1 : 0;
+        });
+      } else {
+        sortedList = filteredList.sort((a, b) => {
+          if (orderDir === "desc")
+            return (
+              b[orderyProperty.toLowerCase()] - a[orderyProperty.toLowerCase()]
+            );
+          else if (orderDir === "asc")
+            return (
+              a[orderyProperty.toLowerCase()] - b[orderyProperty.toLowerCase()]
+            );
+        });
+      }
+
       return sortedList.slice(0, this.showLimit);
     }
   },

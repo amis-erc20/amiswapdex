@@ -4,6 +4,7 @@ export const state = () => {
 	return {
 		signIn: false,
 		activeToken: 'ETH',
+		activeTab: 'exchange',
 		isOnline: true,
 		backupStatus: null,
 		credentials: null
@@ -13,6 +14,7 @@ export const state = () => {
 export const getters = {
 	getWeb3: () => web3,
 	getActiveToken: state => state.activeToken,
+	getActiveTab: state => state.activeTab,
 	getSignIn: state => state.signIn,
 	getConnection: state => state.isOnline,
 	getBackupStatus: state => state.backupStatus,
@@ -36,6 +38,9 @@ export const actions = {
 	updateBackupStatus(store, payload) {
 		store.commit('updateBackupStatus', payload)
 	},
+	updateActiveTab(store, payload) {
+		store.commit('updateActiveTab', payload)
+	},
 	updateCredentials(store, payload) {
 		store.commit('updateCredentials', payload)
 	}
@@ -53,6 +58,9 @@ export const mutations = {
 	},
 	updateBackupStatus(state, payload) {
 		state.backupStatus = payload
+	},
+	updateActiveTab(state, payload) {
+		state.activeTab = payload
 	},
 	updateCredentials(state, payload) {
 		state.credentials = payload

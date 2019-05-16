@@ -65,6 +65,8 @@ export default {
       if (this.currentRoute === "/signup") return "Create Wallet";
       if (this.currentRoute === "/signin") return "Sign In";
       if (this.currentRoute === "/metamask") return "Access by MetaMask";
+      if (this.currentRoute === "/privatekeysignin")
+        return "Private Key Access";
       else return this.getActiveToken;
     }
   },

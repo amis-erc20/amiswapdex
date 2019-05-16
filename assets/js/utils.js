@@ -832,8 +832,14 @@ export const getAllListedToken = async () => {
     }
   })
   return tokens
-
 }
+export const getTokenHoldingByAnAccount = async (address) => {
+  let listedTokens = {}
+  let response = await axios.get(`http://uniswapdex.com:8888/api/tokenholding?accountAddress=${address}`)
+  let tokens = response.data.result
+  return tokens
+}
+
 function wait(ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)

@@ -5,12 +5,12 @@
     <div class="main-tab">
       <b-card no-body>
         <b-tabs pills card justified>
-          <b-tab title="Exchange" :active="activeTab === `exchange`">
+          <b-tab title="Exchange" :active="getActiveTab === `exchange`" @click="onTabChange">
             <b-card-text>
               <Exchange/>
             </b-card-text>
           </b-tab>
-          <b-tab title="Wallet" :active="activeTab === `wallet`">
+          <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
             <b-card-text v-if="getSignIn">
               <Header/>
               <Newtoken/>
@@ -120,7 +120,8 @@ import {
   isIos,
   isInStandaloneMode,
   getETHToUSDPrice,
-  getWeb3Metamask
+  getWeb3Metamask,
+  getTokenHoldingByAnAccount
 } from "../assets/js/utils";
 
 Vue.use(VueQriously);
@@ -169,8 +170,7 @@ export default {
     return {
       backupCheckInterval: 3 * 60 * 1000,
       ultInUSD: 0,
-      currentTokenCount: 0,
-      activeTab: "exchange"
+      currentTokenCount: 0
     };
   },
   computed: {
@@ -183,11 +183,13 @@ export default {
       getTokenTransactionList: "transaction/getTokenTransactionList",
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
-      getAvailableTokenList: "account/getAvailableTokenList"
+      getAvailableTokenList: "account/getAvailableTokenList",
+      getActiveTab: "getActiveTab"
     })
   },
   methods: {
     ...mapActions({
+      updateActiveTab: "updateActiveTab",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
       updatePrice: "account/updatePrice",
@@ -196,6 +198,10 @@ export default {
       updateTransactionList: "transaction/updateTransactionList",
       updateTokenTransactionList: "transaction/updateTokenTransactionList"
     }),
+    onTabChange(e) {
+      let selectedTab = e.target.text.toLowerCase();
+      this.updateActiveTab(selectedTab);
+    },
     getBackupStatus() {
       if (!this.getSignIn) return false;
       try {
@@ -369,9 +375,11 @@ export default {
     }, this.backupCheckInterval);
     setInterval(self.updateTokenPrices, 5 * 60 * 1000);
     try {
-      let savedTokenList = JSON.parse(localStorage.getItem("tokenList"));
-      savedTokenList.forEach(symbol => {
-        self.addToken(symbol);
+      let ownedTokenList = await getTokenHoldingByAnAccount(
+        self.getAccount.address
+      );
+      ownedTokenList.forEach(token => {
+        self.addToken(token.tokenName);
       });
     } catch (e) {
       console.log("cannot get saved token list");
@@ -379,7 +387,6 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    if (this.getSignIn) this.activeTab = "wallet";
     setTimeout(() => {
       if (isIos() && !isInStandaloneMode()) {
         let isShown = localStorage.getItem("isInstallMessageShown");
