@@ -12,26 +12,59 @@
       </b-form-group>
     </b-form>
 
-    <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
-
     <div class="exchangelist-section">
-      <div class="exchange-list-order">
+      <!-- <div class="exchange-list-order">
         <div class="order-by">Order By</div>
         <div class="ordery-choice">
           <b-dropdown id="dropdown-right" right :text="orderBy" variant="outline-primary">
             <b-dropdown-item href="#" @click="changeOrder('Liquidity')">Liquidity</b-dropdown-item>
-            <!-- <b-dropdown-item href="#" @click="changeOrder('Price')">Price</b-dropdown-item> -->
             <b-dropdown-item href="#" @click="changeOrder('Volume')">24H Volume</b-dropdown-item>
           </b-dropdown>
         </div>
-      </div>
+      </div>-->
       <div class="exchangelist-title">
         <div class="title-order">No</div>
         <div class="title-name">Name</div>
         <div class="title-price">24H Change</div>
-        <div class="title-price">Price</div>
-        <div class="title-volume">24H Volume</div>
-        <div class="title-liquidity">Liquidity Depth</div>
+        <div class="title-price" @click="changeOrder(`price`)">
+          Price
+          <font-awesome-icon
+            v-if="orderBy[0] === 'price' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-right"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'price' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-left"
+            size="xs"
+          />
+        </div>
+        <div class="title-volume" @click="changeOrder(`volume`)">
+          24H Volume
+          <font-awesome-icon
+            v-if="orderBy[0] === 'volume' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-right"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'volume' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-left"
+            size="xs"
+          />
+        </div>
+        <div class="title-liquidity" @click="changeOrder(`liquidity`)">
+          Liquidity Depth
+          <font-awesome-icon
+            v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-right"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-left"
+            size="xs"
+          />
+        </div>
       </div>
       <b-card style="border-top: 0px; background: red">
         <b-list-group flush>
@@ -70,9 +103,15 @@
             </div>
           </b-list-group-item>
         </b-list-group>
-        <b-button variant="primary" id="add-token-button" @click="loadMoreToken">Load More Tokens</b-button>
+        <b-button
+          variant="outline-primary"
+          id="add-token-button"
+          @click="loadMoreToken"
+        >Load More Tokens</b-button>
       </b-card>
     </div>
+
+    <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
 
     <!-- LIST TOKEN MODAL -->
     <b-modal
@@ -147,7 +186,7 @@ export default {
       },
       summary: [],
       showLimit: 20,
-      orderBy: "Liquidity",
+      orderBy: ["liquidity", "desc"],
       ethToUsd: 0,
       errorMessage: "",
       infoMessage: "",
@@ -206,9 +245,18 @@ export default {
           }
         });
       }
-      let sortedList = filteredList.sort(
-        (a, b) => b[self.orderBy.toLowerCase()] - a[self.orderBy.toLowerCase()]
-      );
+      let orderyProperty = this.orderBy[0] || "Liquidity";
+      let orderDir = this.orderBy[1] || "desc";
+      let sortedList = filteredList.sort((a, b) => {
+        if (orderDir === "desc")
+          return (
+            b[orderyProperty.toLowerCase()] - a[orderyProperty.toLowerCase()]
+          );
+        else if (orderDir === "asc")
+          return (
+            a[orderyProperty.toLowerCase()] - b[orderyProperty.toLowerCase()]
+          );
+      });
       return sortedList.slice(0, this.showLimit);
     }
   },
@@ -227,8 +275,17 @@ export default {
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return parts.join(".");
     },
-    changeOrder(property) {
-      this.orderBy = property;
+    changeOrder(property, dir) {
+      let currentOrderProperty = this.orderBy[0];
+      let currentOrderDir = this.orderBy[1];
+      console.log(currentOrderProperty, currentOrderDir);
+      let newDir = "desc";
+      if (property === currentOrderProperty) {
+        if (currentOrderDir === "asc") newDir = "desc";
+        else if (currentOrderDir === "desc") newDir = "asc";
+      }
+      this.orderBy = [property, newDir];
+      console.log(this.orderBy);
     },
     redirect(url) {
       this.$router.push(url);
@@ -500,5 +557,12 @@ export default {
 }
 #list_token_modal button[type="submit"] {
   width: 100%;
+}
+#listToken {
+  width: 100%;
+  font-weight: bolder;
+}
+.exchangelist-title div svg {
+  transform: rotateZ(90deg);
 }
 </style>
