@@ -3,16 +3,26 @@
     <Nav/>
     <div id="signup-section">
       <!-- <img src="../assets/logo.svg" alt> -->
-      <h4>Create New Wallet</h4>
+      <!-- <h4>Create New Wallet</h4> -->
       <scale-loader :loading="loading && !success" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <font-awesome-icon v-if="success" icon="check" size="2x" color="green" align="center"/>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <nuxt-link to="/backup" v-if="success">
-        <b-button type="button" variant="primary" id="create-account-btn">Backup to Google Drive</b-button>
+        <b-button
+          type="button"
+          variant="primary"
+          class="create-account-success-btn"
+        >Backup to Google Drive</b-button>
       </nuxt-link>
-      <nuxt-link to="/" v-if="success">
-        <b-button type="button" variant="outline-primary" id="create-account-btn">Continue to Wallet</b-button>
-      </nuxt-link>
+      <!-- <nuxt-link v-if="success" @click="onContinueToWallet"> -->
+      <b-button
+        v-if="success"
+        @click="onContinueToWallet"
+        type="button"
+        variant="outline-primary"
+        class="create-account-success-btn"
+      >Continue to Wallet</b-button>
+      <!-- </nuxt-link> -->
       <b-form @submit="onCreate" v-if="loading !== true">
         <b-form-group>
           <label for>Email</label>
@@ -98,7 +108,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ getSignIn: "getSignIn" })
+    ...mapGetters({
+      getSignIn: "getSignIn",
+      getAuthRedirectUrl: "getAuthRedirectUrl"
+    })
   },
   created: async function() {
     this.web3 = await getWeb3();
@@ -108,7 +121,9 @@ export default {
     ...mapActions({
       addAccount: "account/addAccount",
       updateAuthStatus: "updateAuthStatus",
-      updateCredentials: "updateCredentials"
+      updateCredentials: "updateCredentials",
+      updateActiveToken: "updateActiveToken",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
     validatePassword() {
       let password1 = normaliseText(this.form.password1);
@@ -136,7 +151,7 @@ export default {
     },
     async createNewAccount() {
       const { address, privateKey } = await this.web3.eth.accounts.create();
-      const account = { address, privateKey, balance: 0 };
+      const account = { address, privateKey, balance: 0, type: "crednetials" };
       this.addAccount(account);
       return account;
     },
@@ -164,6 +179,16 @@ export default {
       this.updateAuthStatus(true);
       this.success = true;
       this.statusMessage = "Successfully created a new account !";
+    },
+    onContinueToWallet() {
+      let { url, token } = this.getAuthRedirectUrl;
+      if (url === "/tokendetail" && token !== null) {
+        this.updateActiveToken(token);
+        this.redirect("/tokendetail");
+        this.updateAuthRedirectUrl({ url: "/", token: null });
+      } else {
+        this.redirect("/");
+      }
     },
     comparePassword(password, hash) {
       return bcrypt.compareSync(password, hash);
@@ -324,7 +349,12 @@ export default {
   font-weight: bold;
   margin-bottom: 40px;
 }
-#signup-section a button {
+/* #signup-section a button { */
+.create-account-success-btn {
+  width: 100%;
+  font-size: 14px;
+  font-weight: bold;
+  height: 50px;
   width: 180px;
   margin-bottom: 20px;
   font-size: 13px;

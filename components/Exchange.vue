@@ -1,6 +1,6 @@
 <template>
   <section id="exchange-container">
-    <h4>Uniswap Exchange</h4>
+    <h4 id="main-title">Uniswap Decentralized Exchange</h4>
     <b-form>
       <b-form-group>
         <b-form-input
@@ -28,7 +28,7 @@
             size="xs"
           />
         </div>
-        <div class="title-price" @click="changeOrder(`price`)">
+        <div class="title-price" @click="changeOrder(`change`)">
           24H Change
           <font-awesome-icon
             v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
@@ -84,7 +84,7 @@
       <b-card style="border-top: 0px; background: red">
         <b-list-group flush>
           <b-list-group-item v-for="token in tokenList" :key="token.tokenAddress">
-            <div class="token">
+            <div class="token" @click="onSelectToken(token.name)">
               <div class="token-order-container">
                 <p class="token-order">{{ token.order }}.</p>
               </div>
@@ -174,6 +174,7 @@
 <script>
 import Vue from "vue";
 import axios from "axios";
+import * as R from "ramda";
 import Token from "~/components/Token.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
@@ -195,7 +196,6 @@ import {
 } from "../assets/js/token";
 import { setTimeout } from "timers";
 import config from "../config";
-
 export default {
   components: { Token },
   data: function() {
@@ -219,6 +219,7 @@ export default {
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
+      getRefresher: "account/getRefresher",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
       getTransactionListToken: "transaction/getTransactionListToken",
@@ -281,26 +282,53 @@ export default {
           var textB = b.name.toUpperCase();
           return textB < textA ? -1 : textB > textA ? 1 : 0;
         });
+      } else if (orderyProperty === "change" && orderDir === "desc") {
+        let zeroChangeList = filteredList.filter(
+          t => parseFloat(t.change) === 0
+        );
+        let nonZeroChangeList = filteredList.filter(
+          t => parseFloat(t.change) > 0 || parseFloat(t.change) < 0
+        );
+        let sortedNonZeroChangeList = nonZeroChangeList.sort((a, b) => {
+          let y = Math.abs(parseFloat(b["change"]));
+          let x = Math.abs(parseFloat(a["change"]));
+          if (orderDir === "desc") return y - x;
+          else if (orderDir === "asc") return x - y;
+        });
+        sortedList = R.concat(sortedNonZeroChangeList, zeroChangeList);
+      } else if (orderyProperty === "change" && orderDir === "asc") {
+        let zeroChangeList = filteredList.filter(
+          t => parseFloat(t.change) === 0
+        );
+        let nonZeroChangeList = filteredList.filter(
+          t => parseFloat(t.change) > 0 || parseFloat(t.change) < 0
+        );
+        let sortedNonZeroChangeList = nonZeroChangeList.sort((a, b) => {
+          let y = Math.abs(parseFloat(b["change"]));
+          let x = Math.abs(parseFloat(a["change"]));
+          if (orderDir === "desc") return y - x;
+          else if (orderDir === "asc") return x - y;
+        });
+        sortedList = R.concat(zeroChangeList, sortedNonZeroChangeList);
       } else {
         sortedList = filteredList.sort((a, b) => {
-          if (orderDir === "desc")
-            return (
-              b[orderyProperty.toLowerCase()] - a[orderyProperty.toLowerCase()]
-            );
-          else if (orderDir === "asc")
-            return (
-              a[orderyProperty.toLowerCase()] - b[orderyProperty.toLowerCase()]
-            );
+          let y = parseFloat(b[orderyProperty.toLowerCase()]);
+          let x = parseFloat(a[orderyProperty.toLowerCase()]);
+          if (orderDir === "desc") return y - x;
+          else if (orderDir === "asc") return x - y;
         });
       }
-
       return sortedList.slice(0, this.showLimit);
     }
   },
   methods: {
     ...mapActions({
+      updateAuthRedirectUrl: "updateAuthRedirectUrl",
+      updateActiveTab: "updateActiveTab",
+      updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
+      setRefresher: "account/setRefresher",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateBalance: "account/updateBalance",
       updateTransactionListToken: "transaction/updateTransactionListToken",
@@ -425,6 +453,17 @@ export default {
     resetMessages() {
       this.infoMessage = "";
       this.errorMessage = "";
+    },
+    onSelectToken(name) {
+      if (this.getSignIn) {
+        this.updateActiveToken(name);
+        this.redirect("/tokendetail");
+      }
+      this.updateAuthRedirectUrl({
+        url: "/tokendetail",
+        token: name
+      });
+      this.updateActiveTab("wallet");
     }
   },
   created: async function() {
@@ -447,7 +486,7 @@ export default {
   min-height: 100vh;
   width: 95%;
   max-width: 650px;
-  margin: 70px auto;
+  margin: 40px auto;
 }
 .main-tab > .card > .tabs .card-body {
   /* padding: 5px; */
@@ -509,6 +548,12 @@ export default {
   background: #fff;
   color: #333;
   padding-top: 10px;
+  transition: 0.5s;
+}
+.exchangelist-section .token:hover {
+  cursor: pointer;
+  box-shadow: 0px 2px 5px #bcc0c1;
+  transform: scale(1.03);
 }
 .exchangelist-section .token .token-name {
   font-size: 14px;
@@ -601,5 +646,12 @@ export default {
 }
 .exchangelist-title div svg {
   transform: rotateZ(90deg);
+}
+#main-title {
+  font-weight: normal;
+  font-size: 1.5rem;
+  margin: 30px auto;
+  color: #434d6f;
+  text-transform: uppercase;
 }
 </style>

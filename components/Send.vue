@@ -12,15 +12,7 @@
       <b-button variant="primary" @click="hideScanner" class="cancel-scanner-btn">Cancel</b-button>
     </div>
     <div class="send-section" v-else>
-      <div v-if="form.currency">
-        <p>
-          Send
-          <strong>{{ form.currency }}</strong> to other address
-        </p>
-        <img v-if="form.currency === 'ULT'" src="../assets/logo.svg" alt>
-        <img v-if="form.currency === 'ETH'" src="../assets/eth-logo.png" alt>
-        <img v-if="form.currency === 'DAI'" src="../assets/dai-logo.png" alt>
-      </div>
+      <div v-if="form.currency"></div>
       <p v-else>Please select ETH or token to send</p>
       <b-form @submit="onSubmit" @reset="onReset">
         <b-form-group id="exampleInputGroup1" v-if="form.currency !== null">

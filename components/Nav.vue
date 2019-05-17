@@ -3,7 +3,10 @@
     <nuxt-link to="/" v-if="currentRoute !== '/'">
       <font-awesome-icon icon="chevron-left" size="lg" color="#fff"/>
     </nuxt-link>
-    <h4 class="title">{{ title }}</h4>
+    <div class="title">
+      <img v-if="currentRoute === '/tokendetail'" :src="activeTokenLogo" alt>
+      <h4>{{ title }}</h4>
+    </div>
 
     <b-button v-b-modal.settingModal variant="outline-light">
       <font-awesome-icon icon="bars" size="lg" color="#fff"/>
@@ -24,7 +27,7 @@
           @click="redirect('/resetpassword')"
         >Change Password</b-list-group-item>
         <b-list-group-item
-          v-if="getAccount.type === 'credentials'"
+          v-if="getAccount.type === 'credentials' || getAccount.type === 'private_key'"
           @click="redirect('/privatekey')"
         >Show Private Key</b-list-group-item>
         <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
@@ -41,12 +44,18 @@
 import { mapGetters, mapActions } from "vuex";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
 export default {
+  props: {
+    refreshInterval: {
+      type: Number
+    }
+  },
   computed: {
     ...mapGetters({
       getActiveToken: "getActiveToken",
       getCredentials: "getCredentials",
       getSignIn: "getSignIn",
-      getAccount: "account/getAccount"
+      getAccount: "account/getAccount",
+      getAvailableTokenList: "account/getAvailableTokenList"
     }),
     currentRoute: function() {
       return this.$route.path;
@@ -68,6 +77,14 @@ export default {
       if (this.currentRoute === "/privatekeysignin")
         return "Private Key Access";
       else return this.getActiveToken;
+    },
+    activeTokenLogo() {
+      let self = this;
+      const token = this.getAvailableTokenList.find(
+        t => t.symbol === self.getActiveToken
+      );
+      console.log(token);
+      return token.logo;
     }
   },
   methods: {
@@ -76,15 +93,26 @@ export default {
       removeAccount: "account/removeAccount",
       resetAllBalances: "account/resetAllBalances",
       resetTransactionList: "transaction/resetTransactionList",
-      resetTokenTransactionList: "transaction/resetTokenTransactionList"
+      resetTokenTransactionList: "transaction/resetTokenTransactionList",
+      setRefresher: "account/setRefresher",
+      resetTokenList: "account/resetTokenList"
     }),
+    hideModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].hide();
+    },
     onLogout() {
       this.updateAuthStatus(false);
       this.removeAccount();
       this.resetAllBalances();
       this.resetTransactionList();
       this.resetTokenTransactionList();
+      this.resetTokenList();
       // localStorage.removeItem("credentials");
+      this.hideModal("settingModal_ref");
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval);
+        this.setRefresher(false);
+      }
       this.$router.push("/");
     },
     redirect(url) {
@@ -111,6 +139,14 @@ export default {
   text-align: center;
   flex-grow: 3;
   padding-left: 20px;
+  display: flex;
+  justify-content: center;
+}
+.nav-section .title img {
+  margin-right: 15px;
+  width: 30px;
+  height: 30px;
+  margin-top: 10px;
 }
 .nav-section a {
   padding-top: 10px;

@@ -11,7 +11,8 @@ export const state = () => ({
 	totalValue: 0,
 	price: {},
 	tokenList: ['ETH', 'ULT', 'DAI'],
-	availableTokenList: []
+	availableTokenList: [],
+	refresher: false
 })
 
 export const getters = {
@@ -20,7 +21,8 @@ export const getters = {
 	getPrice: state => state.price,
 	getTokenList: state => state.tokenList,
 	getTotalValue: state => state.totalValue,
-	getAvailableTokenList: state => state.availableTokenList
+	getAvailableTokenList: state => state.availableTokenList,
+	getRefresher: state => state.refresher
 }
 
 export const mutations = {
@@ -32,6 +34,9 @@ export const mutations = {
 	},
 	addToken(state, newToken) {
 		if (state.tokenList.indexOf(newToken) === -1) state.tokenList.push(newToken)
+	},
+	resetTokenList(state) {
+		state.tokenList = ['ETH', 'ULT', 'DAI']
 	},
 	updateBalance(state, payload) {
 		if (state.account === null) return
@@ -54,6 +59,9 @@ export const mutations = {
 	},
 	setAvailableTokenList(state, payload) {
 		state.availableTokenList = payload
+	},
+	setRefresher(state, payload) {
+		state.refresher = payload
 	}
 }
 
@@ -67,6 +75,9 @@ export const actions = {
 	addToken(store, payload) {
 		store.commit('addToken', payload)
 	},
+	resetTokenList(store) {
+		store.commit('resetTokenList')
+	},
 	async setAvailableTokenList(store, payload) {
 		store.commit('setAvailableTokenList', payload)
 	},
@@ -78,5 +89,8 @@ export const actions = {
 	},
 	async updatePrice(store, payload) {
 		store.commit('updatePrice', payload)
+	},
+	async setRefresher(store, payload) {
+		store.commit('setRefresher', payload)
 	}
 }

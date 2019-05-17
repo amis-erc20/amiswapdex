@@ -7,7 +7,11 @@ export const state = () => {
 		activeTab: 'exchange',
 		isOnline: true,
 		backupStatus: null,
-		credentials: null
+		credentials: null,
+		authRedirectUrl: {
+			url: "/",
+			token: null
+		}
 	}
 }
 
@@ -18,7 +22,8 @@ export const getters = {
 	getSignIn: state => state.signIn,
 	getConnection: state => state.isOnline,
 	getBackupStatus: state => state.backupStatus,
-	getCredentials: state => state.credentials
+	getCredentials: state => state.credentials,
+	getAuthRedirectUrl: state => state.authRedirectUrl
 }
 
 export const actions = {
@@ -43,6 +48,10 @@ export const actions = {
 	},
 	updateCredentials(store, payload) {
 		store.commit('updateCredentials', payload)
+	},
+	updateAuthRedirectUrl(store, payload) {
+		console.log(payload)
+		store.commit('updateAuthRedirectUrl', payload)
 	}
 }
 
@@ -64,5 +73,9 @@ export const mutations = {
 	},
 	updateCredentials(state, payload) {
 		state.credentials = payload
+	},
+	updateAuthRedirectUrl(state, payload) {
+		state.authRedirectUrl.url = payload.url
+		state.authRedirectUrl.token = payload.token
 	}
 }

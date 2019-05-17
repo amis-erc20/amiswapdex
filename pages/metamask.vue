@@ -3,10 +3,12 @@
     <Nav/>
     <div id="metamask-section">
       <no-connection/>
-      <h6>Please use MyEtherWallet on a secure (SSL/HTTPS) connection to connect.</h6>
+
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
+
+      <img src="../assets/metamask.png" alt="metamask logo">
 
       <!-- ACCESS METAMASK -->
       <b-form @submit="onAccessMetamask">
@@ -21,9 +23,9 @@
           <b-button
             type="submit"
             variant="primary"
-            id="signin-btn"
+            id="metamask-access-btn"
             :disabled="!isAccepted"
-          >Access Metamask</b-button>
+          >Access Metamask Wallet</b-button>
         </div>
       </b-form>
     </div>
@@ -69,7 +71,11 @@ export default {
       isAccepted: false
     };
   },
-  computed: {},
+  computed: {
+    ...mapGetters({
+      getAuthRedirectUrl: "getAuthRedirectUrl"
+    })
+  },
   created: async function() {
     this.web3 = await getWeb3Metamask();
     // this.web3 = await getWeb3();
@@ -80,7 +86,9 @@ export default {
       addAccount: "account/addAccount",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateAuthStatus: "updateAuthStatus",
-      updateCredentials: "updateCredentials"
+      updateCredentials: "updateCredentials",
+      updateActiveToken: "updateActiveToken",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
     redirect(url) {
       this.$router.push(url);
@@ -149,7 +157,14 @@ export default {
       };
       this.updateAuthStatus(true);
       this.addAccount(account);
-      this.redirect("/");
+      let { url, token } = this.getAuthRedirectUrl;
+      if (url === "/tokendetail" && token !== null) {
+        this.updateActiveToken(token);
+        this.redirect("/tokendetail");
+        this.updateAuthRedirectUrl({ url: "/", token: null });
+      } else {
+        this.redirect("/");
+      }
     },
     showModal(ref) {
       this.$refs[ref].show();
@@ -183,9 +198,9 @@ export default {
   align-items: center;
 }
 #metamask-section img {
-  width: 120px;
+  width: 150px;
   text-align: center;
-  animation: rotateLogo 14s infinite linear;
+  margin: 30px auto;
 }
 #metamask-section h4 {
   margin: 30px auto;
@@ -193,6 +208,7 @@ export default {
 #metamask-section form label {
   font-weight: bolder;
   font-size: 13px;
+  padding-top: 5px;
 }
 #metamask-section form {
   width: 90%;
@@ -206,19 +222,18 @@ export default {
   width: 100%;
   max-width: 450px;
 }
-#signin-btn {
+#metamask-access-btn {
   width: 100%;
   font-size: 14px;
   font-weight: bold;
   height: 50px;
+  color: #fff;
+  background-color: #e8811c;
+  border-color: #e8811c;
 }
-@keyframes rotateLogo {
-  from {
-    -webkit-transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(359deg);
-  }
+#metamask-access-btn:hover {
+  background-color: #d36c16;
+  border-color: #e8811c;
 }
 .file-error {
   font-size: 13px;

@@ -1,7 +1,7 @@
 <template>
   <section class="main-container">
     <no-connection/>
-    <Nav/>
+    <Nav :refreshInterval="refreshInterval"/>
     <div class="main-tab">
       <b-card no-body>
         <b-tabs pills card justified>
@@ -170,7 +170,8 @@ export default {
     return {
       backupCheckInterval: 3 * 60 * 1000,
       ultInUSD: 0,
-      currentTokenCount: 0
+      currentTokenCount: 0,
+      refreshInterval: null
     };
   },
   computed: {
@@ -184,23 +185,30 @@ export default {
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getRefresher: "account/getRefresher",
       getActiveTab: "getActiveTab"
     })
   },
   methods: {
     ...mapActions({
       updateActiveTab: "updateActiveTab",
+      updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
       updatePrice: "account/updatePrice",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateBalance: "account/updateBalance",
+      setRefresher: "account/setRefresher",
       updateTransactionList: "transaction/updateTransactionList",
-      updateTokenTransactionList: "transaction/updateTokenTransactionList"
+      updateTokenTransactionList: "transaction/updateTokenTransactionList",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
     onTabChange(e) {
       let selectedTab = e.target.text.toLowerCase();
       this.updateActiveTab(selectedTab);
+      if (selectedTab === "exchange") {
+        this.updateAuthRedirectUrl({ url: "/", token: null });
+      }
     },
     getBackupStatus() {
       if (!this.getSignIn) return false;
@@ -268,7 +276,6 @@ export default {
               symbol: "ETH",
               balance
             });
-            // console.log(tokenBalanceList);
             for (let i = 0; i < tokenBalanceList.length; i++) {
               this.updateBalance(tokenBalanceList[i]);
             }
@@ -354,22 +361,24 @@ export default {
         self.refresh(web3);
       }
     }
-
-    let refreshInterval = setInterval(async () => {
-      if (self.getSignIn) {
-        let accountType = self.getAccount.type;
-        if (accountType === "metamask") {
-          self.refresh(metamaskWeb3);
+    const isRefresherExisted = self.getRefresher;
+    if (!isRefresherExisted) {
+      self.refreshInterval = setInterval(async () => {
+        if (self.getSignIn) {
+          let accountType = self.getAccount.type;
+          if (accountType === "metamask") {
+            self.refresh(metamaskWeb3);
+          } else {
+            self.refresh(web3);
+          }
         } else {
-          self.refresh(web3);
+          if (self.refreshInterval) {
+            clearInterval(self.refreshInterval);
+            self.refreshInterval = null;
+          }
         }
-      } else {
-        if (refreshInterval) {
-          clearInterval(refreshInterval);
-          refreshInterval = null;
-        }
-      }
-    }, config.refreshInterval);
+      }, config.refreshInterval);
+    }
     setTimeout(() => {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
@@ -477,12 +486,19 @@ export default {
   border: 1px solid #dadada;
   padding: 25px 15px;
   width: 90%;
-  max-width: 650px;
-  box-shadow: 0px 3px 4px #dcdbdb;
+  max-width: 550px;
+  box-shadow: none;
   border-radius: 10px;
   margin: 20px auto;
+  transition: 0.5s;
+}
+.no-account-container > div:hover {
+  box-shadow: 0px 4px 4px #dcdbdb;
 }
 div {
   outline: none;
+}
+#metamask-btn {
+  width: 225px;
 }
 </style>

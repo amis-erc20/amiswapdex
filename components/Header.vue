@@ -11,9 +11,10 @@
           {{ calculateBalance(getBalance["ULT"]) }}
           <span>ULT</span>
         </h2>
-        <h2
-          v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'"
-        >{{ calculateBalance(getBalance[getActiveToken]) }}</h2>
+        <h2 v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
+          {{ calculateBalance(getBalance[getActiveToken]) }}
+          <span>{{getActiveToken}}</span>
+        </h2>
         <div v-if="currentRoute === `/`" id="total-summary">
           <h5>Total Value</h5>
           <h2>$ {{ getTotalValue.toFixed(3) }}</h2>
@@ -55,8 +56,10 @@ export default {
     }),
     calculateBalance: function(balance) {
       let formattedBalance = parseFloat(balance / Math.pow(10, 18)).toFixed(6);
-      if (Number.isNaN(formattedBalance)) return "--";
-      return parseFloat(balance / Math.pow(10, 18)).toFixed(6);
+      if (Number.isNaN(formattedBalance) || formattedBalance == "NaN")
+        return "0.000";
+      else return formattedBalance;
+      // return parseFloat(balance / Math.pow(10, 18)).toFixed(6);
     },
     refreshUSDPrices: async function() {
       let self = this;

@@ -56,7 +56,12 @@ export default {
       Ns: null
     };
   },
-  computed: {},
+  computed: {
+    ...mapGetters({
+      getSignIn: "getSignIn",
+      getAuthRedirectUrl: "getAuthRedirectUrl"
+    })
+  },
   created: async function() {
     this.web3 = await getWeb3();
   },
@@ -65,7 +70,9 @@ export default {
       addAccount: "account/addAccount",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateAuthStatus: "updateAuthStatus",
-      updateCredentials: "updateCredentials"
+      updateCredentials: "updateCredentials",
+      updateActiveToken: "updateActiveToken",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
     redirect(url) {
       this.$router.push(url);
@@ -94,7 +101,14 @@ export default {
         account.type = "private_key";
         this.addAccount(account);
         this.updateAuthStatus(true);
-        this.redirect("/");
+        let { url, token } = this.getAuthRedirectUrl;
+        if (url === "/tokendetail" && token !== null) {
+          this.updateActiveToken(token);
+          this.redirect("/tokendetail");
+          this.updateAuthRedirectUrl({ url: "/", token: null });
+        } else {
+          this.redirect("/");
+        }
       } catch (e) {
         console.log(e);
         console.log(`Invalid Private Key`);

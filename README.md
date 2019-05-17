@@ -31,8 +31,9 @@ TODO:
 - show pending transaction after submitted to network
 - get internal tx list
 
-- metamask transfer tx does not return tx hash after submit. It retruns tx detail after tx is confirmed on blockchain
+- estimateGas not working make a lot of problems
 - Detect that the current account has changed for metamask
+
 
 let account = getAccount();
 let accountInterval = setInterval(() => {

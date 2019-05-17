@@ -2,6 +2,7 @@
   <div>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
     <script src="https://apis.google.com/js/api.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ramda/0.25.0/ramda.min.js"></script>
     <!-- <script src="../assets/js/_nuxt/addtohomescreen.js"></script> -->
     <!-- <link rel="stylesheet" type="text/css" href="../assets/css/addtohomescreen.css"> -->
     <nuxt/>

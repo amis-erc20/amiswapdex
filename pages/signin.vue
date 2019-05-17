@@ -5,7 +5,7 @@
       <no-connection/>
       <!-- <img src="../assets/logo.svg" alt> -->
       <!-- <h4>Sign In</h4> -->
-      <h6>Please sign into your wallet.</h6>
+      <!-- <h6>Please sign into your wallet.</h6> -->
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
@@ -162,7 +162,12 @@ export default {
       Ns: null
     };
   },
-  computed: {},
+  computed: {
+    ...mapGetters({
+      getSignIn: "getSignIn",
+      getAuthRedirectUrl: "getAuthRedirectUrl"
+    })
+  },
   created: async function() {
     this.web3 = await getWeb3();
   },
@@ -171,7 +176,9 @@ export default {
       addAccount: "account/addAccount",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateAuthStatus: "updateAuthStatus",
-      updateCredentials: "updateCredentials"
+      updateCredentials: "updateCredentials",
+      updateActiveToken: "updateActiveToken",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
     validatePassword() {
       if (this.form.password1 !== this.form.password2) {
@@ -295,7 +302,14 @@ export default {
           );
         }
         this.updateCredentials({ Ep, De, Ns: this.Ns, E, Ps });
-        this.redirect("/");
+        let { url, token } = this.getAuthRedirectUrl;
+        if (url === "/tokendetail" && token !== null) {
+          this.updateActiveToken(token);
+          this.redirect("/tokendetail");
+          this.updateAuthRedirectUrl({ url: "/", token: null });
+        } else {
+          this.redirect("/");
+        }
       } catch (e) {
         console.log(e);
         console.log(`Incorrect Password`);
