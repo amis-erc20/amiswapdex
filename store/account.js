@@ -11,6 +11,7 @@ export const state = () => ({
 	totalValue: 0,
 	price: {},
 	tokenList: ['ETH', 'ULT', 'DAI'],
+	ownedTokenList: [],
 	availableTokenList: [],
 	refresher: false
 })
@@ -20,6 +21,7 @@ export const getters = {
 	getBalance: state => state.balance,
 	getPrice: state => state.price,
 	getTokenList: state => state.tokenList,
+	getOwnedTokenList: state => state.ownedTokenList,
 	getTotalValue: state => state.totalValue,
 	getAvailableTokenList: state => state.availableTokenList,
 	getRefresher: state => state.refresher
@@ -44,7 +46,7 @@ export const mutations = {
 		state.balance[symbol] = balance
 		state.totalValue = 0
 		for (let key in state.balance) {
-			state.totalValue += (state.balance[key] / Math.pow(10, 18)) * state.price[key]
+			state.totalValue += (state.balance[key] / Math.pow(10, 18)) * state.price[key] || 0.0
 		}
 	},
 	resetAllBalances(state) {
@@ -62,6 +64,9 @@ export const mutations = {
 	},
 	setRefresher(state, payload) {
 		state.refresher = payload
+	},
+	setOwnedTokenList(state, payload) {
+		state.ownedTokenList = payload
 	}
 }
 
@@ -92,5 +97,8 @@ export const actions = {
 	},
 	async setRefresher(store, payload) {
 		store.commit('setRefresher', payload)
+	},
+	async setOwnedTokenList(store, payload) {
+		store.commit('setOwnedTokenList', payload)
 	}
 }

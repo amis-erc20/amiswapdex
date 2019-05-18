@@ -184,6 +184,7 @@ export default {
       getTokenTransactionList: "transaction/getTokenTransactionList",
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
+      getOwnedTokenList: "account/getOwnedTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
       getRefresher: "account/getRefresher",
       getActiveTab: "getActiveTab"
@@ -195,6 +196,7 @@ export default {
       updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
+      setOwnedTokenList: "account/setOwnedTokenList",
       updatePrice: "account/updatePrice",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateBalance: "account/updateBalance",
@@ -248,12 +250,12 @@ export default {
           console.log("Refreshing...");
           const balance = await getBalance(account.address, web3);
           let tokenBalanceList = [];
-
           for (let i = 1; i < this.getTokenList.length; i++) {
             let tokenBalance = await getTokenBalance(
               account.address,
               this.getTokenList[i],
-              web3
+              web3,
+              this.getOwnedTokenList
             );
             tokenBalanceList.push({
               symbol: this.getTokenList[i],
@@ -390,6 +392,7 @@ export default {
       ownedTokenList.forEach(token => {
         self.addToken(token.tokenName);
       });
+      self.setOwnedTokenList(ownedTokenList);
     } catch (e) {
       console.log("cannot get saved token list");
     }

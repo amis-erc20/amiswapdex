@@ -6,12 +6,12 @@
 
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
-      <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
+      <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
 
       <img src="../assets/metamask.png" alt="metamask logo">
 
       <!-- ACCESS METAMASK -->
-      <b-form @submit="onAccessMetamask">
+      <b-form @submit="onAccessMetamask" v-if="shouldRender">
         <b-form-group>
           <b-form-checkbox
             id="accept-checkbox"
@@ -68,7 +68,8 @@ export default {
       web3: null,
       statusMessage: "",
       credentials: null,
-      isAccepted: false
+      isAccepted: false,
+      shouldRender: true
     };
   },
   computed: {
@@ -78,8 +79,11 @@ export default {
   },
   created: async function() {
     this.web3 = await getWeb3Metamask();
-    // this.web3 = await getWeb3();
-    // this.web3 = new Web3(Web3.givenProvider || "wss://mainnet.infura.io/ws");
+    if (this.web3 === null) {
+      this.errorMessage =
+        "Metamask web3 instance is overwritten by an another wallet extension. Please disable other wallet extensions";
+      this.shouldRender = false;
+    }
   },
   methods: {
     ...mapActions({

@@ -11,7 +11,7 @@
       <div class="token-amount-container">
         <div v-if="token.balance !== `NaN`">
           <p class="token-amount-usd" v-if="priceInUSD && priceInUSD !== `NaN`">{{ priceInUSD }} USD</p>
-          <p class="token-amount-usd" v-else>--</p>
+          <p class="token-amount-usd" v-else>0.000 USD</p>
           <p class="token-amount">{{token.balance}} {{token.name}}</p>
         </div>
         <p class="token-amount" v-else>loading...</p>

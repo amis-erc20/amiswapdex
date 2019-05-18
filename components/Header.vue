@@ -55,11 +55,11 @@ export default {
       updatePrice: "account/updatePrice"
     }),
     calculateBalance: function(balance) {
+      if (!balance) return 0.0;
       let formattedBalance = parseFloat(balance / Math.pow(10, 18)).toFixed(6);
       if (Number.isNaN(formattedBalance) || formattedBalance == "NaN")
-        return "0.000";
+        return 0.0;
       else return formattedBalance;
-      // return parseFloat(balance / Math.pow(10, 18)).toFixed(6);
     },
     refreshUSDPrices: async function() {
       let self = this;

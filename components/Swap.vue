@@ -5,7 +5,12 @@
         Buy or Sell
         <strong>{{getActiveToken}}</strong>
       </p>
-      <b-form @submit="onSubmit" @reset="onReset">
+      <div v-if="!shouldRender" class="no-exchange-yet">
+        <p>
+          <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
+        </p>
+      </div>
+      <b-form @submit="onSubmit" @reset="onReset" v-if="shouldRender">
         <label>Pay With</label>
         <b-form-group id="exampleInputGroup1">
           <b-form-select
@@ -173,7 +178,8 @@ import {
   unlockToken,
   swapEthToToken,
   swapTokenToToken,
-  metamaskSwap
+  metamaskSwap,
+  hasTokenUniswap
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -231,6 +237,10 @@ export default {
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance"
     }),
+    shouldRender: function() {
+      if (hasTokenUniswap(this.getActiveToken)) return true;
+      else return false;
+    },
     availableTokens: function() {
       let options = this.getAvailableTokenList
         .map(token => token.symbol)
@@ -972,5 +982,10 @@ form label {
 .exchange-info-container p {
   font-size: 13px;
   color: #223b48;
+}
+.no-exchange-yet p {
+  text-align: center;
+  margin: 30px auto;
+  line-height: 1.5;
 }
 </style>

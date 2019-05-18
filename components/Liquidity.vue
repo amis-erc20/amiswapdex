@@ -1,7 +1,12 @@
 <template>
   <div>
     <div id="uniswap-convert-section">
-      <b-form-group id="exampleInputGroup1">
+      <div v-if="!shouldRender" class="no-exchange-yet">
+        <p>
+          <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
+        </p>
+      </div>
+      <b-form-group v-if="shouldRender" id="exampleInputGroup1">
         <label>Add Liquidity / Remove Liquidity / Create Exchange</label>
         <b-form-select
           v-model="liquidity"
@@ -282,7 +287,8 @@ import {
   createNewExchange,
   getWeb3Metamask,
   metamaskAddLiquidity,
-  metamaskRemoveLiquidity
+  metamaskRemoveLiquidity,
+  hasTokenUniswap
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -344,6 +350,10 @@ export default {
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance"
     }),
+    shouldRender: function() {
+      if (hasTokenUniswap(this.getActiveToken)) return true;
+      else return false;
+    },
     availableTokens: function() {
       let options = tokenSymbols.map(symbol => {
         return {

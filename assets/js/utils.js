@@ -35,6 +35,34 @@ export const initContracts = async function (web3, availableTokens) {
     )
   }
 }
+export const createNewCotract = async function (web3, token) {
+  factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
+  tokenAddresses[token.symbol] = token.tokenAddress
+  const tokenContract = new web3.eth.Contract(
+    tokenABI,
+    token.tokenAddress
+  )
+  tokenContracts[token.symbol] = tokenContract
+  return tokenContract
+}
+export const hasTokenUniswap = function (symbol) {
+  if (exchangeAddresses[symbol]) {
+    return true
+  }
+  else return false
+}
+async function getCurrentReserve(exchangeAddress, tokenContract, web3) {
+  let ethReserve = await web3.eth.getBalance(exchangeAddress)
+
+  // https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress=0x862Da0A691bb0b74038377295f8fF523D0493eB4&apikey=YourApiKeyToken
+  let tokenSupply = await tokenContract.methods
+    .balanceOf(exchangeAddress)
+    .call()
+  return {
+    ethReserve: parseInt(ethReserve),
+    tokenReserve: parseInt(tokenSupply, 'hex')
+  }
+}
 export const getWeb3 = function () {
   return new Promise(function (resolve, reject) {
     try {
@@ -52,13 +80,18 @@ export const getWeb3 = function () {
 export const getWeb3Metamask = function () {
   return new Promise(function (resolve, reject) {
     try {
-      // let web3 = new Web3(Web3.givenProvider || "wss://mainnet.infura.io/ws");
+      if (!Web3.givenProvider._metamask) {
+        console.warn("Metamask web3 is overwritten by an another extension")
+        console.log(Web3.givenProvider)
+        resolve(null)
+      }
+      // web3.currentProvider.guardaWeb3
       let web3 = new Web3(Web3.givenProvider);
       resolve(web3)
     } catch (e) {
       console.log(e)
       console.log('Cannot get web3 instance for metamask')
-      reject('Cannot get web3 instance for metamask')
+      reject('false')
     }
   })
 }
@@ -160,11 +193,12 @@ export const getBalance = async function (address, web3) {
     return
   }
 }
-export const getTokenBalance = async function (address, currency, web3) {
+export const getTokenBalance = async function (address, currency, web3, ownedTokenList) {
   if (!address) return
   if (!tokenContracts[currency]) {
-    console.log(`Cannot find token contrat for ${currency}. Creating now...`)
-    await initContracts(web3)
+    console.warn(`Cannot find token contract for ${currency}. Creating now...`)
+    let tokenInfo = R.find(R.propEq('tokenName', currency))(ownedTokenList);
+    await createNewCotract(web3, { symbol: tokenInfo.tokenName, tokenAddress: tokenInfo.tokenAddress })
   }
   try {
     let tokenBalance = await tokenContracts[currency].methods

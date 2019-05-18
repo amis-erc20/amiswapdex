@@ -83,8 +83,8 @@ export default {
       const token = this.getAvailableTokenList.find(
         t => t.symbol === self.getActiveToken
       );
-      console.log(token);
-      return token.logo;
+      if (token) return token.logo;
+      else return "../_nuxt/assets/default-token.png";
     }
   },
   methods: {

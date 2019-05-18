@@ -49,6 +49,14 @@ export default {
           };
         }
         let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+        if (!token) {
+          return {
+            name: symbol,
+            balance: this.calculateBalance(self.getBalance[symbol] || 0.0),
+            balanceUsd: 0.0,
+            src: null
+          };
+        }
         return {
           name: symbol,
           balance: this.calculateBalance(self.getBalance[symbol]),
