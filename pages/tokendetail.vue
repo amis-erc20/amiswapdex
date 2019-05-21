@@ -6,26 +6,34 @@
     </div>
     <b-card no-body v-if="getConnection">
       <b-tabs pills card>
-        <b-tab title="Balance" active>
-          <Header/>
-          <Transactionlist/>
+        <b-tab title="Info" active v-if="getActiveToken !== 'ETH'">
+          <Info/>
         </b-tab>
-        <b-tab title="Receive" active>
-          <Receive/>
+        <b-tab title="Balance">
+          <Header v-if="getSignIn"/>
+          <Transactionlist v-if="getSignIn"/>
+          <Noaccount v-else/>
+        </b-tab>
+        <b-tab title="Receive">
+          <Receive v-if="getSignIn"/>
+          <Noaccount v-else/>
         </b-tab>
         <b-tab title="Send">
           <b-card-text>
-            <Send/>
+            <Send v-if="getSignIn"/>
+            <Noaccount v-else/>
           </b-card-text>
         </b-tab>
         <b-tab title="Swap">
           <b-card-text>
-            <Swap/>
+            <Swap v-if="getSignIn"/>
+            <Noaccount v-else/>
           </b-card-text>
         </b-tab>
-        <b-tab title="Pool">
+        <b-tab title="Pool" v-if="getActiveToken !== 'ETH'">
           <b-card-text>
-            <Liquidity/>
+            <Liquidity v-if="getSignIn"/>
+            <Noaccount v-else/>
           </b-card-text>
         </b-tab>
       </b-tabs>
@@ -38,15 +46,28 @@ import Transactionlist from "~/components/Transactionlist.vue";
 import Header from "~/components/Header.vue";
 import Nav from "~/components/Nav.vue";
 import Receive from "~/components/Receive.vue";
+import Info from "~/components/Info.vue";
 import Send from "~/components/Send.vue";
 import Swap from "~/components/Swap.vue";
 import Liquidity from "~/components/Liquidity.vue";
+import Noaccount from "~/components/Noaccount.vue";
 import { mapGetters, mapActions } from "vuex";
 export default {
-  components: { Transactionlist, Header, Nav, Receive, Send, Swap, Liquidity },
+  components: {
+    Transactionlist,
+    Header,
+    Nav,
+    Info,
+    Receive,
+    Send,
+    Swap,
+    Liquidity,
+    Noaccount
+  },
   computed: {
     ...mapGetters({
       getConnection: "getConnection",
+      getSignIn: "getSignIn",
       getAccount: "account/getAccount",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
@@ -149,7 +170,7 @@ export default {
 .token-detail-section .tab-pane.card-body {
   border: none;
   background-image: linear-gradient(to top, #dfe9f3 0%, white 100%) !important;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 100px);
 }
 .token-detail-section .tabs .card-header {
   padding: 0px;

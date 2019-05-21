@@ -13,6 +13,13 @@
     </b-form>
 
     <div class="exchangelist-section">
+      <div class="show-low-liquidity">
+        <b-form-checkbox
+          v-model="showLowLiquidityToken"
+          name="check-button"
+          switch
+        >Show tokens with liquidity less than 1 ETH</b-form-checkbox>
+      </div>
       <div class="exchangelist-title">
         <div class="title-order">No</div>
         <div class="title-name" @click="changeOrder(`name`)">
@@ -24,19 +31,6 @@
           />
           <font-awesome-icon
             v-if="orderBy[0] === 'name' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-left"
-            size="xs"
-          />
-        </div>
-        <div class="title-price" @click="changeOrder(`change`)">
-          24H Change
-          <font-awesome-icon
-            v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-right"
-            size="xs"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'change' && orderBy[1] === 'asc'"
             icon="long-arrow-alt-left"
             size="xs"
           />
@@ -54,6 +48,20 @@
             size="xs"
           />
         </div>
+        <div class="title-price" @click="changeOrder(`change`)">
+          24H Change
+          <font-awesome-icon
+            v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-right"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'change' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-left"
+            size="xs"
+          />
+        </div>
+
         <div class="title-volume" @click="changeOrder(`volume`)">
           24H Volume
           <font-awesome-icon
@@ -92,13 +100,11 @@
                 <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
                 <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
                 <img v-else-if="token.src" :src="token.src" alt>
-                <!-- <img
-                  v-else-if="token.tokenAddress"
-                  :src="`http://uniswapdex.com:8888/static/${token.tokenAddress.toLowerCase()}.png`"
-                  alt
-                >-->
                 <img v-else src="../assets/default-token.png">
                 <p>{{token.name}}</p>
+              </div>
+              <div class="token-price-container">
+                <p class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
               </div>
               <div class="token-price-container">
                 <p
@@ -111,9 +117,7 @@
                 >-{{ (Math.abs(token.change) * 100).toFixed(2) }}%</p>
                 <p v-if="token.change == 0" class="token-price-usd zero-change">0.00%</p>
               </div>
-              <div class="token-price-container">
-                <p class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
-              </div>
+
               <div class="token-volume-container">
                 <p class="token-volume">${{ numberWithCommas(token.volume.toFixed(0)) }}</p>
               </div>
@@ -211,7 +215,8 @@ export default {
       errorMessage: "",
       infoMessage: "",
       txHash: "",
-      loading: false
+      loading: false,
+      showLowLiquidityToken: false
     };
   },
   computed: {
@@ -231,29 +236,37 @@ export default {
     tokenList: function() {
       let self = this;
       let ethToUsd = this.ethToUsd;
-      let unsortedList = this.getAvailableTokenList.map(token => {
-        let summaryInfo = self.summary.find(s => s.token_id === token.id);
-        if (!summaryInfo)
+      let unsortedList = this.getAvailableTokenList
+        .map(token => {
+          let summaryInfo = self.summary.find(s => s.token_id === token.id);
+          if (!summaryInfo)
+            return {
+              name: token.symbol,
+              liquidity: 0,
+              volume: 0,
+              price: 0,
+              src: token.logo,
+              order: "-",
+              change: 0
+            };
           return {
             name: token.symbol,
-            liquidity: 0,
-            volume: 0,
-            price: 0,
+            tokenAddress: token.tokenAddress,
+            liquidity: summaryInfo.liquidity * ethToUsd,
+            volume: summaryInfo.volume_eth_1D * ethToUsd,
+            price: summaryInfo.price_last_1H * ethToUsd,
             src: token.logo,
-            order: "-",
-            change: 0
+            order: summaryInfo.order || "-",
+            change: summaryInfo.price_change_24h || 0
           };
-        return {
-          name: token.symbol,
-          tokenAddress: token.tokenAddress,
-          liquidity: summaryInfo.liquidity * ethToUsd,
-          volume: summaryInfo.volume_eth_1D * ethToUsd,
-          price: summaryInfo.price_last_1H * ethToUsd,
-          src: token.logo,
-          order: summaryInfo.order || "-",
-          change: summaryInfo.price_change_24h || 0
-        };
-      });
+        })
+        .filter(token => {
+          if (this.showLowLiquidityToken) {
+            return true;
+          } else {
+            return token.liquidity / ethToUsd > 1;
+          }
+        });
       let symbol;
       let filteredList;
       if (!this.form.query) {
@@ -282,38 +295,17 @@ export default {
           var textB = b.name.toUpperCase();
           return textB < textA ? -1 : textB > textA ? 1 : 0;
         });
-      } else if (orderyProperty === "change" && orderDir === "desc") {
-        let zeroChangeList = filteredList.filter(
-          t => parseFloat(t.change) === 0
-        );
-        let nonZeroChangeList = filteredList.filter(
-          t => parseFloat(t.change) > 0 || parseFloat(t.change) < 0
-        );
-        let sortedNonZeroChangeList = nonZeroChangeList.sort((a, b) => {
-          let y = Math.abs(parseFloat(b["change"]));
-          let x = Math.abs(parseFloat(a["change"]));
+      } else if (orderyProperty === "change") {
+        sortedList = filteredList.sort((a, b) => {
+          let y = parseFloat(b["change"]);
+          let x = parseFloat(a["change"]);
           if (orderDir === "desc") return y - x;
           else if (orderDir === "asc") return x - y;
         });
-        sortedList = R.concat(sortedNonZeroChangeList, zeroChangeList);
-      } else if (orderyProperty === "change" && orderDir === "asc") {
-        let zeroChangeList = filteredList.filter(
-          t => parseFloat(t.change) === 0
-        );
-        let nonZeroChangeList = filteredList.filter(
-          t => parseFloat(t.change) > 0 || parseFloat(t.change) < 0
-        );
-        let sortedNonZeroChangeList = nonZeroChangeList.sort((a, b) => {
-          let y = Math.abs(parseFloat(b["change"]));
-          let x = Math.abs(parseFloat(a["change"]));
-          if (orderDir === "desc") return y - x;
-          else if (orderDir === "asc") return x - y;
-        });
-        sortedList = R.concat(zeroChangeList, sortedNonZeroChangeList);
       } else {
         sortedList = filteredList.sort((a, b) => {
-          let y = parseFloat(b[orderyProperty.toLowerCase()]);
-          let x = parseFloat(a[orderyProperty.toLowerCase()]);
+          let y = b[orderyProperty.toLowerCase()];
+          let x = a[orderyProperty.toLowerCase()];
           if (orderDir === "desc") return y - x;
           else if (orderDir === "asc") return x - y;
         });
@@ -455,15 +447,17 @@ export default {
       this.errorMessage = "";
     },
     onSelectToken(name) {
-      if (this.getSignIn) {
-        this.updateActiveToken(name);
-        this.redirect("/tokendetail");
-      }
+      // if (this.getSignIn) {
+      //   this.updateActiveToken(name);
+      //   this.redirect("/tokendetail");
+      // }
       this.updateAuthRedirectUrl({
         url: "/tokendetail",
         token: name
       });
-      this.updateActiveTab("wallet");
+      this.updateActiveToken(name);
+      this.redirect("/tokendetail");
+      this.updateActiveTab("exchange");
     }
   },
   created: async function() {
@@ -530,7 +524,7 @@ export default {
   position: relative;
 }
 .exchangelist-title .title-price {
-  left: -20px;
+  left: -8px;
   position: relative;
 }
 
@@ -653,5 +647,15 @@ export default {
   margin: 30px auto;
   color: #434d6f;
   text-transform: uppercase;
+}
+.show-low-liquidity {
+  margin-bottom: 20px;
+  text-align: left;
+  font-weight: normal;
+}
+.show-low-liquidity label {
+  font-weight: normal;
+  font-size: 12px;
+  padding-top: 5px;
 }
 </style>

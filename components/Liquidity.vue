@@ -351,6 +351,7 @@ export default {
       getBalance: "account/getBalance"
     }),
     shouldRender: function() {
+      if (this.getActiveToken === "ETH") return false;
       if (hasTokenUniswap(this.getActiveToken)) return true;
       else return false;
     },

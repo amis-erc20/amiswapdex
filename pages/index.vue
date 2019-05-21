@@ -12,6 +12,7 @@
           </b-tab>
           <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
             <b-card-text v-if="getSignIn">
+              <!-- <b-card-text> -->
               <Header/>
               <Newtoken/>
               <Tokenlist/>
@@ -38,40 +39,17 @@
                 <strong>Add to Homescreen</strong>
               </b-modal>
             </b-card-text>
-            <div class="no-account-container" v-else>
-              <div>
-                <p>
-                  Please sign in or create a new
-                  <strong>uniswapDEX</strong> wallet.
-                </p>
-                <nuxt-link to="/signup">
-                  <b-button type="button" variant="outline-primary" id="backup-btn">Create Wallet</b-button>
-                </nuxt-link>
-                <nuxt-link to="/signin">
-                  <b-button type="button" variant="primary" id="backup-btn">Sign In</b-button>
-                </nuxt-link>
-              </div>
-              <div>
-                <p>
-                  Use
-                  <strong>Metamask</strong> Extension to access your wallet.
-                </p>
-                <nuxt-link to="/metamask">
-                  <b-button type="button" variant="outline-primary" id="metamask-btn">Metamask</b-button>
-                </nuxt-link>
-              </div>
-              <div>
-                <p>
-                  Use
-                  <strong>private key</strong> to access your wallet
-                </p>
-                <nuxt-link to="/privatekeysignin">
-                  <b-button type="button" variant="outline-primary" id="metamask-btn">Private Key</b-button>
-                </nuxt-link>
-              </div>
-            </div>
+            <Noaccount v-else/>
           </b-tab>
         </b-tabs>
+
+        <!-- Redirecting Modal -->
+        <b-modal
+          ref="redirecting_modal"
+          id="redirecting_modal"
+          title="Redirecting"
+          :hide-footer="true"
+        >Redirecting to token detail page</b-modal>
       </b-card>
     </div>
   </section>
@@ -111,6 +89,7 @@ import "bootstrap-vue/dist/bootstrap-vue.css";
 import VueQriously from "vue-qriously";
 import Offline from "v-offline";
 import vSelect from "vue-select";
+import Noaccount from "~/components/Noaccount.vue";
 
 import {
   getHistory,
@@ -164,7 +143,8 @@ export default {
     PeriodicBackup,
     Newtoken,
     Exchange,
-    NoConnection
+    NoConnection,
+    Noaccount
   },
   data: function() {
     return {
@@ -233,6 +213,8 @@ export default {
       this.$router.push(url);
     },
     showModal(ref) {
+      console.log(ref);
+      console.log(this.$refs);
       if (this.$refs[ref]) this.$refs[ref].show();
     },
     async updateUSDPrices() {
@@ -386,19 +368,34 @@ export default {
     }, this.backupCheckInterval);
     setInterval(self.updateTokenPrices, 5 * 60 * 1000);
     try {
-      let ownedTokenList = await getTokenHoldingByAnAccount(
-        self.getAccount.address
-      );
-      ownedTokenList.forEach(token => {
-        self.addToken(token.tokenName);
-      });
-      self.setOwnedTokenList(ownedTokenList);
+      if (self.getSignIn) {
+        let ownedTokenList = await getTokenHoldingByAnAccount(
+          self.getAccount.address
+        );
+        ownedTokenList.forEach(token => {
+          self.addToken(token.tokenName);
+        });
+        self.setOwnedTokenList(ownedTokenList);
+      }
     } catch (e) {
-      console.log("cannot get saved token list");
+      console.log("cannot get owned token list");
     }
   },
   mounted: async function() {
     let self = this;
+    let redirectTokenAddress = this.$route.query.token;
+    if (redirectTokenAddress) {
+      this.showModal("redirecting_modal");
+      setTimeout(() => {
+        let token = self.getAvailableTokenList.find(
+          t =>
+            t.tokenAddress.toLowerCase() === redirectTokenAddress.toLowerCase()
+        );
+        self.updateActiveToken(token.symbol);
+        self.redirect("/tokendetail");
+        self.updateActiveTab("exchange");
+      }, 1000);
+    }
     setTimeout(() => {
       if (isIos() && !isInStandaloneMode()) {
         let isShown = localStorage.getItem("isInstallMessageShown");
@@ -476,32 +473,15 @@ export default {
   position: relative;
   top: 50px;
 }
-.no-account-container {
-  position: relative;
-  /* top: 10vh; */
-}
-.no-account-container button {
-  min-width: 110px;
-  height: 40px;
-  font-size: 0.8rem;
-}
-.no-account-container > div {
-  border: 1px solid #dadada;
-  padding: 25px 15px;
-  width: 90%;
-  max-width: 550px;
-  box-shadow: none;
-  border-radius: 10px;
-  margin: 20px auto;
-  transition: 0.5s;
-}
-.no-account-container > div:hover {
-  box-shadow: 0px 4px 4px #dcdbdb;
-}
 div {
   outline: none;
 }
 #metamask-btn {
   width: 225px;
+}
+#redirecting_modal {
+  color: #333;
+  position: fixed;
+  top: 150px;
 }
 </style>
