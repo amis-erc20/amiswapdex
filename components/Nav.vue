@@ -1,7 +1,7 @@
 <template>
   <div class="nav-section">
     <nuxt-link to="/" v-if="currentRoute !== '/'">
-      <font-awesome-icon icon="chevron-left" size="lg" color="#fff"/>
+      <font-awesome-icon icon="chevron-left" size="lg" color="#fff" @click="onPressBack"/>
     </nuxt-link>
     <div class="title">
       <img v-if="currentRoute === '/tokendetail'" :src="activeTokenLogo" alt>
@@ -95,7 +95,8 @@ export default {
       resetTransactionList: "transaction/resetTransactionList",
       resetTokenTransactionList: "transaction/resetTokenTransactionList",
       setRefresher: "account/setRefresher",
-      resetTokenList: "account/resetTokenList"
+      resetTokenList: "account/resetTokenList",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
     hideModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].hide();
@@ -117,6 +118,14 @@ export default {
     },
     redirect(url) {
       this.$router.push(url);
+    },
+    onPressBack() {
+      console.log("going back to '/'")
+      if(this.currentRoute === "/tokendetail") {
+        this.updateAuthRedirectUrl({
+          tokenSubTab: "info"
+        })
+      }
     }
   }
 };

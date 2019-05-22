@@ -100,7 +100,8 @@ import {
   isInStandaloneMode,
   getETHToUSDPrice,
   getWeb3Metamask,
-  getTokenHoldingByAnAccount
+  getTokenHoldingByAnAccount,
+  getEthToUsdcPrice
 } from "../assets/js/utils";
 
 Vue.use(VueQriously);
@@ -178,6 +179,7 @@ export default {
       addToken: "account/addToken",
       setOwnedTokenList: "account/setOwnedTokenList",
       updatePrice: "account/updatePrice",
+      updateEthPrice: "account/updateEthPrice",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateBalance: "account/updateBalance",
       setRefresher: "account/setRefresher",
@@ -244,7 +246,6 @@ export default {
               balance: tokenBalance
             });
           }
-          // this.updateUSDPrices();
           let txList = await getHistory(account.address);
           let tokenTxList = await getTokenHistory(account.address);
           if (!Array.isArray(txList) || !Array.isArray(tokenTxList)) return;
@@ -335,8 +336,10 @@ export default {
     let availableTokens = await getAllListedToken();
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
+    getEthToUsdcPrice().then(price => {
+      self.updateEthPrice(price)
+    })
     await this.updateTokenPrices();
-
     if (self.getSignIn) {
       let accountType = self.getAccount.type;
       if (accountType === "metamask") {

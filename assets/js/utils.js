@@ -798,10 +798,10 @@ export const normaliseText = text => {
 }
 
 export const metamaskSendToken = async function (data) {
-  const { from, to, value, gasPrice, gasLimit, currency } = data
-  const ethereum = window.ethereum;
+  const { from, to, value, currency } = data
+  const ethereum = window.ethereum
   let web3 = await getWeb3Metamask()
-  let accounts = await ethereum.enable()
+  await ethereum.enable()
   web3.setProvider(ethereum);
   let selectedAddress = ethereum.selectedAddress
   let amount = web3.utils.toHex(value)
@@ -869,9 +869,19 @@ export const getAllListedToken = async () => {
 }
 export const getTokenHoldingByAnAccount = async (address) => {
   let listedTokens = {}
-  let response = await axios.get(`http://uniswapdex.com:8888/api/tokenholding?accountAddress=${address}`)
+  let response = await axios.get(`${CONFIG.uniswapDexServer}api/tokenholding?accountAddress=${address}`)
   let tokens = response.data.result
   return tokens
+}
+
+export const getEthToUsdcPrice = async () => {
+  let url = `${CONFIG.uniswapDexServer}api/event?tokenAddress=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&limit=10`
+  let response = await axios.get(url)
+  let events = response.data.result
+  for (let i = 0; i < events.length; i++) {
+    let event = events[i]
+    if (event.price > 0) return parseFloat(1 / event.price)
+  }
 }
 
 function wait(ms) {

@@ -3,15 +3,18 @@
     <div class="token-info-table">
       <b-row>
         <b-col>Name</b-col>
-        <b-col>{{ selectedToken.name }}</b-col>
+        <b-col v-if="getActiveToken === 'ETH'">Ether</b-col>
+        <b-col v-else>{{ selectedToken.name }}</b-col>
       </b-row>
       <b-row>
         <b-col>Symbol</b-col>
-        <b-col>{{ selectedToken.symbol }}</b-col>
+        <b-col v-if="getActiveToken === 'ETH'">ETH</b-col>
+        <b-col v-else>{{ selectedToken.symbol }}</b-col>
       </b-row>
       <b-row>
         <b-col>Price</b-col>
-        <b-col>${{ numberWithCommas(selectedToken.price.toFixed(2)) }}</b-col>
+        <b-col v-if="getActiveToken === 'ETH'">${{ numberWithCommas(getEthPrice.toFixed(2))}}</b-col>
+        <b-col v-else>${{ numberWithCommas(selectedToken.price.toFixed(2)) }}</b-col>
       </b-row>
       <b-row>
         <b-col>24H Change</b-col>
@@ -33,7 +36,7 @@
         <b-col>Liquidity</b-col>
         <b-col>${{ numberWithCommas(selectedToken.liquidity.toFixed(0)) }}</b-col>
       </b-row>
-      <b-row>
+      <b-row v-if="getActiveToken !== 'ETH'">
         <b-col>Token Address</b-col>
         <b-col cols="8">
           <a
@@ -42,7 +45,7 @@
           >{{ selectedToken.tokenAddress }}</a>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row v-if="getActiveToken !== 'ETH'">
         <b-col>Exchange Address</b-col>
         <b-col cols="8">
           <a
@@ -83,12 +86,16 @@ export default {
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
       getAvailableTokenList: "account/getAvailableTokenList",
-      getPrice: "account/getPrice"
+      getPrice: "account/getPrice",
+      getEthPrice: "account/getEthPrice"
     }),
     selectedToken: function() {
       let self = this;
+      let selectedTokenSymbol
+      if (this.getActiveToken === "ETH") selectedTokenSymbol = "USDC"
+      else selectedTokenSymbol = this.getActiveToken
       let token = this.getAvailableTokenList.find(
-        t => t.symbol === self.getActiveToken
+        t => t.symbol === selectedTokenSymbol
       );
       if (!this.summary)
         return {
@@ -129,6 +136,7 @@ export default {
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
     }
+    console.log(this.getEthPrice)
     this.ethToUsd = ethPrice;
   },
   methods: {

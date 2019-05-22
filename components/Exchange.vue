@@ -231,7 +231,8 @@ export default {
       getTokenTransactionListToken: "transaction/getTokenTransactionListToken",
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
-      getAvailableTokenList: "account/getAvailableTokenList"
+      getAvailableTokenList: "account/getAvailableTokenList",
+      getAuthRedirectUrl: "getAuthRedirectUrl",
     }),
     tokenList: function() {
       let self = this;
@@ -447,13 +448,10 @@ export default {
       this.errorMessage = "";
     },
     onSelectToken(name) {
-      // if (this.getSignIn) {
-      //   this.updateActiveToken(name);
-      //   this.redirect("/tokendetail");
-      // }
       this.updateAuthRedirectUrl({
         url: "/tokendetail",
-        token: name
+        token: name,
+        tokenSubTab: this.getAuthRedirectUrl.tokenSubTab || 'info'
       });
       this.updateActiveToken(name);
       this.redirect("/tokendetail");

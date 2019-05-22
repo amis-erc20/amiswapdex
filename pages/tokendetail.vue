@@ -6,31 +6,56 @@
     </div>
     <b-card no-body v-if="getConnection">
       <b-tabs pills card>
-        <b-tab title="Info" active v-if="getActiveToken !== 'ETH'">
+        <b-tab
+          title="Info"
+          :active="activeTokenSubTab === 'info'"
+          @click="onTokenTabChange('info')"
+        >
           <Info/>
         </b-tab>
-        <b-tab title="Balance">
+        <b-tab
+          :active="activeTokenSubTab === 'balance'"
+          title="Balance"
+          @click="onTokenTabChange('balance')"
+        >
           <Header v-if="getSignIn"/>
           <Transactionlist v-if="getSignIn"/>
           <Noaccount v-else/>
         </b-tab>
-        <b-tab title="Receive">
+        <b-tab
+          :active="activeTokenSubTab === 'receive'"
+          title="Receive"
+          @click="onTokenTabChange('receive')"
+        >
           <Receive v-if="getSignIn"/>
           <Noaccount v-else/>
         </b-tab>
-        <b-tab title="Send">
+        <b-tab
+          :active="activeTokenSubTab === 'send'"
+          title="Send"
+          @click="onTokenTabChange('send')"
+        >
           <b-card-text>
             <Send v-if="getSignIn"/>
             <Noaccount v-else/>
           </b-card-text>
         </b-tab>
-        <b-tab title="Swap">
+        <b-tab
+          :active="activeTokenSubTab === 'swap'"
+          title="Swap"
+          @click="onTokenTabChange('swap')"
+        >
           <b-card-text>
             <Swap v-if="getSignIn"/>
             <Noaccount v-else/>
           </b-card-text>
         </b-tab>
-        <b-tab title="Pool" v-if="getActiveToken !== 'ETH'">
+        <b-tab
+          :active="activeTokenSubTab === 'pool'"
+          title="Pool"
+          v-if="getActiveToken !== 'ETH'"
+          @click="onTokenTabChange('pool')"
+        >
           <b-card-text>
             <Liquidity v-if="getSignIn"/>
             <Noaccount v-else/>
@@ -69,6 +94,7 @@ export default {
       getConnection: "getConnection",
       getSignIn: "getSignIn",
       getAccount: "account/getAccount",
+      getAuthRedirectUrl: "getAuthRedirectUrl",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
       getActiveToken: "getActiveToken"
@@ -76,12 +102,24 @@ export default {
     getTxList: function() {
       if (this.getActiveToken === "ETH") return this.getTransactionList;
       else return this.getTokenTransactionList;
+    },
+    activeTokenSubTab: function() {
+      let redirectUrl = this.getAuthRedirectUrl;
+      return redirectUrl.tokenSubTab || "info";
     }
   },
   methods: {
     ...mapActions({
-      updateTransactionList: "transaction/updateTransactionList"
-    })
+      updateTransactionList: "transaction/updateTransactionList",
+      updateAuthRedirectUrl: "updateAuthRedirectUrl"
+    }),
+    onTokenTabChange(tabName) {
+      this.updateAuthRedirectUrl({
+        url: "/tokendetail",
+        token: this.getActiveToken,
+        tokenSubTab: tabName
+      });
+    }
   }
 };
 </script>
