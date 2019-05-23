@@ -215,8 +215,6 @@ export default {
       this.$router.push(url);
     },
     showModal(ref) {
-      console.log(ref);
-      console.log(this.$refs);
       if (this.$refs[ref]) this.$refs[ref].show();
     },
     async updateUSDPrices() {
@@ -231,7 +229,6 @@ export default {
       let account = this.getAccount;
       try {
         if (account) {
-          console.log("Refreshing...");
           const balance = await getBalance(account.address, web3);
           let tokenBalanceList = [];
           for (let i = 1; i < this.getTokenList.length; i++) {
@@ -337,8 +334,8 @@ export default {
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
     getEthToUsdcPrice().then(price => {
-      self.updateEthPrice(price)
-    })
+      self.updateEthPrice(price);
+    });
     await this.updateTokenPrices();
     if (self.getSignIn) {
       let accountType = self.getAccount.type;
@@ -370,6 +367,11 @@ export default {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
     setInterval(self.updateTokenPrices, 5 * 60 * 1000);
+    setInterval(async () => {
+      let allTokens = await getAllListedToken();
+      this.setAvailableTokenList(allTokens);
+      await initContracts(web3, allTokens);
+    }, 30000);
     try {
       if (self.getSignIn) {
         let ownedTokenList = await getTokenHoldingByAnAccount(

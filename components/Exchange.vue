@@ -336,14 +336,12 @@ export default {
     changeOrder(property, dir) {
       let currentOrderProperty = this.orderBy[0];
       let currentOrderDir = this.orderBy[1];
-      console.log(currentOrderProperty, currentOrderDir);
       let newDir = "desc";
       if (property === currentOrderProperty) {
         if (currentOrderDir === "asc") newDir = "desc";
         else if (currentOrderDir === "desc") newDir = "asc";
       }
       this.orderBy = [property, newDir];
-      console.log(this.orderBy);
     },
     redirect(url) {
       this.$router.push(url);
@@ -456,11 +454,14 @@ export default {
       this.updateActiveToken(name);
       this.redirect("/tokendetail");
       this.updateActiveTab("exchange");
+    },
+    async getSummary() {
+      let response = await axios.get(`${config.uniswapDexServer}api/summary`);
+      this.summary = response.data.result;
     }
   },
   created: async function() {
-    let response = await axios.get(`${config.uniswapDexServer}api/summary`);
-    this.summary = response.data.result;
+    await this.getSummary()
     let ethPrice = this.getPrice["ETH"];
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
@@ -469,7 +470,12 @@ export default {
     this.web3 = await getWeb3();
     this.web3Metamask = await getWeb3Metamask();
   },
-  mounted: async function() {}
+  mounted: async function() {
+    let self = this;
+    setInterval(() => {
+      self.getSummary()
+    }, 5000)
+  }
 };
 </script>
 

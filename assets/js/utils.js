@@ -48,10 +48,9 @@ export const createNewCotract = async function (web3, token) {
 export const hasTokenUniswap = function (symbol) {
   if (exchangeAddresses[symbol]) {
     return true
-  }
-  else return false
+  } else return false
 }
-async function getCurrentReserve(exchangeAddress, tokenContract, web3) {
+async function getCurrentReserve (exchangeAddress, tokenContract, web3) {
   let ethReserve = await web3.eth.getBalance(exchangeAddress)
 
   // https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress=0x862Da0A691bb0b74038377295f8fF523D0493eB4&apikey=YourApiKeyToken
@@ -72,7 +71,7 @@ export const getWeb3 = function () {
       )
       resolve(web3)
     } catch (e) {
-      console.log(e)
+      console.error(e)
       reject('Cannot get web3 instance')
     }
   })
@@ -81,17 +80,17 @@ export const getWeb3Metamask = function () {
   return new Promise(function (resolve, reject) {
     try {
       if (!Web3.givenProvider._metamask) {
-        console.warn("Metamask web3 is overwritten by an another extension")
+        console.warn('Metamask web3 is overwritten by an another extension')
         console.log(Web3.givenProvider)
         resolve(null)
       }
       // web3.currentProvider.guardaWeb3
-      let web3 = new Web3(Web3.givenProvider);
+      let web3 = new Web3(Web3.givenProvider)
       resolve(web3)
     } catch (e) {
       console.log(e)
       console.log('Cannot get web3 instance for metamask')
-      reject('false')
+      resolve(null)
     }
   })
 }
@@ -167,7 +166,6 @@ export const getHistory = async function (address) {
   } catch (e) {
     console.log(`ERROR - getHistory`)
     console.log(e)
-    return
   }
 }
 export const getTokenHistory = async function (address) {
@@ -179,7 +177,6 @@ export const getTokenHistory = async function (address) {
   } catch (e) {
     console.log(`ERROR - getTokenHistory`)
     console.log(e)
-    return
   }
 }
 export const getBalance = async function (address, web3) {
@@ -190,14 +187,13 @@ export const getBalance = async function (address, web3) {
   } catch (e) {
     console.log(`ERROR - getBalance`)
     console.log(e)
-    return
   }
 }
 export const getTokenBalance = async function (address, currency, web3, ownedTokenList) {
   if (!address) return
   if (!tokenContracts[currency]) {
     console.warn(`Cannot find token contract for ${currency}. Creating now...`)
-    let tokenInfo = R.find(R.propEq('tokenName', currency))(ownedTokenList);
+    let tokenInfo = R.find(R.propEq('tokenName', currency))(ownedTokenList)
     await createNewCotract(web3, { symbol: tokenInfo.tokenName, tokenAddress: tokenInfo.tokenAddress })
   }
   try {
@@ -245,15 +241,45 @@ export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) 
 
 export const estimateGas = async function (transaction, web3) {
   try {
+    console.log(web3.eth)
+    console.log(transaction)
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
-      to: transaction.to,
-      value: transaction.value,
-      data: transaction.data
-    }).call()
+      // to: transaction.to,
+      to: transaction.from,
+      value: transaction.value
+    })
     return gas
   } catch (e) {
-    console.log(e)
+    console.error(e)
+    return 0
+  }
+}
+export const estimateGasForSwap = async function (transaction, web3, exchangeAddress) {
+  try {
+    let contract = new web3.eth.Contract(
+      exchangeABI,
+      exchangeAddress
+    )
+    const blockNumber = await web3.eth.getBlockNumber()
+    const block = await web3.eth.getBlock(blockNumber)
+    const deadline = block.timestamp + 300
+    return new Promise(resolve => {
+      contract.methods
+        .tokenToEthSwapInput(100000, 1, deadline)
+        .estimateGas({ from: transaction.from })
+        .then(function (gasAmount) {
+          console.log(`Estimated gas for token swap: ${gasAmount}`)
+          resolve(gasAmount)
+        })
+        .catch(function (error) {
+          console.log('estimate gas error')
+          console.error(error)
+          resolve(0)
+        })
+    })
+  } catch (e) {
+    console.error(e)
     return 0
   }
 }
@@ -288,7 +314,6 @@ export const createNewExchange = async function (
   tokenAddress,
   privateKey
 ) {
-
   console.log(tx)
   let web3 = await getWeb3()
   let myAddress = tx.from
@@ -311,8 +336,8 @@ export const createNewExchange = async function (
     transactionParameters.gasLimit = web3.utils.toHex(estimatedGas)
   }
 
-  console.log(`Estimate gas: ${estimatedGas}`);
-  console.log(`Estimate gas price: ${gasPrice}`);
+  console.log(`Estimate gas: ${estimatedGas}`)
+  console.log(`Estimate gas price: ${gasPrice}`)
   console.log(transactionParameters)
 
   let transaction = await web3.eth.accounts.signTransaction(
@@ -597,7 +622,7 @@ export const metamaskAddLiquidity = async function (
         } else {
           resolve(data)
         }
-      });
+      })
   })
 }
 export const removeLiquidity = async function (
@@ -670,7 +695,7 @@ export const metamaskRemoveLiquidity = async function (
       tx.amount.toFixed(0),
       tx.ethWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
       tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
-      tx.deadline,
+      tx.deadline
     ).send({ from: myAddress }, (err, data) => {
       if (err) {
         console.log(e)
@@ -678,7 +703,7 @@ export const metamaskRemoveLiquidity = async function (
       } else {
         resolve(data)
       }
-    });
+    })
   })
 }
 
@@ -688,7 +713,7 @@ export const metamaskSwap = async function (data) {
   let { inputValue, inputCurrency, outputValue, outputCurrency, type } = data
   const blockNumber = await web3Metamask.eth.getBlockNumber()
   const block = await web3Metamask.eth.getBlock(blockNumber)
-  const deadline = block.timestamp + 300;
+  const deadline = block.timestamp + 300
   const accounts = await web3Metamask.eth.getAccounts()
   let exchangeContract
   if (type === 'ETH_TO_TOKEN') {
@@ -725,8 +750,7 @@ export const metamaskSwap = async function (data) {
             console.log(`Transaction is not submitted`)
             console.log(err)
             reject(err)
-          }
-          else {
+          } else {
             resolve(data)
           }
         })
@@ -762,10 +786,10 @@ export const metamaskSwap = async function (data) {
 }
 export const metamaskSendEth = async function (data) {
   let { from, to, value, gasPrice, gasLimit } = data
-  const ethereum = window.ethereum;
+  const ethereum = window.ethereum
   let web3 = await getWeb3Metamask()
   let accounts = await ethereum.enable()
-  web3.setProvider(ethereum);
+  web3.setProvider(ethereum)
   let selectedAddress = ethereum.selectedAddress
   const transactionParameters = {
     gasPrice: web3.utils.toHex(gasPrice),
@@ -802,7 +826,7 @@ export const metamaskSendToken = async function (data) {
   const ethereum = window.ethereum
   let web3 = await getWeb3Metamask()
   await ethereum.enable()
-  web3.setProvider(ethereum);
+  web3.setProvider(ethereum)
   let selectedAddress = ethereum.selectedAddress
   let amount = web3.utils.toHex(value)
   let count = await web3.eth.getTransactionCount(from)
@@ -884,7 +908,7 @@ export const getEthToUsdcPrice = async () => {
   }
 }
 
-function wait(ms) {
+function wait (ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
   })

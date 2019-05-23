@@ -171,6 +171,7 @@ import { tokenAddresses, exchangeAddresses } from "../assets/js/token";
 import {
   getWeb3,
   estimateGas,
+  estimateGasForSwap,
   estimateGasPrice,
   sendToken,
   signAndSendETH,
@@ -405,13 +406,14 @@ export default {
     },
     async getEstimatedGas(toAddress) {
       let value = this.form.inputValue || 1;
-      let estimatedGas = await estimateGas(
+      let estimatedGas = await estimateGasForSwap(
         {
           from: this.getAccount.address,
           to: toAddress,
-          amount: new BigNumber(value * Math.pow(10, 18))
+          amount: new BigNumber(value * Math.pow(10, 18)).toNumber()
         },
-        this.web3
+        this.web3,
+        toAddress
       );
       return estimatedGas;
     },
@@ -573,21 +575,30 @@ export default {
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
       let exchangeContract = exchangeContracts[outputCurrency];
-      console.log(this.getAccount);
       if (this.getAccount.type === "metamask") {
-        this.txHash = await metamaskSwap({
-          inputValue,
-          inputCurrency,
-          outputValue,
-          outputCurrency,
-          type,
-          exchangeContract
-        });
+        try {
+          this.txHash = await metamaskSwap({
+            inputValue,
+            inputCurrency,
+            outputValue,
+            outputCurrency,
+            type,
+            exchangeContract
+          });
+        } catch (e) {
+          console.error("Error while trying to submit tx using metamask");
+          console.error(e);
+        }
         if (this.txHash) {
           this.updateActiveToken(this.form.outputCurrency);
           this.onReset();
           this.loading = false;
           this.showModal("success_modal_ref");
+        } else {
+          this.onReset();
+          this.loading = false;
+          this.showModal("failed_modal_ref");
+          return;
         }
       } else {
         try {
