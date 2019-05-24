@@ -1,5 +1,12 @@
 <template>
   <div class="tokenlist-section">
+    <div class="show-zero-balance-tokens">
+      <b-form-checkbox
+        v-model="hideZeroAmountTokens"
+        name="check-button"
+        switch
+      >Hide tokens with zero token amount</b-form-checkbox>
+    </div>
     <b-card style="border-top: 0px; background: red">
       <b-list-group flush>
         <b-list-group-item
@@ -12,6 +19,9 @@
         </b-list-group-item>
       </b-list-group>
     </b-card>
+    <div v-if="tokenList.length == 0">
+      <b-spinner style="width: 2rem; height: 2rem;" label="Loading"></b-spinner>
+    </div>
   </div>
 </template>
 
@@ -23,7 +33,8 @@ export default {
   components: { Token },
   data: function() {
     return {
-      tokenAddresses: []
+      tokenAddresses: [],
+      hideZeroAmountTokens: true
     };
   },
   created: async function() {
@@ -40,30 +51,38 @@ export default {
     }),
     tokenList: function() {
       let self = this;
-      return this.getTokenList.map(symbol => {
-        if (symbol === "ETH" || symbol === "ULT") {
+      return this.getTokenList
+        .map(symbol => {
+          if (symbol === "ETH" || symbol === "ULT") {
+            return {
+              name: symbol,
+              balance: this.calculateBalance(self.getBalance[symbol]),
+              balanceUsd: 0.0
+            };
+          }
+          let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+          if (!token) {
+            return {
+              name: symbol,
+              balance: this.calculateBalance(self.getBalance[symbol] || 0.0),
+              balanceUsd: 0.0,
+              src: null
+            };
+          }
           return {
             name: symbol,
             balance: this.calculateBalance(self.getBalance[symbol]),
-            balanceUsd: 0.0
-          };
-        }
-        let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
-        if (!token) {
-          return {
-            name: symbol,
-            balance: this.calculateBalance(self.getBalance[symbol] || 0.0),
             balanceUsd: 0.0,
-            src: null
+            src: token.logo ? token.logo : null
           };
-        }
-        return {
-          name: symbol,
-          balance: this.calculateBalance(self.getBalance[symbol]),
-          balanceUsd: 0.0,
-          src: token.logo ? token.logo : null
-        };
-      });
+        })
+        .filter(token => {
+          if (self.hideZeroAmountTokens) {
+            if (token.balance > 0) return true;
+            else return false;
+          } else return true;
+        })
+        .sort((a, b) => b.balance - a.balance);
     }
   },
   methods: {
@@ -78,7 +97,7 @@ export default {
     calculateBalance: function(balance) {
       if (!balance || balance === 0) return 0;
       else {
-        var parsedBalance = parseFloat(balance / Math.pow(10, 18)).toFixed(6);
+        var parsedBalance = parseFloat(balance / Math.pow(10, 18));
         return parsedBalance;
       }
     }
@@ -104,7 +123,6 @@ export default {
   max-width: 650px;
   margin: 55px auto;
   margin-bottom: 0px;
-  /* border-bottom: 1px solid #d2dde6; */
 }
 .tokenlist-section .card {
   border: none;
@@ -118,5 +136,13 @@ export default {
 }
 .tokenlist-section h4 {
   font-size: 16px;
+}
+.show-zero-balance-tokens {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.show-zero-balance-tokens label {
+  font-weight: normal;
+  padding-top: 5px;
 }
 </style>

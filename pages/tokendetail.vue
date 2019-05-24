@@ -131,6 +131,7 @@ export default {
 }
 .transactionlist-section {
   box-shadow: 0px 4px 3px #eee;
+  min-height: 100px;
 }
 .transactionlist-section .card-header {
   background: #efefef;

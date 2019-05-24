@@ -4,7 +4,7 @@
       variant="outline-danger"
       id="add-more-token"
       @click="showModal(`add_more_token_modal`)"
-    >+ Add ERC-20 Token</b-button>
+    >+ Add Token to Wallet</b-button>
     <!-- add more token modal -->
     <b-modal
       ref="add_more_token_modal"

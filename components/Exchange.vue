@@ -11,8 +11,17 @@
         ></b-form-input>
       </b-form-group>
     </b-form>
-
-    <div class="exchangelist-section">
+    <div v-if="tokenList.length == 0 && form.query.length == 0">
+      <b-spinner style="width: 2rem; height: 2rem;" label="Loading"></b-spinner>
+    </div>
+    <div v-if="tokenList.length == 0 && form.query.length > 0">
+      <b-alert show variant="danger">
+        Token
+        <strong>{{form.query}}</strong> is not listed on Uniswap Exchange
+      </b-alert>
+      <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
+    </div>
+    <div v-if="tokenList.length > 0" class="exchangelist-section">
       <div class="show-low-liquidity">
         <b-form-checkbox
           v-model="showLowLiquidityToken"
@@ -104,7 +113,11 @@
                 <p>{{token.name}}</p>
               </div>
               <div class="token-price-container">
-                <p class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
+                <p
+                  v-if="token.price < 1"
+                  class="token-price-usd"
+                >${{ numberWithCommas(token.price.toFixed(4)) }}</p>
+                <p v-else class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
               </div>
               <div class="token-price-container">
                 <p
@@ -135,7 +148,12 @@
       </b-card>
     </div>
 
-    <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
+    <b-button
+      v-if="tokenList.length > 0"
+      id="listToken"
+      variant="primary"
+      @click="showListToken"
+    >+ List ERC-20 Token</b-button>
 
     <!-- LIST TOKEN MODAL -->
     <b-modal
@@ -232,7 +250,7 @@ export default {
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
-      getAuthRedirectUrl: "getAuthRedirectUrl",
+      getAuthRedirectUrl: "getAuthRedirectUrl"
     }),
     tokenList: function() {
       let self = this;
@@ -449,7 +467,7 @@ export default {
       this.updateAuthRedirectUrl({
         url: "/tokendetail",
         token: name,
-        tokenSubTab: this.getAuthRedirectUrl.tokenSubTab || 'info'
+        tokenSubTab: this.getAuthRedirectUrl.tokenSubTab || "info"
       });
       this.updateActiveToken(name);
       this.redirect("/tokendetail");
@@ -461,7 +479,7 @@ export default {
     }
   },
   created: async function() {
-    await this.getSummary()
+    await this.getSummary();
     let ethPrice = this.getPrice["ETH"];
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
@@ -473,8 +491,8 @@ export default {
   mounted: async function() {
     let self = this;
     setInterval(() => {
-      self.getSummary()
-    }, 5000)
+      self.getSummary();
+    }, 5000);
   }
 };
 </script>

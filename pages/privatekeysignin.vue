@@ -83,6 +83,7 @@ export default {
         privateKey
       } = await this.web3.eth.accounts.privateKeyToAccount(key);
       const account = { address, privateKey, balance: 0, type: "private_key" };
+      console.log(account)
       return account;
     },
     async onSubmitPrivateKey(evt) {

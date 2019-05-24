@@ -2,8 +2,10 @@
   <div class="tos-view">
     <Nav/>
     <div id="tos-description">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus dignissim erat nec malesuada. Nam eget elit lacinia, auctor mauris in, dapibus nisl. Phasellus mollis faucibus blandit. Proin consequat, libero eu venenatis tempus, lacus metus rhoncus urna, in congue risus arcu ut leo. Nam fermentum odio urna, ac dictum nisi vehicula at. Cras mauris orci, blandit mattis cursus posuere, ultrices sit amet lacus. Morbi suscipit, dolor scelerisque venenatis egestas, velit ex suscipit lacus, a laoreet dui neque quis ipsum. Maecenas interdum varius arcu non laoreet. Nam diam quam, suscipit a commodo ut, accumsan ac leo. Nulla pellentesque posuere auctor. In auctor vulputate est vitae ornare. In fringilla tristique dapibus. Sed ut iaculis felis, non finibus dolor.</p>
-      <p>Aliquam erat volutpat. In sagittis ex mauris, eu auctor orci interdum a. Nulla bibendum diam eget ultricies hendrerit. Nam pharetra purus varius nibh venenatis commodo. Duis ut dolor lobortis, auctor lorem et, fermentum lorem. Aliquam erat volutpat. Vestibulum ultrices, urna et interdum aliquam, tellus tellus finibus ipsum, a convallis ante velit sed ex. Curabitur id pellentesque nisi, sit amet luctus sem. Vivamus laoreet tellus lectus, ut sagittis nisi vehicula quis. Etiam tortor neque, elementum in lobortis vitae, egestas sed tortor. Vivamus rhoncus posuere suscipit. Sed eros lorem, mattis nec libero pulvinar, euismod viverra libero. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi tempus arcu id sapien pharetra, at volutpat eros laoreet.</p>
+      <p>The UniswapDEX.com service, henceforth referred to as Service provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by Uniswap.io.</p>
+      <p>The Service does not store your private keys. The safe storage of your private keys are your responsibility. If you lose your private keys or forget your password, we cannot help you in any way.</p>
+      <p><strong>THE Service IS PROVIDED TO YOU <em>‘AS IS’</em> AND WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND EITHER EXPRESSED OR IMPLIED.</strong></p>
+      <p>You agree to indemnify, defend and hold the Service harmless from any loss, claim or demand including attorneys’ fees and costs and any fines, fees or penalties imposed by any regulatory authority or any third party arising out of or related to your use of the Service and/or your violation of any law, rule, or regulation, or the rights of any third party.</p>
     </div>
   </div>
 </template>
@@ -44,6 +46,8 @@ export default {
   margin: 0 auto;
 }
 #tos-description p {
-  text-align: center;
+  text-align: left;
+  line-height: 1.5;
+  font-weight: normal;
 }
 </style>

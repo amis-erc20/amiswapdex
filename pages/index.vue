@@ -7,7 +7,8 @@
         <b-tabs pills card justified>
           <b-tab title="Exchange" :active="getActiveTab === `exchange`" @click="onTabChange">
             <b-card-text>
-              <Exchange/>
+              <Loading v-if="redirecting"/>
+              <Exchange v-else/>
             </b-card-text>
           </b-tab>
           <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
@@ -44,12 +45,12 @@
         </b-tabs>
 
         <!-- Redirecting Modal -->
-        <b-modal
+        <!-- <b-modal
           ref="redirecting_modal"
           id="redirecting_modal"
           title="Redirecting"
           :hide-footer="true"
-        >Redirecting to token detail page</b-modal>
+        >Redirecting to token detail page</b-modal>-->
       </b-card>
     </div>
   </section>
@@ -62,6 +63,7 @@ import Nav from "~/components/Nav.vue";
 import Newtoken from "~/components/Newtoken.vue";
 import Tokenlist from "~/components/Tokenlist.vue";
 import PeriodicBackup from "~/components/PeriodicBackup.vue";
+import Loading from "~/components/Loading.vue";
 import Exchange from "~/components/Exchange.vue";
 import NoConnection from "~/components/NoConnection.vue";
 import BootstrapVue from "bootstrap-vue";
@@ -145,14 +147,16 @@ export default {
     Newtoken,
     Exchange,
     NoConnection,
-    Noaccount
+    Noaccount,
+    Loading
   },
   data: function() {
     return {
       backupCheckInterval: 3 * 60 * 1000,
       ultInUSD: 0,
       currentTokenCount: 0,
-      refreshInterval: null
+      refreshInterval: null,
+      redirecting: false
     };
   },
   computed: {
@@ -390,25 +394,32 @@ export default {
     let self = this;
     let redirectTokenAddress = this.$route.query.token;
     if (redirectTokenAddress) {
-      this.showModal("redirecting_modal");
+      this.redirecting = true;
       setTimeout(() => {
-        let token = self.getAvailableTokenList.find(
-          t =>
-            t.tokenAddress.toLowerCase() === redirectTokenAddress.toLowerCase()
-        );
-        self.updateActiveToken(token.symbol);
-        self.redirect("/tokendetail");
-        self.updateActiveTab("exchange");
-      }, 1000);
-    }
-    setTimeout(() => {
-      if (isIos() && !isInStandaloneMode()) {
-        let isShown = localStorage.getItem("isInstallMessageShown");
-        if (isShown !== "true") {
-          this.showModal("install_modal");
+        try {
+          let token = self.getAvailableTokenList.find(
+            t =>
+              t.tokenAddress.toLowerCase() ===
+              redirectTokenAddress.toLowerCase()
+          );
+          self.updateActiveToken(token.symbol);
+          self.redirect("/tokendetail");
+          self.updateActiveTab("exchange");
+        } catch (e) {
+          console.log(e);
+          alert("Invalid Token Address !");
+          self.redirecting = false;
         }
-      }
-    }, 3000);
+      }, 3000);
+      setTimeout(() => {
+        if (isIos() && !isInStandaloneMode()) {
+          let isShown = localStorage.getItem("isInstallMessageShown");
+          if (isShown !== "true") {
+            this.showModal("install_modal");
+          }
+        }
+      }, 3000);
+    }
   }
 };
 </script>
@@ -462,11 +473,14 @@ export default {
 .nav-pills .nav-link {
   height: 64px;
   padding: 20px;
+  text-transform: uppercase;
+  color: #777777;
 }
 .nav-pills .nav-link.active {
   background: #fff;
-  color: #2752e4;
-  border-bottom: 2px solid #2752e4;
+  color: #2752e4 !important;
+  font-weight: bold;
+  border-bottom: 2px solid #4d62ac;
   border-radius: 0px;
 }
 .main-tab .card-header .nav-item {

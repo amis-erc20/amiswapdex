@@ -7,11 +7,9 @@
       <img v-if="currentRoute === '/tokendetail'" :src="activeTokenLogo" alt>
       <h4>{{ title }}</h4>
     </div>
-
     <b-button v-b-modal.settingModal variant="outline-light">
       <font-awesome-icon icon="bars" size="lg" color="#fff"/>
     </b-button>
-
     <b-modal ref="settingModal_ref" id="settingModal" title="Wallet Setting" :hide-footer="true">
       <b-list-group v-if="getSignIn">
         <b-list-group-item
@@ -34,7 +32,10 @@
         <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
         <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
       </b-list-group>
-      <p v-else>Please sign into your wallet first.</p>
+      <b-list-group v-else>
+        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
+        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+      </b-list-group>
     </b-modal>
     <no-connection/>
   </div>
@@ -84,6 +85,8 @@ export default {
         t => t.symbol === self.getActiveToken
       );
       if (token) return token.logo;
+      else if (this.getActiveToken === "ETH")
+        return "../_nuxt/assets/eth-logo.png";
       else return "../_nuxt/assets/default-token.png";
     }
   },
@@ -120,11 +123,11 @@ export default {
       this.$router.push(url);
     },
     onPressBack() {
-      console.log("going back to '/'")
-      if(this.currentRoute === "/tokendetail") {
+      console.log("going back to '/'");
+      if (this.currentRoute === "/tokendetail") {
         this.updateAuthRedirectUrl({
           tokenSubTab: "info"
-        })
+        });
       }
     }
   }

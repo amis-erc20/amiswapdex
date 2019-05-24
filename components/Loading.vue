@@ -1,0 +1,19 @@
+<template>
+  <div id="loading-background">
+    <b-spinner style="width: 6rem; height: 6rem;" label="Loading" variant="primary"></b-spinner>
+  </div>
+</template>
+<style>
+#loading-background {
+    background: rgb(51, 49, 49);
+    opacity: 0.8;
+    z-index: 999999;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    padding-top: 300px;
+}
+</style>
+

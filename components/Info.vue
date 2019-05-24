@@ -41,7 +41,7 @@
         <b-col cols="8">
           <a
             target="_blank"
-            :href="`https://etherscan.io/address/${selectedToken.tokenAddress}`"
+            :href="`https://etherscan.io/token/${selectedToken.tokenAddress}`"
           >{{ selectedToken.tokenAddress }}</a>
         </b-col>
       </b-row>
@@ -91,43 +91,49 @@ export default {
     }),
     selectedToken: function() {
       let self = this;
-      let selectedTokenSymbol
-      if (this.getActiveToken === "ETH") selectedTokenSymbol = "USDC"
-      else selectedTokenSymbol = this.getActiveToken
+      let selectedTokenSymbol;
+      if (this.getActiveToken === "ETH") selectedTokenSymbol = "USDC";
+      else selectedTokenSymbol = this.getActiveToken;
       let token = this.getAvailableTokenList.find(
         t => t.symbol === selectedTokenSymbol
       );
-      if (!this.summary)
+      if (!this.summary || !token)
         return {
-          name: token.name,
-          symbol: token.symbol,
+          name: this.getActiveToken,
+          symbol: this.getActiveToken,
           liquidity: 0,
           volume: 0,
           price: 0,
-          src: token.logo,
+          src: "/_nuxt/assets/default-token.png",
           order: "-",
           change: 0,
+          tokenAddress: "-",
+          exchangeAddress: "-"
+        };
+      else {
+        return {
+          name: token.name,
+          symbol: token.symbol,
+          tokenAddress: token.tokenAddress,
+          liquidity: this.summary.liquidity * this.ethToUsd,
+          volume: this.summary.volume_eth_1D * this.ethToUsd,
+          price: this.summary.price_last_1H * this.ethToUsd,
+          src: token.logo,
+          order: this.summary.order || "-",
+          change: this.summary.price_change_24h || 0,
           tokenAddress: token.tokenAddress,
           exchangeAddress: token.exchangeAddress
         };
-      return {
-        name: token.name,
-        symbol: token.symbol,
-        tokenAddress: token.tokenAddress,
-        liquidity: this.summary.liquidity * this.ethToUsd,
-        volume: this.summary.volume_eth_1D * this.ethToUsd,
-        price: this.summary.price_last_1H * this.ethToUsd,
-        src: token.logo,
-        order: this.summary.order || "-",
-        change: this.summary.price_change_24h || 0,
-        tokenAddress: token.tokenAddress,
-        exchangeAddress: token.exchangeAddress
-      };
+      }
     }
   },
   created: async function() {
+    let self = this;
+    let activeSymbol =
+      this.getActiveToken === "ETH" ? "USDC" : this.getActiveToken;
+    let token = this.getAvailableTokenList.find(t => t.symbol === activeSymbol);
     let url = `${config.uniswapDexServer}api/summary?tokenAddress=${
-      this.selectedToken.tokenAddress
+      token.tokenAddress
     }`;
     let response = await axios.get(url);
     this.summary = response.data.result;
@@ -136,7 +142,7 @@ export default {
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
     }
-    console.log(this.getEthPrice)
+    console.log(this.getEthPrice);
     this.ethToUsd = ethPrice;
   },
   methods: {

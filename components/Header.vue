@@ -16,7 +16,7 @@
           <span>{{getActiveToken}}</span>
         </h2>
         <div v-if="currentRoute === `/`" id="total-summary">
-          <h5>Total Value</h5>
+          <h5>TOTAL VALUE</h5>
           <h2>$ {{ getTotalValue.toFixed(3) }}</h2>
         </div>
       </div>
@@ -180,9 +180,11 @@ export default {
 }
 .balance-summary h2 {
   margin: 30px 20px;
-  font-size: 32px;
+  font-size: 38px;
+  font-weight: normal;
   position: relative;
   left: -20px;
+  color: #2a324e;
 }
 .balance-summary h2 > span {
   font-size: 18px;
@@ -223,11 +225,12 @@ export default {
   text-align: center;
 }
 #total-summary h2 {
-  font-size: 32px;
+  font-size: 45px;
   position: relative;
   left: 0px;
   margin: 10px auto;
-  font-weight: bold;
+  font-weight: normal;
+  color: #2f3c42;
 }
 #total-summary h5 {
   font-size: 16px;
