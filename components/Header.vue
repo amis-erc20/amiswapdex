@@ -56,53 +56,7 @@ export default {
     }),
     calculateBalance: function(balance) {
       if (!balance) return 0.0;
-      let formattedBalance = parseFloat(balance / Math.pow(10, 18)).toFixed(6);
-      if (Number.isNaN(formattedBalance) || formattedBalance == "NaN")
-        return 0.0;
-      else return formattedBalance;
-    },
-    refreshUSDPrices: async function() {
-      let self = this;
-      let unitPriceInUSD;
-      let shouldRefreshPrices = false;
-
-      this.getTokenList.forEach(symbol => {
-        if (!self.getPrice[symbol]) {
-          shouldRefreshPrices = true;
-        }
-      });
-
-      if (shouldRefreshPrices) {
-        console.log(`Getting USD prices from server...`);
-        let ultPrice = await getULTToUSDPrice();
-        let ethPrice = await getETHToUSDPrice();
-
-        this.updatePrice({
-          symbol: "ULT",
-          price: ultPrice
-        });
-        this.updatePrice({
-          symbol: "ETH",
-          price: ethPrice
-        });
-
-        this.getTokenList
-          .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
-          .forEach(async symbol => {
-            let tokenPrice = await getTokenToUSDPrice(symbol);
-            self.updatePrice({
-              symbol: symbol,
-              price: tokenPrice
-            });
-          });
-      }
-      await this.wait(500);
-
-      unitPriceInUSD = this.getPrice[this.getActiveToken];
-      this.priceInUSD = parseFloat(
-        this.calculateBalance(this.getBalance[this.getActiveToken]) *
-          unitPriceInUSD
-      ).toFixed(3);
+      return balance.toFixed(4);
     },
     wait(ms) {
       return new Promise(resolve => {
@@ -112,38 +66,7 @@ export default {
       });
     }
   },
-  mounted: async function() {
-    // let self = this;
-    // let unitPriceInUSD;
-    // if (!this.getPrice["ETH"]) {
-    //   console.log(`Getting prices from remote server...`);
-    //   let ultPrice = await getULTToUSDPrice();
-    //   let ethPrice = await getETHToUSDPrice();
-    //   this.updatePrice({
-    //     symbol: "ULT",
-    //     price: ultPrice
-    //   });
-    //   this.updatePrice({
-    //     symbol: "ETH",
-    //     price: ethPrice
-    //   });
-    //   this.getTokenList
-    //     .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
-    //     .forEach(async symbol => {
-    //       let tokenPrice = await getTokenToUSDPrice(symbol);
-    //       self.updatePrice({
-    //         symbol: symbol,
-    //         price: tokenPrice
-    //       });
-    //     });
-    // }
-    // unitPriceInUSD = this.getPrice[this.getActiveToken];
-    // this.priceInUSD = parseFloat(
-    //   this.calculateBalance(this.getBalance[this.getActiveToken]) *
-    //     unitPriceInUSD
-    // ).toFixed(3);
-    // setInterval(this.refreshUSDPrices, 1000 * 60 * 3);
-  }
+  mounted: async function() {}
 };
 </script>
 

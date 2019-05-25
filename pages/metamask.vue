@@ -43,7 +43,8 @@ import {
   getWeb3Metamask,
   isIos,
   isInStandaloneMode,
-  getAllListedToken
+  getAllListedToken,
+  getTokenHoldingByAnAccount
 } from "../assets/js/utils";
 import sjcl from "../assets/js/sjcl.js";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
@@ -88,7 +89,9 @@ export default {
   methods: {
     ...mapActions({
       addAccount: "account/addAccount",
+      addToken: "account/addToken",
       setAvailableTokenList: "account/setAvailableTokenList",
+      setOwnedTokenList: "account/setOwnedTokenList",
       updateAuthStatus: "updateAuthStatus",
       updateCredentials: "updateCredentials",
       updateActiveToken: "updateActiveToken",
@@ -153,6 +156,7 @@ export default {
       this.loading = false;
     },
     async signIn(metamaskAddress) {
+      let self = this;
       const account = {
         address: metamaskAddress,
         privateKey: null,
@@ -161,6 +165,7 @@ export default {
       };
       this.updateAuthStatus(true);
       this.addAccount(account);
+      this.loadWallet(metamaskAddress);
       let { url, token } = this.getAuthRedirectUrl;
       if (url === "/tokendetail" && token !== null) {
         this.updateActiveToken(token);
@@ -169,6 +174,15 @@ export default {
       } else {
         this.redirect("/");
       }
+    },
+    async loadWallet(address) {
+      let self = this;
+      let ownedTokenList = await getTokenHoldingByAnAccount(address);
+      ownedTokenList.forEach(token => {
+        self.addToken(token);
+      });
+      self.setOwnedTokenList(ownedTokenList);
+      console.log("Wallet loaded.")
     },
     showModal(ref) {
       this.$refs[ref].show();

@@ -4,6 +4,7 @@ import { exchangeABI, tokenABI, ERC20_ABI, factoryABI } from './abi'
 import { factoryAddress } from './token'
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
+import R from 'ramda'
 
 let exchangeAddresses = {}
 let tokenAddresses = {}
@@ -50,7 +51,7 @@ export const hasTokenUniswap = function (symbol) {
     return true
   } else return false
 }
-async function getCurrentReserve (exchangeAddress, tokenContract, web3) {
+async function getCurrentReserve(exchangeAddress, tokenContract, web3) {
   let ethReserve = await web3.eth.getBalance(exchangeAddress)
 
   // https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress=0x862Da0A691bb0b74038377295f8fF523D0493eB4&apikey=YourApiKeyToken
@@ -130,12 +131,19 @@ export const getETHToUSDPrice = async () => {
       let ethUsdPrice = response.data.transactions[0].price_eth_usd
       return ethUsdPrice
     }
+    // let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
+    // return response.data.result.ethusd
   } catch (e) {
     console.log(`ERROR - getETHToUSDPrice`)
     console.log(e)
     return 0
   }
 }
+async function test() {
+  let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
+  console.log(response.data.result.ethusd)
+}
+test()
 
 export const getEthAndUltPrice = async () => {
   let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
@@ -892,7 +900,6 @@ export const getAllListedToken = async () => {
   return tokens
 }
 export const getTokenHoldingByAnAccount = async (address) => {
-  let listedTokens = {}
   let response = await axios.get(`${CONFIG.uniswapDexServer}api/tokenholding?accountAddress=${address}`)
   let tokens = response.data.result
   return tokens
@@ -908,7 +915,7 @@ export const getEthToUsdcPrice = async () => {
   }
 }
 
-function wait (ms) {
+function wait(ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
   })

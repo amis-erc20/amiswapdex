@@ -30,7 +30,8 @@ import {
   getWeb3,
   isIos,
   isInStandaloneMode,
-  getAllListedToken
+  getAllListedToken,
+  getTokenHoldingByAnAccount
 } from "../assets/js/utils";
 import sjcl from "../assets/js/sjcl.js";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
@@ -68,6 +69,8 @@ export default {
   methods: {
     ...mapActions({
       addAccount: "account/addAccount",
+      addToken: "account/addToken",
+      setOwnedTokenList: "account/setOwnedTokenList",
       setAvailableTokenList: "account/setAvailableTokenList",
       updateAuthStatus: "updateAuthStatus",
       updateCredentials: "updateCredentials",
@@ -83,8 +86,16 @@ export default {
         privateKey
       } = await this.web3.eth.accounts.privateKeyToAccount(key);
       const account = { address, privateKey, balance: 0, type: "private_key" };
-      console.log(account)
       return account;
+    },
+    async loadWallet(address) {
+      let self = this;
+      let ownedTokenList = await getTokenHoldingByAnAccount(address);
+      ownedTokenList.forEach(token => {
+        self.addToken(token);
+      });
+      self.setOwnedTokenList(ownedTokenList);
+      console.log("Wallet loaded.");
     },
     async onSubmitPrivateKey(evt) {
       evt.preventDefault();
@@ -102,6 +113,7 @@ export default {
         account.type = "private_key";
         this.addAccount(account);
         this.updateAuthStatus(true);
+        this.loadWallet(account.address);
         let { url, token } = this.getAuthRedirectUrl;
         if (url === "/tokendetail" && token !== null) {
           this.updateActiveToken(token);
@@ -171,7 +183,7 @@ export default {
 .alert {
   font-size: 12px;
   width: 100%;
-  max-width: 450px;
+  max-width: 650px;
 }
 #signin-btn {
   width: 100%;

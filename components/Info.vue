@@ -14,7 +14,8 @@
       <b-row>
         <b-col>Price</b-col>
         <b-col v-if="getActiveToken === 'ETH'">${{ numberWithCommas(getEthPrice.toFixed(2))}}</b-col>
-        <b-col v-else>${{ numberWithCommas(selectedToken.price.toFixed(2)) }}</b-col>
+        <b-col v-else-if="selectedToken.price > 1">${{ selectedToken.price.toFixed(2) }}</b-col>
+        <b-col v-else-if="selectedToken.price < 1">${{ selectedToken.price.toFixed(4) }}</b-col>
       </b-row>
       <b-row>
         <b-col>24H Change</b-col>

@@ -100,18 +100,18 @@ export default {
       if (this.getTokenList.indexOf(this.selectedToken.title) !== -1) {
         return;
       }
-      this.addToken(this.selectedToken.title);
+      let foundToken = self.getAvailableTokenList.find(
+        t => t.symbol == self.selectedToken.title
+      );
+      console.log(foundToken);
+      this.addToken({
+        symbol: foundToken.symbol,
+        balance: 0,
+        tokenAddresses: foundToken.tokenAddress,
+        priceInUsd: 0
+      });
       this.hideModal("add_more_token_modal");
       this.selectedToken = "";
-      this.getTokenList
-        .filter(symbol => symbol !== "ETH" && symbol !== "ULT")
-        .forEach(async symbol => {
-          let tokenPrice = await getTokenToUSDPrice(symbol);
-          self.updatePrice({
-            symbol: symbol,
-            price: tokenPrice
-          });
-        });
       localStorage.setItem("tokenList", JSON.stringify(this.getTokenList));
     }
   }

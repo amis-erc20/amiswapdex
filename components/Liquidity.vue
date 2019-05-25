@@ -32,7 +32,7 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button variant="primary" id="currency-swap-button">
+        <b-button variant="primary" id="pool-swap-button">
           <font-awesome-icon icon="plus" size="lg" color="#fff"/>
         </b-button>
 
@@ -107,7 +107,7 @@
           <b-form-invalid-feedback :state="validateLiquidityInput">{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button variant="primary" id="currency-swap-button">
+        <b-button variant="primary" id="pool-swap-button">
           <font-awesome-icon icon="arrow-down" size="lg" color="#fff"/>
         </b-button>
 
@@ -1094,10 +1094,10 @@ label {
 #unlock_request_modal button[type="submit"] {
   width: 100%;
 }
-#currency-swap-button svg {
+#pool-swap-button svg {
   transform: rotateZ(0deg);
 }
-#currency-swap-button {
+#pool-swap-button {
   border-radius: 100px !important;
   width: 50px;
   height: 50px;

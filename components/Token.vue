@@ -10,8 +10,8 @@
       </div>
       <div class="token-amount-container">
         <div v-if="token.balance !== `NaN`">
-          <p class="token-amount-usd" v-if="priceInUSD && priceInUSD !== `NaN`">${{ priceInUSD }}</p>
-          <p class="token-amount-usd" v-else>$0.000</p>
+          <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
+          <p class="token-amount-usd" v-else>-</p>
           <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p>
         </div>
         <p class="token-amount" v-else>loading...</p>
@@ -36,7 +36,7 @@ export default {
   },
   data: function() {
     return {
-      priceInUSD: null
+      balanceInUsd: 0.0
     };
   },
   methods: {
@@ -44,20 +44,6 @@ export default {
       if (tokenName === "ETH") return `../assets/eth-logo.png`;
       if (tokenName === "ULT") return `../assets/logo.svg`;
       if (tokenName === "DAI") return `../assets/dai-logo.png`;
-    },
-    refreshUSDPrices: async function() {
-      let unitPriceInUSD = this.getPrice[this.token.name];
-      await this.wait(500);
-      if (this.token.name !== "DAI")
-        if (unitPriceInUSD < 1) {
-          this.priceInUSD = parseFloat(
-            this.token.balance * unitPriceInUSD
-          ).toFixed(4);
-        } else {
-          this.priceInUSD = parseFloat(
-            this.token.balance * unitPriceInUSD
-          ).toFixed(2);
-        }
     },
     wait(ms) {
       return new Promise(resolve => {
@@ -68,38 +54,15 @@ export default {
     }
   },
   mounted: async function() {
-    let unitPriceInUSD = this.getPrice[this.token.name];
-    await this.wait(500);
-
-    if (unitPriceInUSD < 1) {
-      this.priceInUSD = parseFloat(this.token.balance * unitPriceInUSD).toFixed(
-        4
-      );
-    } else if (unitPriceInUSD > 1) {
-      this.priceInUSD = parseFloat(this.token.balance * unitPriceInUSD).toFixed(
-        2
-      );
-    } else {
-      this.priceInUSD = 0.0;
-    }
-    setInterval(this.refreshUSDPrices, 60000);
+    let priceInUsd = this.token.priceInUsd;
+    this.balanceInUsd = this.token.balance * priceInUsd;
+    if (this.balanceInUsd === 0) this.balanceInUsd = "-";
+    else if (this.balanceInUsd < 1)
+      this.balanceInUsd = this.balanceInUsd.toFixed(4);
+    else if (this.balanceInUsd >= 1)
+      this.balanceInUsd = this.balanceInUsd.toFixed(2);
   },
-  updated: async function() {
-    let unitPriceInUSD = this.getPrice[this.token.name];
-    await this.wait(500);
-
-    if (unitPriceInUSD < 1) {
-      this.priceInUSD = parseFloat(this.token.balance * unitPriceInUSD).toFixed(
-        4
-      );
-    } else if (unitPriceInUSD > 1) {
-      this.priceInUSD = parseFloat(this.token.balance * unitPriceInUSD).toFixed(
-        2
-      );
-    } else {
-      this.priceInUSD = 0.0;
-    }
-  }
+  updated: async function() {}
 };
 </script>
 

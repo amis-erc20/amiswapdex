@@ -80,7 +80,8 @@ import {
   getWeb3,
   normaliseText,
   isIos,
-  isInStandaloneMode
+  isInStandaloneMode,
+  getTokenHoldingByAnAccount
 } from "../assets/js/utils";
 import sjcl from "../assets/js/sjcl.js";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
@@ -120,6 +121,8 @@ export default {
   methods: {
     ...mapActions({
       addAccount: "account/addAccount",
+      addToken: "account/addToken",
+      setOwnedTokenList: "account/setOwnedTokenList",
       updateAuthStatus: "updateAuthStatus",
       updateCredentials: "updateCredentials",
       updateActiveToken: "updateActiveToken",
@@ -177,8 +180,18 @@ export default {
       );
       this.updateCredentials({ Ep, De, Ps, E, Ns });
       this.updateAuthStatus(true);
+      this.loadWallet(newAccount.address);
       this.success = true;
       this.statusMessage = "Successfully created a new account !";
+    },
+    async loadWallet(address) {
+      let self = this;
+      let ownedTokenList = await getTokenHoldingByAnAccount(address);
+      ownedTokenList.forEach(token => {
+        self.addToken(token);
+      });
+      self.setOwnedTokenList(ownedTokenList);
+      console.log("Wallet loaded.");
     },
     onContinueToWallet() {
       let { url, token } = this.getAuthRedirectUrl;

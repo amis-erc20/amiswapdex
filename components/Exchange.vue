@@ -1,6 +1,5 @@
 <template>
   <section id="exchange-container">
-    <h4 id="main-title">Uniswap Decentralized Exchange</h4>
     <b-form>
       <b-form-group>
         <b-form-input
@@ -110,7 +109,10 @@
                 <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
                 <img v-else-if="token.src" :src="token.src" alt>
                 <img v-else src="../assets/default-token.png">
-                <p>{{token.name}}</p>
+                <div>
+                  <p>{{token.name}}</p>
+                  <p>{{token.fullname}}</p>
+                </div>
               </div>
               <div class="token-price-container">
                 <p
@@ -261,6 +263,7 @@ export default {
           if (!summaryInfo)
             return {
               name: token.symbol,
+              fullname: token.name,
               liquidity: 0,
               volume: 0,
               price: 0,
@@ -270,6 +273,7 @@ export default {
             };
           return {
             name: token.symbol,
+            fullname: token.name,
             tokenAddress: token.tokenAddress,
             liquidity: summaryInfo.liquidity * ethToUsd,
             volume: summaryInfo.volume_eth_1D * ethToUsd,
@@ -293,7 +297,10 @@ export default {
       } else {
         let searchKeyword = this.form.query.trim().toLowerCase();
         filteredList = unsortedList.filter(function(token) {
-          if (token.name.toLowerCase().indexOf(searchKeyword) !== -1) {
+          if (
+            token.name.toLowerCase().indexOf(searchKeyword) !== -1 ||
+            token.fullname.toLowerCase().indexOf(searchKeyword) !== -1
+          ) {
             return true;
           }
         });
@@ -546,8 +553,12 @@ export default {
   position: relative;
 }
 .exchangelist-title .title-price {
-  left: -8px;
+  left: 40px;
   position: relative;
+}
+.exchangelist-title .title-name {
+  position: relative;
+  left: -10px;
 }
 
 .exchangelist-section .card-body {
@@ -575,6 +586,22 @@ export default {
   font-size: 14px;
   font-weight: bold;
   margin: 0;
+  display: flex;
+  flex-grow: 0.4;
+}
+.exchangelist-section .token .token-name > div {
+  margin-left: 10px;
+}
+.exchangelist-section .token .token-name > div > p:nth-of-type(1) {
+  font-size: 12px;
+  text-align: left;
+  margin-bottom: 5px;
+}
+.exchangelist-section .token .token-name > div > p:nth-of-type(2) {
+  font-size: 10px;
+  text-align: left;
+  color: #666;
+  font-weight: normal;
 }
 .exchangelist-section .token .token-liquidity-usd,
 .exchangelist-section .token .token-price-usd,
@@ -602,6 +629,7 @@ export default {
 }
 .token-name img {
   width: 30px;
+  height: 30px;
 }
 .tokenlist-section a {
   text-decoration: none !important;

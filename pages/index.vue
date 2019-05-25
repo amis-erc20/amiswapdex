@@ -43,14 +43,6 @@
             <Noaccount v-else/>
           </b-tab>
         </b-tabs>
-
-        <!-- Redirecting Modal -->
-        <!-- <b-modal
-          ref="redirecting_modal"
-          id="redirecting_modal"
-          title="Redirecting"
-          :hide-footer="true"
-        >Redirecting to token detail page</b-modal>-->
       </b-card>
     </div>
   </section>
@@ -72,6 +64,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faLongArrowAltRight,
   faLongArrowAltLeft,
+  faArrowDown,
   faExchangeAlt,
   faInfo,
   faShare,
@@ -111,6 +104,7 @@ Vue.use(BootstrapVue);
 
 library.add(faLongArrowAltRight);
 library.add(faLongArrowAltLeft);
+library.add(faArrowDown);
 library.add(faExchangeAlt);
 library.add(faInfo);
 library.add(faShare);
@@ -233,44 +227,44 @@ export default {
       let account = this.getAccount;
       try {
         if (account) {
-          const balance = await getBalance(account.address, web3);
-          let tokenBalanceList = [];
-          for (let i = 1; i < this.getTokenList.length; i++) {
-            let tokenBalance = await getTokenBalance(
-              account.address,
-              this.getTokenList[i],
-              web3,
-              this.getOwnedTokenList
-            );
-            tokenBalanceList.push({
-              symbol: this.getTokenList[i],
-              balance: tokenBalance
-            });
-          }
+          console.log("Refreshing Wallet");
           let txList = await getHistory(account.address);
           let tokenTxList = await getTokenHistory(account.address);
           if (!Array.isArray(txList) || !Array.isArray(tokenTxList)) return;
+          let newTokenHolding = await getTokenHoldingByAnAccount(
+            account.address
+          );
+          let isTokenHoldingUpdated = self.checkTokenHoldingUpdate(
+            newTokenHolding
+          );
           if (
             txList.length !== this.getTransactionList.length ||
             tokenTxList.length !== this.getTokenTransactionList.length ||
-            balance !== this.getBalance["ETH"] ||
-            this.currentTokenCount !== tokenBalanceList.length
+            isTokenHoldingUpdated
           ) {
+            console.log("UPDATING TXS and WALLET BALANCES");
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
-            this.updateBalance({
-              symbol: "ETH",
-              balance
+            newTokenHolding.forEach(token => {
+              self.addToken(token);
             });
-            for (let i = 0; i < tokenBalanceList.length; i++) {
-              this.updateBalance(tokenBalanceList[i]);
-            }
-            this.currentTokenCount = tokenBalanceList.length;
+            self.setOwnedTokenList(newTokenHolding);
           }
         }
       } catch (e) {
         console.log(e);
       }
+    },
+    checkTokenHoldingUpdate(tokenHolding) {
+      let self = this;
+      for (let i = 0; i < tokenHolding.length; i++) {
+        let token = tokenHolding[i];
+        if (token.balance !== self.getBalance[token.symbol]) {
+          console.log(`Token balance is updated for ${token.symbol}`);
+          return true;
+        }
+      }
+      return false;
     },
     async checkRemoteBackup(web3) {
       if (!this.getSignIn) return;
@@ -376,19 +370,6 @@ export default {
       this.setAvailableTokenList(allTokens);
       await initContracts(web3, allTokens);
     }, 30000);
-    try {
-      if (self.getSignIn) {
-        let ownedTokenList = await getTokenHoldingByAnAccount(
-          self.getAccount.address
-        );
-        ownedTokenList.forEach(token => {
-          self.addToken(token.tokenName);
-        });
-        self.setOwnedTokenList(ownedTokenList);
-      }
-    } catch (e) {
-      console.log("cannot get owned token list");
-    }
   },
   mounted: async function() {
     let self = this;

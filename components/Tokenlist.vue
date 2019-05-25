@@ -29,6 +29,7 @@
 import Token from "~/components/Token.vue";
 import { mapActions, mapGetters } from "vuex";
 import { getAllListedToken } from "../assets/js/utils";
+import * as R from "ramda";
 export default {
   components: { Token },
   data: function() {
@@ -44,6 +45,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getTokenList: "account/getTokenList",
+      getPrice: "account/getPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
       getTransactionList: "transaction/getTransactionList",
       getBalance: "account/getBalance",
@@ -51,38 +53,27 @@ export default {
     }),
     tokenList: function() {
       let self = this;
-      return this.getTokenList
-        .map(symbol => {
-          if (symbol === "ETH" || symbol === "ULT") {
-            return {
-              name: symbol,
-              balance: this.calculateBalance(self.getBalance[symbol]),
-              balanceUsd: 0.0
-            };
-          }
-          let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
-          if (!token) {
-            return {
-              name: symbol,
-              balance: this.calculateBalance(self.getBalance[symbol] || 0.0),
-              balanceUsd: 0.0,
-              src: null
-            };
-          }
-          return {
-            name: symbol,
-            balance: this.calculateBalance(self.getBalance[symbol]),
-            balanceUsd: 0.0,
-            src: token.logo ? token.logo : null
-          };
-        })
+      let list = this.getTokenList.map(symbol => {
+        let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+        return {
+          name: symbol,
+          balance: self.getBalance[symbol],
+          priceInUsd: self.getPrice[symbol],
+          src: token ? token.logo : null
+        };
+      });
+      let ethToken = list.slice(0, 1);
+      let otherTokens = list
         .filter(token => {
+          if (token.name === "ETH") return false;
           if (self.hideZeroAmountTokens) {
             if (token.balance > 0) return true;
             else return false;
           } else return true;
         })
-        .sort((a, b) => b.balance - a.balance);
+        .sort((a, b) => b.priceInUsd - a.priceInUsd);
+      let sorted = R.concat(ethToken, otherTokens);
+      return sorted;
     }
   },
   methods: {
