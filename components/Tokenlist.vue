@@ -135,7 +135,7 @@ export default {
   font-size: 16px;
 }
 .tokenlist-section .wallet-title-name {
-  padding-left: 10px;
+  padding-left: 5px;
 }
 .show-zero-balance-tokens {
   text-align: center;
