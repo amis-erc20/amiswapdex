@@ -8,6 +8,21 @@
         <img v-else src="../assets/default-token.png">
         {{token.name}}
       </div>
+      <div class="token-price-container">
+        <div v-if="token.priceInUsd">
+          <p
+            class="token-price-in-usd"
+            v-if="token.priceInUsd < 1"
+          >${{ token.priceInUsd.toFixed(4) }}</p>
+          <p
+            class="token-price-in-usd"
+            v-if="token.priceInUsd >= 1"
+          >${{ token.priceInUsd.toFixed(2) }}</p>
+        </div>
+        <div v-else>
+          <p class="token-price-in-usd">-</p>
+        </div>
+      </div>
       <div class="token-amount-container">
         <div v-if="token.balance !== `NaN`">
           <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
@@ -78,6 +93,8 @@ export default {
   font-weight: bold;
   margin: 0;
   padding-top: 10px;
+  width: 100px;
+  text-align: left;
 }
 .token .token-amount {
   font-size: 11px;
@@ -91,6 +108,17 @@ export default {
   margin: 0;
   margin-bottom: 5px;
   text-align: right;
+}
+.token .token-price-container {
+  width: 100px;
+}
+.token .token-price-in-usd {
+  font-size: 13px;
+  margin: 0;
+  margin-bottom: 5px;
+  text-align: left;
+  padding-top: 15px;
+  font-weight: normal;
 }
 .token-name img {
   width: 30px;

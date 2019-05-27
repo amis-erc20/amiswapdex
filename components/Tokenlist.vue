@@ -7,6 +7,12 @@
         switch
       >Hide tokens with zero token amount</b-form-checkbox>
     </div>
+
+    <div class="exchangelist-title">
+      <div class="wallet-title-name">Token</div>
+      <div class="wallet-title-price">Price</div>
+      <div class="wallet-title-price">Balance</div>
+    </div>
     <b-card style="border-top: 0px; background: red">
       <b-list-group flush>
         <b-list-group-item
@@ -127,6 +133,9 @@ export default {
 }
 .tokenlist-section h4 {
   font-size: 16px;
+}
+.tokenlist-section .wallet-title-name {
+  padding-left: 10px;
 }
 .show-zero-balance-tokens {
   text-align: center;
