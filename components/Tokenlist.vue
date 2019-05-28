@@ -69,15 +69,16 @@ export default {
         };
       });
       let ethToken = list.slice(0, 1);
-      let otherTokens = list
-        .filter(token => {
-          if (token.name === "ETH") return false;
-          if (self.hideZeroAmountTokens) {
-            if (token.balance > 0) return true;
-            else return false;
-          } else return true;
-        })
-        .sort((a, b) => b.priceInUsd - a.priceInUsd);
+      let otherTokens = list.filter(token => {
+        if (token.name === "ETH") return false;
+        if (self.hideZeroAmountTokens) {
+          if (token.balance > 0) return true;
+          else return false;
+        } else return true;
+      });
+      otherTokens = otherTokens.sort(
+        (a, b) => b.priceInUsd * b.balance - a.priceInUsd * a.balance
+      );
       let sorted = R.concat(ethToken, otherTokens);
       return sorted;
     }
