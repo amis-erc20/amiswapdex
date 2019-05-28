@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { getULTToUSDPrice, getETHToUSDPrice } from "../assets/js/utils";
+import { getULTToUSDPrice } from "../assets/js/utils";
 import { mapGetters, mapActions } from "vuex";
 export default {
   props: {
@@ -47,12 +47,15 @@ export default {
   computed: {
     ...mapGetters({
       getPrice: "account/getPrice"
-    })
-  },
-  data: function() {
-    return {
-      balanceInUsd: 0.0
-    };
+    }),
+    balanceInUsd: function() {
+      if (this.token.balance && this.token.priceInUsd) {
+        let value = this.token.balance * this.token.priceInUsd;
+        if (value >= 1) return value.toFixed(2);
+        else if (value < 1) return value.toFixed(4);
+        else if (value === 1) return "-";
+      } else return "-";
+    }
   },
   methods: {
     getLogoUrl: function(tokenName) {
@@ -68,19 +71,7 @@ export default {
       });
     }
   },
-  mounted: async function() {
-    console.log(`${this.token.name} token balance: ${this.token.balance}`);
-    console.log(`${this.token.name} token price usd: ${this.token.priceInUsd}`);
-    this.balanceInUsd = this.token.balance * this.token.priceInUsd;
-    console.log(`${this.token.name} token balance usd: ${this.balanceInUsd}`);
-    console.log(`----------------`);
-    if (this.balanceInUsd === 0) this.balanceInUsd = "-";
-    else if (this.balanceInUsd < 1)
-      this.balanceInUsd = this.balanceInUsd.toFixed(4);
-    else if (this.balanceInUsd >= 1)
-      this.balanceInUsd = this.balanceInUsd.toFixed(2);
-  },
-  updated: async function() {}
+  mounted: async function() {}
 };
 </script>
 

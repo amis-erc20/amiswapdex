@@ -139,11 +139,6 @@ export const getETHToUSDPrice = async () => {
     return 0
   }
 }
-async function test() {
-  let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
-  console.log(response.data.result.ethusd)
-}
-test()
 
 export const getEthAndUltPrice = async () => {
   let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)

@@ -300,6 +300,7 @@ export default {
       }, this.backupCheckInterval);
     },
     async updateTokenPrices() {
+      console.log(`UPDATING TOKEN PRICES`);
       let self = this;
       let ethPrice = await getETHToUSDPrice();
       await self.updatePrice({
@@ -365,6 +366,7 @@ export default {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
     setInterval(self.updateTokenPrices, 5 * 60 * 1000);
+    // setInterval(self.updateTokenPrices, 2 * 60 * 1000);
     setInterval(async () => {
       let allTokens = await getAllListedToken();
       this.setAvailableTokenList(allTokens);

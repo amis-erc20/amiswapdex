@@ -34,7 +34,7 @@ export const mutations = {
     if (state.tokenList.indexOf(newToken.symbol) === -1) {
       state.tokenList.push(newToken.symbol)
     }
-    state.price[newToken.symbol] = newToken.priceInUsd
+    if (!state.price[newToken.symbol]) state.price[newToken.symbol] = newToken.priceInUsd
     state.balance[newToken.symbol] = newToken.balance
 
     state.totalValue = 0
