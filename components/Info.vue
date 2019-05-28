@@ -133,17 +133,18 @@ export default {
     let activeSymbol =
       this.getActiveToken === "ETH" ? "USDC" : this.getActiveToken;
     let token = this.getAvailableTokenList.find(t => t.symbol === activeSymbol);
-    let url = `${config.uniswapDexServer}api/summary?tokenAddress=${
-      token.tokenAddress
-    }`;
-    let response = await axios.get(url);
-    this.summary = response.data.result;
+    if (token) {
+      let url = `${config.uniswapDexServer}api/summary?tokenAddress=${
+        token.tokenAddress
+      }`;
+      let response = await axios.get(url);
+      this.summary = response.data.result;
+    }
 
     let ethPrice = this.getPrice["ETH"];
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
     }
-    console.log(this.getEthPrice);
     this.ethToUsd = ethPrice;
   },
   methods: {

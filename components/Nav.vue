@@ -4,7 +4,21 @@
       <font-awesome-icon icon="chevron-left" size="lg" color="#fff" @click="onPressBack"/>
     </nuxt-link>
     <div class="title">
-      <img v-if="currentRoute === '/tokendetail'" :src="activeTokenLogo" alt>
+      <img
+        v-if="currentRoute === '/tokendetail' && getActiveToken==='ETH'"
+        src="../assets/eth-logo.png"
+        alt
+      >
+      <img
+        v-else-if="currentRoute === '/tokendetail' && activeTokenLogo"
+        :src="activeTokenLogo"
+        alt
+      >
+      <img
+        v-else-if="currentRoute === '/tokendetail' && !activeTokenLogo"
+        src="../assets/default-token.png"
+        alt
+      >
       <h4>{{ title }}</h4>
     </div>
     <b-button v-b-modal.settingModal variant="outline-light">
@@ -85,9 +99,8 @@ export default {
         t => t.symbol === self.getActiveToken
       );
       if (token) return token.logo;
-      else if (this.getActiveToken === "ETH")
-        return "../_nuxt/assets/eth-logo.png";
-      else return "../_nuxt/assets/default-token.png";
+      else if (this.getActiveToken === "ETH") return null;
+      else return null;
     }
   },
   methods: {
@@ -123,7 +136,6 @@ export default {
       this.$router.push(url);
     },
     onPressBack() {
-      console.log("going back to '/'");
       if (this.currentRoute === "/tokendetail") {
         this.updateAuthRedirectUrl({
           tokenSubTab: "info"

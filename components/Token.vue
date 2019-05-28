@@ -69,8 +69,11 @@ export default {
     }
   },
   mounted: async function() {
-    let priceInUsd = this.token.priceInUsd;
-    this.balanceInUsd = this.token.balance * priceInUsd;
+    console.log(`${this.token.name} token balance: ${this.token.balance}`);
+    console.log(`${this.token.name} token price usd: ${this.token.priceInUsd}`);
+    this.balanceInUsd = this.token.balance * this.token.priceInUsd;
+    console.log(`${this.token.name} token balance usd: ${this.balanceInUsd}`);
+    console.log(`----------------`);
     if (this.balanceInUsd === 0) this.balanceInUsd = "-";
     else if (this.balanceInUsd < 1)
       this.balanceInUsd = this.balanceInUsd.toFixed(4);
