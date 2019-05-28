@@ -4,7 +4,7 @@ import { exchangeABI, tokenABI, ERC20_ABI, factoryABI } from './abi'
 import { factoryAddress } from './token'
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
-import R from 'ramda'
+import * as R from "ramda";
 
 let exchangeAddresses = {}
 let tokenAddresses = {}
@@ -89,7 +89,7 @@ export const getWeb3Metamask = function () {
       let web3 = new Web3(Web3.givenProvider)
       resolve(web3)
     } catch (e) {
-      console.log(e)
+      // console.log(e)
       console.log('Cannot get web3 instance for metamask')
       resolve(null)
     }
@@ -106,8 +106,8 @@ export const getExchangeAddress = async function (tokenAddress) {
     if (exchangeAddress) return exchangeAddress
     else return false
   } catch (e) {
-    console.log(`ERROR: cannot get exchange for token address: ${tokenAddress}`)
-    console.log(e)
+    // console.log(`ERROR: cannot get exchange for token address: ${tokenAddress}`)
+    // console.log(e)
     return false
   }
 }
@@ -119,8 +119,8 @@ export const getULTToUSDPrice = async () => {
       return response.data.transactions[0].close
     } else return 0
   } catch (e) {
-    console.log(`ERROR - getULToUSDPrice`)
-    console.log(e)
+    // console.log(`ERROR - getULToUSDPrice`)
+    // console.log(e)
   }
 }
 
@@ -134,8 +134,8 @@ export const getETHToUSDPrice = async () => {
     // let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
     // return response.data.result.ethusd
   } catch (e) {
-    console.log(`ERROR - getETHToUSDPrice`)
-    console.log(e)
+    // console.log(`ERROR - getETHToUSDPrice`)
+    // console.log(e)
     return 0
   }
 }
@@ -155,8 +155,8 @@ export const getTokenToUSDPrice = async (symbol) => {
     )
     return response.data.USD
   } catch (e) {
-    console.log(`ERROR - getTokenToUSDPrice`)
-    console.log(e)
+    // console.log(`ERROR - getTokenToUSDPrice`)
+    // console.log(e)
   }
 }
 
@@ -167,8 +167,8 @@ export const getHistory = async function (address) {
     let response = await axios.get(url)
     return response.data.result
   } catch (e) {
-    console.log(`ERROR - getHistory`)
-    console.log(e)
+    // console.log(`ERROR - getHistory`)
+    // console.log(e)
   }
 }
 export const getTokenHistory = async function (address) {
@@ -178,8 +178,8 @@ export const getTokenHistory = async function (address) {
     let response = await axios.get(url)
     return response.data.result
   } catch (e) {
-    console.log(`ERROR - getTokenHistory`)
-    console.log(e)
+    // console.log(`ERROR - getTokenHistory`)
+    // console.log(e)
   }
 }
 export const getBalance = async function (address, web3) {
@@ -188,8 +188,8 @@ export const getBalance = async function (address, web3) {
     let balance = await web3.eth.getBalance(address)
     return parseInt(balance)
   } catch (e) {
-    console.log(`ERROR - getBalance`)
-    console.log(e)
+    // console.log(`ERROR - getBalance`)
+    // console.log(e)
   }
 }
 export const getTokenBalance = async function (address, currency, web3, ownedTokenList) {
@@ -213,8 +213,8 @@ export const getTokenBalance = async function (address, currency, web3, ownedTok
     //   return parseInt(response.data.result)
     // }
   } catch (e) {
-    console.log(`ERROR - getTokenBalance`)
-    console.log(e)
+    // console.log(`ERROR - getTokenBalance`)
+    // console.log(e)
     return 0
   }
 }
@@ -236,15 +236,14 @@ export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) 
     let absPrice = tokenRserve.dividedBy(ethReserve)
     return absPrice
   } catch (e) {
-    console.log(`ERROR - getAbsPrice`)
-    console.log(e)
+    // console.log(`ERROR - getAbsPrice`)
+    // console.log(e)
     return 0
   }
 }
 
 export const estimateGas = async function (transaction, web3) {
   try {
-    console.log(web3.eth)
     console.log(transaction)
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
@@ -908,6 +907,46 @@ export const getEthToUsdcPrice = async () => {
     let event = events[i]
     if (event.price > 0) return parseFloat(1 / event.price)
   }
+}
+
+export const isValidHex = (inputString) => {
+  var re = /^[0-9a-fA-F]+$/
+  if (re.test(inputString)) {
+    re.lastIndex = 0
+    return true
+  } else {
+    re.lastIndex = 0
+    return false
+  }
+}
+export const isValidAddress = (key) => {
+  if (!key) return false
+  let normalisedKey = key.trim().toLowerCase()
+  if (normalisedKey.length !== 42) return false
+  if (normalisedKey === '0'.repeat(42)) return false
+  let keyToCheck
+  if (normalisedKey[0] === '0' && normalisedKey[1] === 'x') {
+    keyToCheck = normalisedKey.slice(2)
+  } else {
+    keyToCheck = normalisedKey
+  }
+  if (!isValidHex(keyToCheck)) return false
+  return true
+}
+export const isValidPrivateKey = (key) => {
+  let normalisedKey = key.trim().toLowerCase()
+  let keyToCheck
+  let finalKey
+  if (normalisedKey[0] === '0' && normalisedKey[1] === 'x') {
+    keyToCheck = normalisedKey.slice(2)
+    finalKey = normalisedKey
+  } else {
+    keyToCheck = normalisedKey
+    finalKey = '0x' + normalisedKey
+  }
+  if (keyToCheck.length !== 64) return false
+  if (!isValidHex(keyToCheck)) return false
+  return finalKey
 }
 
 function wait(ms) {

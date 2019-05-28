@@ -131,6 +131,9 @@ export default {
         this.setRefresher(false);
       }
       this.$router.push("/");
+      setTimeout(() => {
+        document.location.reload(true);
+      }, 200);
     },
     redirect(url) {
       this.$router.push(url);

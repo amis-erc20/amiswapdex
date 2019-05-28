@@ -102,7 +102,8 @@ import {
   sendToken,
   signAndSendETH,
   metamaskSendEth,
-  metamaskSendToken
+  metamaskSendToken,
+  isValidAddress
 } from "../assets/js/utils";
 import Vue from "vue";
 import VueQrcodeReader from "vue-qrcode-reader";
@@ -153,31 +154,25 @@ export default {
       getBalance: "account/getBalance"
     }),
     validateTargetAddress() {
-      if (this.form.targetAddress.length !== 42) return false;
-      if (this.form.targetAddress === "0".repeat(42)) return false;
-      return true;
+      return isValidAddress(this.form.targetAddress);
     },
     validateAmount() {
       let amount = parseFloat(this.form.amount);
       const isNaN = Number.isNaN(amount);
       if (isNaN || amount <= 0) return false;
       let txFee = this.txFee;
-      let ethBalance = parseFloat(this.getBalance["ETH"] / Math.pow(10, 18));
-      let ultBalance = parseFloat(this.getBalance["ULT"] / Math.pow(10, 18));
-      let daiBalance = parseFloat(this.getBalance["DAI"] / Math.pow(10, 18));
+      let ethBalance = parseFloat(this.getBalance["ETH"]);
       if (this.form.currency === "ETH") {
         if (amount + txFee > ethBalance) {
           this.inputErrorMessage = "Not enough ETH balance or transaction fee";
           return false;
         }
-      } else if (this.form.currency === "ULT") {
-        if (amount > ultBalance || txFee > ethBalance) {
-          this.inputErrorMessage = "Not enough ULT balance or transaction fee";
-          return false;
-        }
-      } else if (this.form.currency === "DAI") {
-        if (amount > daiBalance || txFee > ethBalance) {
-          this.inputErrorMessage = "Not enough DAI balance or transaction fee";
+      } else if (this.form.currency !== "ETH") {
+        let tokenBalance = parseFloat(this.getBalance[this.form.currency]);
+        console.log(`Token Balance: ${tokenBalance}`);
+        if (amount > tokenBalance || txFee > ethBalance) {
+          this.inputErrorMessage =
+            "Not enough token balance or transaction fee";
           return false;
         }
       }
@@ -256,7 +251,7 @@ export default {
           });
         }
         if (this.txHash) {
-          this.updateActiveToken(this.form.outputCurrency);
+          this.updateActiveToken(this.form.currency);
           this.onReset();
           this.loading = false;
           this.showModal("success_modal_ref");
@@ -330,16 +325,11 @@ export default {
         this.txFee =
           (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
         if (this.form.currency === "ETH") {
-          this.form.amount =
-            parseFloat(this.getBalance["ETH"] / Math.pow(10, 18)) - this.txFee;
+          this.form.amount = parseFloat(this.getBalance["ETH"]) - this.txFee;
         } else if (this.form.currency === "ULT") {
-          this.form.amount = parseFloat(
-            this.getBalance["ULT"] / Math.pow(10, 18)
-          );
+          this.form.amount = parseFloat(this.getBalance["ULT"]);
         } else if (this.form.currency === "DAI") {
-          this.form.amount = parseFloat(
-            this.getBalance["DAI"] / Math.pow(10, 18)
-          );
+          this.form.amount = parseFloat(this.getBalance["DAI"]);
         }
       } catch (e) {
         console.log(e);

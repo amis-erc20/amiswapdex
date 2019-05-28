@@ -5,8 +5,12 @@
       <no-connection/>
       <h6>Please provide your private key to access your wallet</h6>
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
-      <p v-if="loading" class="status-message">{{statusMessage}}</p>
-      <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
+      <b-alert
+        v-if="!loading && errorMessage.length > 0"
+        show
+        fade
+        variant="danger"
+      >{{errorMessage}}</b-alert>
 
       <!-- PRIVATE KEY SIGN IN -->
       <b-form @submit="onSubmitPrivateKey">
@@ -31,7 +35,8 @@ import {
   isIos,
   isInStandaloneMode,
   getAllListedToken,
-  getTokenHoldingByAnAccount
+  getTokenHoldingByAnAccount,
+  isValidPrivateKey
 } from "../assets/js/utils";
 import sjcl from "../assets/js/sjcl.js";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
@@ -53,6 +58,7 @@ export default {
       errorMessage: "",
       web3: null,
       statusMessage: "",
+      errorMessage: "",
       credentials: null,
       Ns: null
     };
@@ -100,16 +106,20 @@ export default {
     async onSubmitPrivateKey(evt) {
       evt.preventDefault();
       this.loading = true;
+      let validKey = isValidPrivateKey(this.form.privateKey);
+      if (!validKey) {
+        this.errorMessage = "Invalid Private Key";
+        this.loading = false;
+        return;
+      }
       await this.wait(100);
       this.statusMessage = "Retrieving your wallet using your private key...";
-      await this.signIn();
+      await this.signIn(validKey);
       this.loading = false;
     },
-    async signIn() {
+    async signIn(key) {
       try {
-        const account = await this.getAccountFromPrivateKey(
-          this.form.privateKey
-        );
+        const account = await this.getAccountFromPrivateKey(key);
         account.type = "private_key";
         this.addAccount(account);
         this.updateAuthStatus(true);
@@ -174,7 +184,7 @@ export default {
   font-size: 13px;
 }
 #signin-section form {
-  width: 90%;
+  width: 100%;
 }
 #signin-section p {
   font-size: 12px;

@@ -306,7 +306,7 @@ export default {
       if (!this.validateinputValue) return false;
       let amount = parseFloat(this.form.inputValue * 1);
       let txFee = this.txFee;
-      let ethBalance = parseFloat(this.getBalance["ETH"] / Math.pow(10, 18));
+      let ethBalance = parseFloat(this.getBalance["ETH"]);
 
       if (this.form.inputCurrency === "ETH") {
         if (amount + txFee > ethBalance) {
@@ -314,9 +314,7 @@ export default {
           return false;
         }
       } else {
-        let tokenBalance = parseFloat(
-          this.getBalance[this.form.inputCurrency] / Math.pow(10, 18)
-        );
+        let tokenBalance = parseFloat(this.getBalance[this.form.inputCurrency]);
         if (amount > tokenBalance || txFee > ethBalance) {
           this.inputErrorMessage =
             "Not enough token balance or transaction fee";
@@ -393,12 +391,10 @@ export default {
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (this.form.inputCurrency === "ETH") {
-        console.log(this.getBalance["ETH"] / Math.pow(10, 18), this.txFee);
-        this.form.inputValue =
-          parseFloat(this.getBalance["ETH"] / Math.pow(10, 18)) - this.txFee;
+        this.form.inputValue = parseFloat(this.getBalance["ETH"]) - this.txFee;
       } else {
         this.form.inputValue = parseFloat(
-          this.getBalance[this.form.inputCurrency] / Math.pow(10, 18)
+          this.getBalance[this.form.inputCurrency]
         );
       }
       this.lastEditedField = "input";
