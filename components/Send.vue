@@ -393,13 +393,16 @@ export default {
   max-width: 650px;
   margin: 30px auto;
   text-align: center;
-  padding-top: 65px;
+  padding-top: 20px;
 }
 .send-section img {
   width: 120px;
   margin: 20px auto;
 }
 .form-group {
+  text-align: left;
+}
+.form-group label {
   text-align: left;
 }
 .send-section form button {

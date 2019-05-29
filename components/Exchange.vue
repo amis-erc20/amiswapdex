@@ -203,8 +203,71 @@
     </b-modal>
 
     <!-- Token Info Modal -->
-    <b-modal ref="token_info_modal" id="token_info_modal" title="Token Info" :hide-footer="true">
-      <Info/>
+    <b-modal
+      ref="token_info_modal"
+      id="token_info_modal"
+      :title="getActiveToken"
+      :hide-footer="true"
+    >
+      <b-card no-body>
+        <b-tabs pills card id="token-info-tabs-container">
+          <b-tab
+            title="Info"
+            :active="activeTokenSubTab === 'info'"
+            @click="onTokenTabChange('info')"
+          >
+            <Info/>
+          </b-tab>
+          <b-tab
+            :active="activeTokenSubTab === 'balance'"
+            title="Balance"
+            @click="onTokenTabChange('balance')"
+          >
+            <Header v-if="getSignIn"/>
+            <Transactionlist v-if="getSignIn"/>
+            <Noaccount v-else/>
+          </b-tab>
+          <b-tab
+            :active="activeTokenSubTab === 'receive'"
+            title="Receive"
+            @click="onTokenTabChange('receive')"
+          >
+            <Receive v-if="getSignIn"/>
+            <Noaccount v-else/>
+          </b-tab>
+          <b-tab
+            :active="activeTokenSubTab === 'send'"
+            title="Send"
+            @click="onTokenTabChange('send')"
+          >
+            <b-card-text>
+              <Send v-if="getSignIn"/>
+              <Noaccount v-else/>
+            </b-card-text>
+          </b-tab>
+          <b-tab
+            :active="activeTokenSubTab === 'swap'"
+            title="Swap"
+            @click="onTokenTabChange('swap')"
+          >
+            <b-card-text>
+              <Swap v-if="getSignIn && getConnection"/>
+              <Noaccount v-else/>
+            </b-card-text>
+          </b-tab>
+          <b-tab
+            :active="activeTokenSubTab === 'pool'"
+            title="Pool"
+            v-if="getActiveToken !== 'ETH'"
+            @click="onTokenTabChange('pool')"
+          >
+            <b-card-text>
+              <Liquidity v-if="getSignIn && getConnection"/>
+              <Noaccount v-else/>
+            </b-card-text>
+          </b-tab>
+        </b-tabs>
+      </b-card>
     </b-modal>
   </section>
 </template>
@@ -214,7 +277,14 @@ import Vue from "vue";
 import axios from "axios";
 import * as R from "ramda";
 import Token from "~/components/Token.vue";
+import Transactionlist from "~/components/Transactionlist.vue";
+import Header from "~/components/Header.vue";
+import Receive from "~/components/Receive.vue";
 import Info from "~/components/Info.vue";
+import Send from "~/components/Send.vue";
+import Swap from "~/components/Swap.vue";
+import Liquidity from "~/components/Liquidity.vue";
+import Noaccount from "~/components/Noaccount.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
@@ -236,7 +306,17 @@ import {
 import { setTimeout } from "timers";
 import config from "../config";
 export default {
-  components: { Token, Info },
+  components: {
+    Token,
+    Noaccount,
+    Transactionlist,
+    Header,
+    Info,
+    Receive,
+    Send,
+    Swap,
+    Liquidity
+  },
   data: function() {
     return {
       form: {
@@ -270,8 +350,19 @@ export default {
       getTokenList: "account/getTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
       getAuthRedirectUrl: "getAuthRedirectUrl",
-      getActiveTab: "getActiveTab"
+      getActiveTab: "getActiveTab",
+      getTransactionList: "transaction/getTransactionList",
+      getTokenTransactionList: "transaction/getTokenTransactionList",
+      getActiveToken: "getActiveToken"
     }),
+    getTxList: function() {
+      if (this.getActiveToken === "ETH") return this.getTransactionList;
+      else return this.getTokenTransactionList;
+    },
+    activeTokenSubTab: function() {
+      let redirectUrl = this.getAuthRedirectUrl;
+      return redirectUrl.tokenSubTab || "info";
+    },
     tokenList: function() {
       let self = this;
       let ethToUsd = this.ethToUsd;
@@ -372,6 +463,13 @@ export default {
       updateTokenTransactionListToken:
         "transaction/updateTokenTransactionListToken"
     }),
+    onTokenTabChange(tabName) {
+      this.updateAuthRedirectUrl({
+        url: "/tokendetail",
+        token: this.getActiveToken,
+        tokenSubTab: tabName
+      });
+    },
     numberWithCommas(x) {
       var parts = x.toString().split(".");
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -595,7 +693,7 @@ export default {
 }
 
 .exchangelist-title .title-volume {
-  left: 10px;
+  left: 20px;
   position: relative;
 }
 .exchangelist-title .title-price {
@@ -655,7 +753,7 @@ export default {
 .exchangelist-section .token .token-volume {
   font-size: 12px;
   margin: 0;
-  text-align: left;
+  text-align: right;
   height: 100%;
   padding-top: 20px;
 }
@@ -666,7 +764,10 @@ export default {
   width: 85px;
 }
 .exchangelist-section .token .token-name {
-  width: 65px;
+  width: 20px !important;
+}
+.exchangelist-section .token .token-order-container {
+  width: 30px !important;
 }
 .exchangelist-section .token .token-order {
   /* width: 60px; */
@@ -765,5 +866,86 @@ export default {
   height: auto;
   width: 100%;
   padding-top: 0px;
+}
+#token_info_modal {
+  position: fixed;
+  top: 50px;
+  width: 100%;
+  height: 85vh;
+  max-width: 100%;
+}
+#token_info_modal .modal-dialog {
+  width: 95%;
+  max-width: 95%;
+  margin: 0 auto;
+}
+#token_info_modal .modal-body {
+  padding: 0;
+  background: #eceeef;
+}
+#token-info-tabs-container {
+  width: 100%;
+  margin: 0 auto;
+}
+#token-info-tabs-container .card-header {
+  position: relative;
+  padding: 0px;
+  height: 44px;
+  width: 100%;
+  margin: 0 auto;
+}
+#token-info-tabs-container .card-header-pills {
+  width: 100%;
+  margin: 0;
+}
+#token-info-tabs-container .card-body {
+  padding: 0px;
+}
+#token-info-tabs-container .card-header .nav-item {
+  height: 44px;
+  width: 16.666%;
+  background: #fff;
+  margin: 0;
+}
+#token-info-tabs-container .card-header .nav-item {
+  height: 44px;
+  width: 16.666%;
+  background: #fff;
+  margin: 0;
+  font-size: 13px;
+}
+#token-info-tabs-container .nav-pills .nav-link {
+  padding: 15px;
+  height: 44px;
+}
+#token-info-tabs-container .tab-content {
+  position: relative;
+  top: 0px;
+}
+#token-info-tabs-container .transactionlist-section {
+  box-shadow: 0px 4px 3px #eee;
+  padding-left: 10px;
+  padding-right: 10px;
+  /* overflow: scroll; */
+  /* max-height: 400px; */
+  margin-bottom: 15px;
+}
+#token-info-tabs-container .receive-section {
+  padding-top: 20px;
+}
+#token-info-tabs-container .modal-content {
+  background-color: #eceeef;
+  min-height: 90vh;
+  /* height: auto; */
+}
+#token_info_modal .modal-dialog,
+#token-info-modal .modal-content {
+  background-color: #eceeef;
+  /* height: auto;
+  max-height: 500px !important; */
+  min-height: 90vh;
+}
+#token_info_modal___BV_modal_content_ {
+  border: none;
 }
 </style>

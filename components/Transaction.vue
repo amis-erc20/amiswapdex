@@ -14,25 +14,29 @@
           </b-col>
         </b-row>
 
-        <b-row class="hash-and-amount-container" @click="showTxDetail(transaction.hash)">
-          <p class="transaction-info" v-if="txType === `converted`">
-            <strong>{{transaction.from}} to {{transaction.to}}</strong>
-          </p>
-          <p class="transaction-info" v-else-if="txType === `received`">
-            <strong>{{transaction.from}}</strong>
-          </p>
-          <p class="transaction-info" v-else-if="txType === `sent`">
-            <strong>{{transaction.to}}</strong>
-          </p>
-          <p class="transaction-info" v-else>
-            <strong>{{txType}}</strong>
-          </p>
-          <p :style="`color: ${iconColor}`">{{txSign}} {{txAmount}} {{txCurrency}}</p>
-        </b-row>
+        <!-- <b-row class="hash-and-amount-container" @click="showTxDetail(transaction.hash)"> -->
+        <a :href="`https://etherscan.io/tx/${transaction.hash}`" target="_blank" class="tx-link">
+          <b-row class="hash-and-amount-container">
+            <p class="transaction-info" v-if="txType === `converted`">
+              <strong>{{transaction.from}} to {{transaction.to}}</strong>
+            </p>
+            <p class="transaction-info" v-else-if="txType === `received`">
+              <strong>{{transaction.from}}</strong>
+            </p>
+            <p class="transaction-info" v-else-if="txType === `sent`">
+              <strong>{{transaction.to}}</strong>
+            </p>
+            <p class="transaction-info" v-else>
+              <strong>{{txType}}</strong>
+            </p>
+            <p :style="`color: ${iconColor}`">{{txSign}} {{txAmount}} {{txCurrency}}</p>
+          </b-row>
+        </a>
       </b-col>
       <b-modal
         :ref="transaction.hash"
         :id="transaction.hash"
+        class="tx-detail-modal"
         title="Transaction Detail"
         :hide-footer="true"
       >
@@ -148,7 +152,7 @@ export default {
   font-size: 12px;
 }
 .transaction .transaction-info {
-  max-width: 50%;
+  max-width: 80%;
 }
 .transaction .from-to-column .date-and-label-container {
   display: flex;
@@ -166,6 +170,7 @@ export default {
 .transaction .from-to-column .transaction-type {
   font-size: 0.9rem;
   color: #888;
+  text-align: left;
 }
 .transaction .from-to-column .transaction-info {
   color: #ccc;
@@ -220,5 +225,12 @@ export default {
 }
 .transaction-info {
   font-size: 13px;
+  text-align: left;
+}
+.tx-detail-modal {
+  height: 50px;
+}
+.tx-link:hover {
+  text-decoration: none;
 }
 </style>

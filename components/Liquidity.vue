@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="uniswap-convert-section">
+    <div id="uniswap-liquidity-section">
       <div v-if="!shouldRender" class="no-exchange-yet">
         <p>
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
@@ -16,10 +16,10 @@
       </b-form-group>
       <b-form @submit="onAddLiquidity" @reset="onReset" v-if="liquidity === `add`">
         <label>Deposit ETH</label>
-        <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
+        <!-- <label class="use-all-funds" @click="useAllFunds">Use All Funds</label> -->
         <b-form-group id="exampleInputGroup1">
           <b-form-input
-            id="inputValue"
+            id="eth-input-text-field"
             type="text"
             v-model="form.inputValue"
             required
@@ -47,9 +47,6 @@
             @keyup="onAmountChange"
             @focus="onOutputFocus"
           />
-          <b-form-invalid-feedback
-            :state="validateOutputAmount && validateTokenBalance"
-          >{{ outputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <div
@@ -1092,11 +1089,11 @@ export default {
 .swaptoken-view {
   min-height: 100vh;
 }
-#uniswap-convert-section h4 {
+#uniswap-liquidity-section h4 {
   text-align: center;
   margin-bottom: 30px;
 }
-#uniswap-convert-section {
+#uniswap-liquidity-section {
   padding-top: 100px;
   width: 90%;
   max-width: 650px;
@@ -1106,7 +1103,7 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-#uniswap-convert-section form button {
+#uniswap-liquidity-section form button {
   flex-grow: 1;
   margin: 20px 5px;
 }
@@ -1118,10 +1115,10 @@ label {
   font-weight: bolder;
   font-size: 13px;
 }
-#uniswap-convert-section form {
+#uniswap-liquidity-section form {
   margin-bottom: 60px;
 }
-#uniswap-convert-section img {
+#uniswap-liquidity-section img {
   width: 120px;
   margin: 20px auto;
 }

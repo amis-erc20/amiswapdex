@@ -1,9 +1,6 @@
 <template>
   <div>
-    <Nav/>
     <div id="metamask-section">
-      <no-connection/>
-
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
@@ -13,20 +10,23 @@
       <!-- ACCESS METAMASK -->
       <b-form @submit="onAccessMetamask" v-if="shouldRender">
         <b-form-group>
-          <b-form-checkbox
+          <!-- <b-form-checkbox
             id="accept-checkbox"
             v-model="isAccepted"
             name="accept-checkbox"
-          >I accept the terms and use to access my wallet</b-form-checkbox>
+          >I accept the terms and use to access my wallet</b-form-checkbox>-->
+          <input type="checkbox" v-model="isAccepted">
+          <span for>I accept the terms and use to access my wallet</span>
         </b-form-group>
         <div class="submit-button-group">
           <b-button
             type="submit"
             variant="primary"
-            id="metamask-access-btn"
             :disabled="!isAccepted"
+            id="metamask-access-btn"
           >Access Metamask Wallet</b-button>
         </div>
+        <!-- :disabled="!isAccepted" -->
       </b-form>
     </div>
   </div>
@@ -204,11 +204,6 @@ export default {
 <style>
 #metamask-section {
   width: 100%;
-  max-width: 650px;
-  min-height: 100vh;
-  overflow: hidden;
-  /* overflow-y: scroll; */
-  width: 90vw;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -252,11 +247,5 @@ export default {
 #metamask-access-btn:hover {
   background-color: #d36c16;
   border-color: #e8811c;
-}
-.file-error {
-  font-size: 13px;
-}
-.show-more-option {
-  margin: 10px auto;
 }
 </style>

@@ -13,7 +13,11 @@
           <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
             <b-card-text v-if="getSignIn">
               <!-- <b-card-text> -->
-              <Header/>
+              <!-- <Header/> -->
+              <div id="total-summary">
+                <h5>TOTAL VALUE</h5>
+                <h2>$ {{ getTotalValue.toFixed(3) }}</h2>
+              </div>
               <Newtoken/>
               <Tokenlist/>
               <periodic-backup :backupStatus="getBackupStatus()"/>
@@ -157,6 +161,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
+      getTotalValue: "account/getTotalValue",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
       getConnection: "getConnection",
@@ -534,5 +539,23 @@ div {
   color: #333;
   position: fixed;
   top: 150px;
+}
+#total-summary {
+  text-align: center;
+}
+#total-summary h2 {
+  font-size: 45px;
+  position: relative;
+  left: 0px;
+  margin: 10px auto;
+  font-weight: normal;
+  color: #2f3c42;
+}
+#total-summary h5 {
+  font-size: 16px;
+}
+.modal-header .close {
+  font-size: 30px;
+  color: #fff;
 }
 </style>

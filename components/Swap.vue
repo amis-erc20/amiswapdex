@@ -960,7 +960,7 @@ export default {
   margin-bottom: 30px;
 }
 #uniswap-convert-section {
-  padding-top: 100px;
+  padding-top: 20px;
   width: 90%;
   max-width: 650px;
   margin: 0 auto;
@@ -980,6 +980,8 @@ export default {
 form label {
   font-weight: bolder;
   font-size: 13px;
+  text-align: left;
+  width: 100%;
 }
 #uniswap-convert-section form {
   margin-bottom: 60px;

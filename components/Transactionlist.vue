@@ -74,6 +74,10 @@ export default {
   position: relative;
   /* top: -50px; */
 }
+.transactionlist-section .list-group-item {
+  padding: 0px;
+  padding-top: 10px;
+}
 
 .list-group-flush .list-group-item {
   border-right: 0;

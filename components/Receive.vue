@@ -112,7 +112,7 @@ export default {
   max-width: 650px;
   margin: 0 auto;
   padding-top: 55px;
-  height: calc(100vh - 64px);
+  /* height: calc(100vh - 64px); */
 }
 .account-address {
   margin-bottom: 0px;

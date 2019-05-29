@@ -3,22 +3,20 @@
     <div class="header-section">
       <div class="balance-summary">
         <p class="token-amount-usd" v-if="priceInUSD && currentRoute !== `/`">{{ priceInUSD }} USD</p>
-        <h2 v-if="currentRoute !== `/` && getActiveToken === 'ETH'">
+        <h2 v-if="getActiveTab === 'exchange' && getActiveToken === 'ETH'">
           {{ calculateBalance(getBalance["ETH"]) }}
           <span>ETH</span>
         </h2>
-        <h2 v-if="currentRoute !== `/` && getActiveToken === 'ULT'">
+        <h2 v-if="getActiveTab === 'exchange' && getActiveToken === 'ULT'">
           {{ calculateBalance(getBalance["ULT"]) }}
           <span>ULT</span>
         </h2>
-        <h2 v-if="currentRoute !== `/` && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
+        <h2
+          v-if="getActiveTab === 'exchange' && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'"
+        >
           {{ calculateBalance(getBalance[getActiveToken]) }}
           <span>{{getActiveToken}}</span>
         </h2>
-        <div v-if="currentRoute === `/`" id="total-summary">
-          <h5>TOTAL VALUE</h5>
-          <h2>$ {{ getTotalValue.toFixed(3) }}</h2>
-        </div>
       </div>
     </div>
   </div>
@@ -44,7 +42,8 @@ export default {
       getPrice: "account/getPrice",
       getActiveToken: "getActiveToken",
       getTokenList: "account/getTokenList",
-      getTotalValue: "account/getTotalValue"
+      getTotalValue: "account/getTotalValue",
+      getActiveTab: "getActiveTab"
     }),
     currentRoute() {
       return this.$route.path;
@@ -77,7 +76,7 @@ export default {
   width: 100%;
   color: #fff;
   color: #333;
-  padding-top: 70px;
+  padding-top: 30px;
 }
 #button-container {
   display: flex;

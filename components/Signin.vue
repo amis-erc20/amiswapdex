@@ -1,16 +1,11 @@
 <template>
   <div>
-    <Nav/>
     <div id="signin-section">
-      <no-connection/>
-      <!-- <img src="../assets/logo.svg" alt> -->
-      <!-- <h4>Sign In</h4> -->
-      <!-- <h6>Please sign into your wallet.</h6> -->
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
 
-      <b-form-group v-if="downloadMethod !== `local`">
+      <b-form-group v-if="downloadMethod !== `local` && !loading">
         <b-form-radio
           value="remote"
           v-model="selected"
@@ -32,7 +27,7 @@
       </b-form-group>
 
       <!-- LOCAL SIGN IN -->
-      <b-form @submit="onLocalSignIn " v-if="downloadMethod === 'local'">
+      <b-form @submit="onLocalSignIn " v-if="downloadMethod === 'local' && !loading">
         <b-form-group>
           <label for>Email</label>
           <b-form-input type="email" v-model="form.email" required/>
@@ -47,7 +42,7 @@
       </b-form>
 
       <!-- REMOTE SIGN IN -->
-      <b-form @submit="onRemoteSignIn " v-if="downloadMethod === 'remote'">
+      <b-form @submit="onRemoteSignIn " v-if="downloadMethod === 'remote' && !loading">
         <b-form-group>
           <label for>Email</label>
           <b-form-input type="email" v-model="form.email" required/>
@@ -62,7 +57,7 @@
         </div>
       </b-form>
       <!-- FILE UPLOAD -->
-      <b-form @submit="onUploadSignIn " v-if="downloadMethod === 'upload'">
+      <b-form @submit="onUploadSignIn " v-if="downloadMethod === 'upload' && !loading">
         <b-form-group>
           <label for>Email</label>
           <b-form-input type="email" v-model="form.email" required/>
@@ -95,7 +90,7 @@
         </div>
       </b-form>
 
-      <b-form-group class="show-more-option">
+      <b-form-group class="show-more-option" v-if="!loading">
         <b-form-checkbox
           switch
           v-model="showMoreOptions"
@@ -303,15 +298,15 @@ export default {
           );
         }
         this.updateCredentials({ Ep, De, Ns: this.Ns, E, Ps });
-        let { url, token } = this.getAuthRedirectUrl;
         this.loadWallet(account.address);
-        if (url === "/tokendetail" && token !== null) {
-          this.updateActiveToken(token);
-          this.redirect("/tokendetail");
-          this.updateAuthRedirectUrl({ url: "/", token: null });
-        } else {
-          this.redirect("/");
-        }
+        // let { url, token } = this.getAuthRedirectUrl;
+        // if (url === "/tokendetail" && token !== null) {
+        //   this.updateActiveToken(token);
+        //   this.redirect("/tokendetail");
+        //   this.updateAuthRedirectUrl({ url: "/", token: null });
+        // } else {
+        //   this.redirect("/");
+        // }
       } catch (e) {
         console.log(e);
         console.log(`Incorrect Password`);
@@ -499,5 +494,9 @@ export default {
 }
 .show-more-option {
   margin: 10px auto;
+}
+#signin-section div {
+  text-align: left;
+  margin: 5px auto;
 }
 </style>
