@@ -99,7 +99,10 @@ export default {
       let token = this.getAvailableTokenList.find(
         t => t.symbol === selectedTokenSymbol
       );
-      if (!this.summary || !token)
+      let foundSummary;
+      if (token)
+        foundSummary = self.getSummary.find(s => s.token_id === token.id);
+      if (!foundSummary || !token)
         return {
           name: this.getActiveToken,
           symbol: this.getActiveToken,
@@ -117,12 +120,12 @@ export default {
           name: token.name,
           symbol: token.symbol,
           tokenAddress: token.tokenAddress,
-          liquidity: this.summary.liquidity * this.ethToUsd,
-          volume: this.summary.volume_eth_1D * this.ethToUsd,
-          price: this.summary.price_last_1H * this.ethToUsd,
+          liquidity: foundSummary.liquidity * this.ethToUsd,
+          volume: foundSummary.volume_eth_1D * this.ethToUsd,
+          price: foundSummary.price_last_1H * this.ethToUsd,
           src: token.logo,
-          order: this.summary.order || "-",
-          change: this.summary.price_change_24h || 0,
+          order: foundSummary.order || "-",
+          change: foundSummary.price_change_24h || 0,
           tokenAddress: token.tokenAddress,
           exchangeAddress: token.exchangeAddress
         };
@@ -137,7 +140,6 @@ export default {
     if (token) {
       this.summary = this.getSummary.find(s => s.token_id === token.id);
     }
-
     let ethPrice = this.getPrice["ETH"];
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
