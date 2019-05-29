@@ -1,7 +1,11 @@
 <template>
   <div class="no-account-container">
     <b-alert v-if="!getConnection" show variant="danger">No Internet Connection</b-alert>
-    <b-alert v-if="!getServerStatus" show variant="danger">Connection Issue to Server !</b-alert>
+    <b-alert
+      v-if="getConnection && !getServerStatus"
+      show
+      variant="danger"
+    >Connection Issue to Server !</b-alert>
     <div v-if="getConnection && getServerStatus">
       <div>
         <p>

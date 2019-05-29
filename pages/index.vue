@@ -336,11 +336,9 @@ export default {
               price: summaryInfo.price_last_1H * ethPrice
             });
         });
-        this.updateServerStatus(true);
         return ethPrice;
       } catch (e) {
         console.warn("Unable to refresh token prices!");
-        this.updateServerStatus(false);
       }
     },
     async refreshTokenList(web3) {
@@ -355,11 +353,23 @@ export default {
         let allTokens = await getAllListedToken();
         this.setAvailableTokenList(allTokens);
         await initContracts(web3, allTokens);
-        this.updateServerStatus(true);
       } catch (e) {
         console.warn("Unable to refresh token list!");
-        this.updateServerStatus(false);
       }
+    },
+    refreshServerStatus() {
+      let self = this;
+      let url = `${config.uniswapDexServer}api/status`;
+      axios
+        .get(url)
+        .then(res => {
+          if (res.status === 200) {
+            self.updateServerStatus(true);
+          }
+        })
+        .catch(e => {
+          self.updateServerStatus(false);
+        });
     }
   },
   created: async function() {
@@ -369,6 +379,7 @@ export default {
     // let availableTokens = await getAllListedToken();
     // this.setAvailableTokenList(availableTokens);
     // await initContracts(web3, availableTokens);
+    this.refreshServerStatus();
     await this.refreshTokenList(web3);
     await this.refreshTokenPrices();
     if (self.getSignIn) {
@@ -407,6 +418,9 @@ export default {
     let tokenListUpdater = setInterval(() => {
       self.refreshTokenList(web3);
     }, config.refreshInterval);
+    let serverStatusUpdater = setInterval(() => {
+      self.refreshServerStatus();
+    }, 3000);
   },
   mounted: async function() {
     let self = this;

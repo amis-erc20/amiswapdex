@@ -236,7 +236,9 @@ export default {
       getAccount: "account/getAccount",
       getAvailableTokenList: "account/getAvailableTokenList",
       getActiveToken: "getActiveToken",
-      getBalance: "account/getBalance"
+      getBalance: "account/getBalance",
+      getConnection: "getConnection",
+      getServerStatus: "getServerStatus"
     }),
     shouldRender: function() {
       if (this.getActiveToken === "ETH") return true;
@@ -531,6 +533,14 @@ export default {
     },
     async onUnlock(evt) {
       evt.preventDefault();
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       this.approvedStatus = "waiting";
       this.unlockTxHash = await unlockToken(
         {
@@ -561,6 +571,14 @@ export default {
       }, 1000);
     },
     async onSubmit(evt) {
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       evt.preventDefault();
       this.loading = true;
       let web3 = this.web3;

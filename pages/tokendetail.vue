@@ -47,7 +47,7 @@
           @click="onTokenTabChange('swap')"
         >
           <b-card-text>
-            <Swap v-if="getSignIn"/>
+            <Swap v-if="getSignIn && getConnection"/>
             <Noaccount v-else/>
           </b-card-text>
         </b-tab>
@@ -58,7 +58,7 @@
           @click="onTokenTabChange('pool')"
         >
           <b-card-text>
-            <Liquidity v-if="getSignIn"/>
+            <Liquidity v-if="getSignIn && getConnection"/>
             <Noaccount v-else/>
           </b-card-text>
         </b-tab>

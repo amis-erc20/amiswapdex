@@ -151,7 +151,9 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
-      getBalance: "account/getBalance"
+      getBalance: "account/getBalance",
+      getConnection: "getConnection",
+      getServerStatus: "getServerStatus"
     }),
     validateTargetAddress() {
       return isValidAddress(this.form.targetAddress);
@@ -227,34 +229,53 @@ export default {
     },
     async onSubmit(evt) {
       evt.preventDefault();
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       this.loading = true;
       let web3 = this.web3;
       let txHash;
       // If user sign in with metamask
+      this.form.targetAddress = this.form.targetAddress.trim().toLowerCase();
       if (this.getAccount.type === "metamask") {
-        if (this.form.currency === "ETH") {
-          this.txHash = await metamaskSendEth({
-            from: this.getAccount.address,
-            to: this.form.targetAddress,
-            value: parseInt(this.form.amount * Math.pow(10, 18)),
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: this.gasLimit
-          });
-        } else {
-          this.txHash = await metamaskSendToken({
-            from: this.getAccount.address,
-            to: this.form.targetAddress,
-            value: parseInt(this.form.amount * Math.pow(10, 18)),
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: this.gasLimit,
-            currency: this.form.currency
-          });
-        }
-        if (this.txHash) {
-          this.updateActiveToken(this.form.currency);
+        try {
+          if (this.form.currency === "ETH") {
+            this.txHash = await metamaskSendEth({
+              from: this.getAccount.address,
+              to: this.form.targetAddress,
+              value: parseInt(this.form.amount * Math.pow(10, 18)),
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: this.gasLimit
+            });
+          } else {
+            this.txHash = await metamaskSendToken({
+              from: this.getAccount.address,
+              to: this.form.targetAddress,
+              value: parseInt(this.form.amount * Math.pow(10, 18)),
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: this.gasLimit,
+              currency: this.form.currency
+            });
+          }
+          if (this.txHash) {
+            this.updateActiveToken(this.form.currency);
+            this.onReset();
+            this.loading = false;
+            this.showModal("success_modal_ref");
+          } else {
+            this.onReset();
+            this.loading = false;
+            alert("Fail to submit transaction");
+          }
+        } catch (e) {
           this.onReset();
           this.loading = false;
-          this.showModal("success_modal_ref");
+          alert("Fail to submit transaction");
         }
         // If user sign in with credentials or private key
       } else {
@@ -292,8 +313,7 @@ export default {
           this.showModal("success_modal_ref");
         } catch (e) {
           this.loading = false;
-          alert(`Error while trying to submit transaction`);
-          console.log(e);
+          alert(`Transaction is not submitted.`);
         }
       }
     },

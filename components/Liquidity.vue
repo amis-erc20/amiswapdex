@@ -348,7 +348,9 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
-      getBalance: "account/getBalance"
+      getBalance: "account/getBalance",
+      getConnection: "getConnection",
+      getServerStatus: "getServerStatus"
     }),
     shouldRender: function() {
       if (this.getActiveToken === "ETH") return false;
@@ -685,6 +687,14 @@ export default {
       ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
     },
     async onUnlock(evt) {
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       evt.preventDefault();
       this.approvedStatus = "waiting";
       let currencyToCheck = this.form.approvedCurrency
@@ -778,6 +788,14 @@ export default {
       }
     },
     async onAddLiquidity(evt) {
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       evt.preventDefault();
       this.loading = true;
       let web3 = this.web3;
@@ -877,6 +895,14 @@ export default {
       this.showModal("success_modal_ref");
     },
     async onRemoveLiquidity(evt) {
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       evt.preventDefault();
       this.loading = true;
       let web3 = this.web3;
@@ -1001,6 +1027,14 @@ export default {
       }
     },
     async onCreateExchange(e) {
+      if (!this.getConnection) {
+        alert("No Internet Connection Detected !");
+        return;
+      }
+      if (!this.getServerStatus) {
+        alert("Connection Issue to Server !");
+        return;
+      }
       e.preventDefault();
       this.loading = true;
       let tokenAddress = this.form.tokenAddress;

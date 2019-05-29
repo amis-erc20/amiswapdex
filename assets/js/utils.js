@@ -89,7 +89,7 @@ export const getWeb3Metamask = function () {
       let web3 = new Web3(Web3.givenProvider)
       resolve(web3)
     } catch (e) {
-      // console.log(e)
+      console.log(e)
       console.log('Cannot get web3 instance for metamask')
       resolve(null)
     }
@@ -801,18 +801,17 @@ export const metamaskSendEth = async function (data) {
     value: web3.utils.toHex(value),
     data: ''
   }
+  return new Promise((resolve, reject) => {
 
-  try {
-    return new Promise((resolve, reject) => {
-      web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
-        console.log('Tx hash: ', hash)
-        resolve(hash)
-      })
+    web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
+      console.log('Tx hash: ', hash)
+      resolve(hash)
+    }).on('error', function (e) {
+      console.log(e)
+      console.log('Error while trying to transfer using metamask extension')
+      reject(e)
     })
-  } catch (e) {
-    console.log('Error while trying to transfer using metamask extension')
-    console.log(e)
-  }
+  })
 }
 
 export const normaliseText = text => {
@@ -843,17 +842,18 @@ export const metamaskSendToken = async function (data) {
     data: contract.methods.transfer(to, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   }
-  try {
-    return new Promise((resolve, reject) => {
-      web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
-        console.log('Tx hash: ', hash)
-        resolve(hash)
-      })
+  return new Promise((resolve, reject) => {
+    web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
+      console.log('Tx hash: ', hash)
+      resolve(hash)
     })
-  } catch (e) {
-    console.log('Error while trying to transfer using metamask extension')
-    console.log(e)
-  }
+      .on('error', function (e) {
+        console.log(e)
+        console.log('Error while trying to transfer using metamask extension')
+        reject(e)
+      })
+
+  })
 }
 
 // Detects if device is on iOS

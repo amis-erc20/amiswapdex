@@ -201,6 +201,11 @@
     >
       <p>Please open a wallet containing ETH to list a new token</p>
     </b-modal>
+
+    <!-- Token Info Modal -->
+    <b-modal ref="token_info_modal" id="token_info_modal" title="Token Info" :hide-footer="true">
+      <Info/>
+    </b-modal>
   </section>
 </template>
 
@@ -209,6 +214,7 @@ import Vue from "vue";
 import axios from "axios";
 import * as R from "ramda";
 import Token from "~/components/Token.vue";
+import Info from "~/components/Info.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
@@ -230,7 +236,7 @@ import {
 import { setTimeout } from "timers";
 import config from "../config";
 export default {
-  components: { Token },
+  components: { Token, Info },
   data: function() {
     return {
       form: {
@@ -485,14 +491,17 @@ export default {
       this.errorMessage = "";
     },
     onSelectToken(name) {
-      this.updateAuthRedirectUrl({
-        url: "/tokendetail",
-        token: name,
-        tokenSubTab: this.getAuthRedirectUrl.tokenSubTab || "info"
-      });
+      // this.updateAuthRedirectUrl({
+      //   url: "/tokendetail",
+      //   token: name,
+      //   tokenSubTab: this.getAuthRedirectUrl.tokenSubTab || "info"
+      // });
+      // this.updateActiveToken(name);
+      // this.redirect("/tokendetail");
+      // this.updateActiveTab("exchange");
+      console.log(name);
       this.updateActiveToken(name);
-      this.redirect("/tokendetail");
-      this.updateActiveTab("exchange");
+      this.showModal("token_info_modal");
     },
     isExchangeTabActive() {
       if (this.$route.path === "/") return true;
@@ -709,9 +718,15 @@ export default {
 
 #list_token_modal,
 #success_modal,
-#no_wallet_modal {
+#no_wallet_modal,
+#token_info_modal {
   position: fixed;
   top: 150px;
+}
+.modal-header,
+.modal-title {
+  text-align: center;
+  width: 100%;
 }
 #list_token_modal .alert {
   font-size: 0.9rem;
@@ -745,5 +760,10 @@ export default {
   font-weight: normal;
   font-size: 12px;
   padding-top: 5px;
+}
+#token_info_modal .token-info-section {
+  height: auto;
+  width: 100%;
+  padding-top: 0px;
 }
 </style>

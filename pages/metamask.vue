@@ -82,7 +82,7 @@ export default {
     this.web3 = await getWeb3Metamask();
     if (this.web3 === null) {
       this.errorMessage =
-        "Metamask web3 instance is overwritten by an another wallet extension. Please disable other wallet extensions";
+        "No Matamask extension or Metamask web3 instance is overwritten by an another wallet extension. Please disable other wallet extensions";
       this.shouldRender = false;
     }
   },
@@ -182,7 +182,7 @@ export default {
         self.addToken(token);
       });
       self.setOwnedTokenList(ownedTokenList);
-      console.log("Wallet loaded.")
+      console.log("Wallet loaded.");
     },
     showModal(ref) {
       this.$refs[ref].show();
