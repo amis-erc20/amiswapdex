@@ -1,15 +1,8 @@
 <template>
   <div id="no-internet-section">
     <v-offline @detected-condition="handleConnectivityChange"></v-offline>
-    <b-modal
-      ref="no_internet_modal"
-      id="no_internet_modal"
-      title="Network Error"
-      :hide-footer="true"
-      @hide="onHideNoInternetModal"
-    >
-      <p>No internet connection detected! Please check your mobile data or WiFi connection</p>
-    </b-modal>
+    <p v-if="showAlert" id="no-internet-alert">No Internet Connection !</p>
+    <p v-if="!getServerStatus" id="no-internet-alert">Connection Issue to Server !</p>
   </div>
 </template>
 
@@ -23,17 +16,20 @@ export default {
     return {
       onlineSlot: "online",
       offlineSlot: "offline",
-      alertInterval: 30000
+      alertInterval: 5000,
+      showAlert: false
     };
   },
   components: { VOffline },
   computed: {
     ...mapGetters({
-      getConnection: "getConnection"
+      getConnection: "getConnection",
+      getServerStatus: "getServerStatus"
     })
   },
   mounted: function() {
-    if (!this.getConnection) this.showModal("no_internet_modal");
+    // if (!this.getConnection) this.showModal("no_internet_modal");
+    if (!this.getConnection) this.showAlert = true;
   },
   methods: {
     ...mapActions({
@@ -42,8 +38,8 @@ export default {
     handleConnectivityChange(status) {
       console.log(`Connectivity Status: ${status}`);
       this.updateConnection(status);
-      if (status === false) this.showModal("no_internet_modal");
-      else this.hideModal("no_internet_modal");
+      if (status === false) this.showAlert = true;
+      else this.showAlert = false;
     },
     onHideNoInternetModal() {
       let self = this;
@@ -63,4 +59,18 @@ export default {
 
 
 <style>
+#no-internet-section {
+  z-index: 999 !important;
+  margin: 0 auto;
+  width: 100%;
+}
+#no-internet-alert {
+  margin: 0 auto;
+  padding: 0px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fd2828;
+  text-align: center;
+  position: relative;
+}
 </style>

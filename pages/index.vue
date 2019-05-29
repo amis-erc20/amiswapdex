@@ -1,6 +1,5 @@
 <template>
   <section class="main-container">
-    <no-connection/>
     <Nav :refreshInterval="refreshInterval"/>
     <div class="main-tab">
       <b-card no-body>
@@ -150,7 +149,8 @@ export default {
       ultInUSD: 0,
       currentTokenCount: 0,
       refreshInterval: null,
-      redirecting: false
+      redirecting: false,
+      web3: null
     };
   },
   computed: {
@@ -159,6 +159,8 @@ export default {
       getBalance: "account/getBalance",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
+      getConnection: "getConnection",
+      getServerStatus: "getServerStatus",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
       getCredentials: "getCredentials",
@@ -173,6 +175,7 @@ export default {
     ...mapActions({
       updateActiveTab: "updateActiveTab",
       updateActiveToken: "updateActiveToken",
+      updateServerStatus: "updateServerStatus",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
       setOwnedTokenList: "account/setOwnedTokenList",
@@ -219,8 +222,8 @@ export default {
       let ultUSD = await getULTToUSDPrice();
       this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
     },
-    async refresh(web3) {
-      if (!this.getSignIn) {
+    async refreshWallet(web3) {
+      if (!this.getSignIn || !this.getConnection) {
         return;
       }
       let self = this;
@@ -299,49 +302,81 @@ export default {
         self.checkRemoteBackup(self.web3);
       }, this.backupCheckInterval);
     },
-    async updateTokenPrices() {
-      console.log(`UPDATING TOKEN PRICES`);
-      let self = this;
-      let ethPrice = await getETHToUSDPrice();
-      await self.updatePrice({
-        symbol: "ETH",
-        price: ethPrice
-      });
-      let response = await axios.get(`${config.uniswapDexServer}api/summary`);
-      let summary = response.data.result;
-      this.getAvailableTokenList.forEach(token => {
-        let summaryInfo = summary.find(s => s.token_id === token.id);
-        if (!summaryInfo)
-          self.updatePrice({
-            symbol: token.symbol,
-            price: 0.0
-          });
-        else
-          self.updatePrice({
-            symbol: token.symbol,
-            price: summaryInfo.price_last_1H * ethPrice
-          });
-      });
-      return ethPrice;
+    isExchangeTabActive() {
+      if (this.$route.path === "/") return true;
+      else return false;
+    },
+    async refreshTokenPrices() {
+      if (
+        !this.isExchangeTabActive() ||
+        this.getActiveTab !== "exchange" ||
+        !this.getConnection
+      )
+        return;
+      console.log(`Refreshing TOKEN PRICES`);
+      try {
+        let self = this;
+        let ethPrice = await getETHToUSDPrice();
+        await self.updatePrice({
+          symbol: "ETH",
+          price: ethPrice
+        });
+        let response = await axios.get(`${config.uniswapDexServer}api/summary`);
+        let summary = response.data.result;
+        this.getAvailableTokenList.forEach(token => {
+          let summaryInfo = summary.find(s => s.token_id === token.id);
+          if (!summaryInfo)
+            self.updatePrice({
+              symbol: token.symbol,
+              price: 0.0
+            });
+          else
+            self.updatePrice({
+              symbol: token.symbol,
+              price: summaryInfo.price_last_1H * ethPrice
+            });
+        });
+        this.updateServerStatus(true);
+        return ethPrice;
+      } catch (e) {
+        console.warn("Unable to refresh token prices!");
+        this.updateServerStatus(false);
+      }
+    },
+    async refreshTokenList(web3) {
+      if (
+        !this.isExchangeTabActive() ||
+        this.getActiveTab !== "exchange" ||
+        !this.getConnection
+      )
+        return;
+      try {
+        console.log("Refreshing TOKEN LIST");
+        let allTokens = await getAllListedToken();
+        this.setAvailableTokenList(allTokens);
+        await initContracts(web3, allTokens);
+        this.updateServerStatus(true);
+      } catch (e) {
+        console.warn("Unable to refresh token list!");
+        this.updateServerStatus(false);
+      }
     }
   },
   created: async function() {
     let self = this;
     let web3 = await getWeb3();
     let metamaskWeb3 = await getWeb3Metamask();
-    let availableTokens = await getAllListedToken();
-    this.setAvailableTokenList(availableTokens);
-    await initContracts(web3, availableTokens);
-    getEthToUsdcPrice().then(price => {
-      self.updateEthPrice(price);
-    });
-    await this.updateTokenPrices();
+    // let availableTokens = await getAllListedToken();
+    // this.setAvailableTokenList(availableTokens);
+    // await initContracts(web3, availableTokens);
+    await this.refreshTokenList(web3);
+    await this.refreshTokenPrices();
     if (self.getSignIn) {
       let accountType = self.getAccount.type;
       if (accountType === "metamask") {
-        self.refresh(metamaskWeb3);
+        self.refreshWallet(metamaskWeb3);
       } else {
-        self.refresh(web3);
+        self.refreshWallet(web3);
       }
     }
     const isRefresherExisted = self.getRefresher;
@@ -350,9 +385,9 @@ export default {
         if (self.getSignIn) {
           let accountType = self.getAccount.type;
           if (accountType === "metamask") {
-            self.refresh(metamaskWeb3);
+            self.refreshWallet(metamaskWeb3);
           } else {
-            self.refresh(web3);
+            self.refreshWallet(web3);
           }
         } else {
           if (self.refreshInterval) {
@@ -362,16 +397,16 @@ export default {
         }
       }, config.refreshInterval);
     }
-    setTimeout(() => {
+    let remoteBackupChecker = setTimeout(() => {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
-    setInterval(self.updateTokenPrices, 5 * 60 * 1000);
-    // setInterval(self.updateTokenPrices, 2 * 60 * 1000);
-    setInterval(async () => {
-      let allTokens = await getAllListedToken();
-      this.setAvailableTokenList(allTokens);
-      await initContracts(web3, allTokens);
-    }, 30000);
+    let tokenPriceUpdater = setInterval(
+      self.refreshTokenPrices,
+      config.refreshInterval
+    );
+    let tokenListUpdater = setInterval(() => {
+      self.refreshTokenList(web3);
+    }, config.refreshInterval);
   },
   mounted: async function() {
     let self = this;
@@ -451,7 +486,7 @@ export default {
   padding: 0px;
   height: 64px;
   width: 100%;
-  z-index: 100000;
+  z-index: 777;
 }
 .nav-pills .nav-link {
   height: 64px;

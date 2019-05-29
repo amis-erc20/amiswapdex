@@ -4,22 +4,27 @@
       <font-awesome-icon icon="chevron-left" size="lg" color="#fff" @click="onPressBack"/>
     </nuxt-link>
     <div class="title">
-      <img
-        v-if="currentRoute === '/tokendetail' && getActiveToken==='ETH'"
-        src="../assets/eth-logo.png"
-        alt
-      >
-      <img
-        v-else-if="currentRoute === '/tokendetail' && activeTokenLogo"
-        :src="activeTokenLogo"
-        alt
-      >
-      <img
-        v-else-if="currentRoute === '/tokendetail' && !activeTokenLogo"
-        src="../assets/default-token.png"
-        alt
-      >
-      <h4>{{ title }}</h4>
+      <div id="main-title-no-connection-container">
+        <div class="logo-title-container">
+          <img
+            v-if="currentRoute === '/tokendetail' && getActiveToken==='ETH'"
+            src="../assets/eth-logo.png"
+            alt
+          >
+          <img
+            v-else-if="currentRoute === '/tokendetail' && activeTokenLogo"
+            :src="activeTokenLogo"
+            alt
+          >
+          <img
+            v-else-if="currentRoute === '/tokendetail' && !activeTokenLogo"
+            src="../assets/default-token.png"
+            alt
+          >
+          <h4>{{ title }}</h4>
+        </div>
+        <no-connection/>
+      </div>
     </div>
     <b-button v-b-modal.settingModal variant="outline-light">
       <font-awesome-icon icon="bars" size="lg" color="#fff"/>
@@ -51,7 +56,6 @@
         <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
       </b-list-group>
     </b-modal>
-    <no-connection/>
   </div>
 </template>
 
@@ -161,6 +165,8 @@ export default {
   width: 100% !important;
   position: fixed;
   z-index: 2000;
+  margin: 0;
+  height: 64px;
 }
 .nav-section .title {
   text-align: center;
@@ -188,6 +194,7 @@ export default {
 .nav-section h4 {
   font-size: 22px;
   padding-top: 10px;
+  margin: 0px;
 }
 #settingModal {
   color: #333;
@@ -223,5 +230,16 @@ export default {
 #settingModal .list-group-item {
   cursor: pointer;
   font-size: 13px;
+}
+#main-title-no-connection-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#main-title-no-connection-container .logo-title-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 </style>

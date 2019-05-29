@@ -84,7 +84,7 @@
           />
         </div>
         <div class="title-liquidity" @click="changeOrder(`liquidity`)">
-          Liquidity Depth
+          Liquidity
           <font-awesome-icon
             v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
             icon="long-arrow-alt-right"
@@ -192,6 +192,15 @@
         :href="`https://etherscan.io/tx/${txHash}`"
       >View tx on etherscan.io</a>
     </b-modal>
+    <!-- No Wallet Modal -->
+    <b-modal
+      ref="no_wallet_modal"
+      id="no_wallet_modal"
+      title="No Wallet Signed In"
+      :hide-footer="true"
+    >
+      <p>Please open a wallet containing ETH to list a new token</p>
+    </b-modal>
   </section>
 </template>
 
@@ -247,12 +256,15 @@ export default {
       getRefresher: "account/getRefresher",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
+      getSummary: "getSummary",
+      getConnection: "getConnection",
       getTransactionListToken: "transaction/getTransactionListToken",
       getTokenTransactionListToken: "transaction/getTokenTransactionListToken",
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
-      getAuthRedirectUrl: "getAuthRedirectUrl"
+      getAuthRedirectUrl: "getAuthRedirectUrl",
+      getActiveTab: "getActiveTab"
     }),
     tokenList: function() {
       let self = this;
@@ -342,6 +354,7 @@ export default {
   methods: {
     ...mapActions({
       updateAuthRedirectUrl: "updateAuthRedirectUrl",
+      updateSummary: "updateSummary",
       updateActiveTab: "updateActiveTab",
       updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
@@ -390,7 +403,8 @@ export default {
       this.showLimit += 20;
     },
     showListToken() {
-      this.showModal("list_token_modal");
+      if (this.getSignIn) this.showModal("list_token_modal");
+      else this.showModal("no_wallet_modal");
     },
     async onListToken(e) {
       e.preventDefault();
@@ -480,13 +494,35 @@ export default {
       this.redirect("/tokendetail");
       this.updateActiveTab("exchange");
     },
-    async getSummary() {
-      let response = await axios.get(`${config.uniswapDexServer}api/summary`);
-      this.summary = response.data.result;
+    isExchangeTabActive() {
+      if (this.$route.path === "/") return true;
+      else return false;
+    },
+    async getSummaryFromServer() {
+      if (
+        !this.isExchangeTabActive() ||
+        this.getActiveTab !== "exchange" ||
+        !this.getConnection
+      )
+        return;
+      console.log("REFRESHING SUMMARY INFO");
+      try {
+        let response = await axios.get(`${config.uniswapDexServer}api/summary`);
+        this.summary = response.data.result;
+        await this.updateSummary(this.summary);
+      } catch (e) {
+        console.warn("Unable to refresh summary info!");
+      }
     }
   },
   created: async function() {
-    await this.getSummary();
+    this.summary = this.getSummary;
+    if (this.getConnection) {
+      await this.getSummaryFromServer();
+      await this.updateSummary(this.summary);
+    } else {
+      this.summary = this.getSummary;
+    }
     let ethPrice = this.getPrice["ETH"];
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
@@ -497,9 +533,9 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    setInterval(() => {
-      self.getSummary();
-    }, 5000);
+    let summaryUpdator = setInterval(() => {
+      self.getSummaryFromServer();
+    }, config.refreshInterval);
   }
 };
 </script>
@@ -510,6 +546,7 @@ export default {
   width: 95%;
   max-width: 650px;
   margin: 40px auto;
+  margin-top: 10px;
 }
 .main-tab > .card > .tabs .card-body {
   /* padding: 5px; */
@@ -671,7 +708,8 @@ export default {
 }
 
 #list_token_modal,
-#success_modal {
+#success_modal,
+#no_wallet_modal {
   position: fixed;
   top: 150px;
 }

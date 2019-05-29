@@ -86,6 +86,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
+      getSummary: "getSummary",
       getAvailableTokenList: "account/getAvailableTokenList",
       getPrice: "account/getPrice",
       getEthPrice: "account/getEthPrice"
@@ -134,11 +135,7 @@ export default {
       this.getActiveToken === "ETH" ? "USDC" : this.getActiveToken;
     let token = this.getAvailableTokenList.find(t => t.symbol === activeSymbol);
     if (token) {
-      let url = `${config.uniswapDexServer}api/summary?tokenAddress=${
-        token.tokenAddress
-      }`;
-      let response = await axios.get(url);
-      this.summary = response.data.result;
+      this.summary = this.getSummary.find(s => s.token_id === token.id);
     }
 
     let ethPrice = this.getPrice["ETH"];

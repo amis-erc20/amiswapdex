@@ -1,10 +1,11 @@
 <template>
   <div class="token-detail-section">
     <Nav/>
-    <div v-if="!getConnection" class="no-internet-description">
+    <!-- <div v-if="!getConnection" class="no-internet-description">
       <p>No Internet Connection</p>
-    </div>
-    <b-card no-body v-if="getConnection">
+    </div>-->
+    <!-- <b-card no-body v-if="getConnection"> -->
+    <b-card no-body>
       <b-tabs pills card>
         <b-tab
           title="Info"

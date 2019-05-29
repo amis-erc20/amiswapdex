@@ -884,6 +884,21 @@ export const getAllListedToken = async () => {
   let listedTokens = {}
   let response = await axios.get(`${CONFIG.uniswapDexServer}api/token`)
   let tokens = response.data.result
+  tokens = tokens.map(token => {
+    let checkedUrl
+    if (token.logo) {
+      let protocol = token.logo.split(":")[0]
+      if (protocol === 'http') {
+        checkedUrl = `https://uniswapdex.com:8889/static/${token.tokenAddress.toLowerCase()}.png`
+      }
+    } else {
+      checkedUrl = token.logo
+    }
+    return {
+      ...token,
+      logo: checkedUrl
+    }
+  })
   tokens.forEach(token => {
     listedTokens[token.symbol] = {
       tokenName: token.name,
