@@ -429,34 +429,14 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    let redirectTokenAddress = this.$route.query.token;
-    if (redirectTokenAddress) {
-      this.redirecting = true;
-      setTimeout(() => {
-        try {
-          let token = self.getAvailableTokenList.find(
-            t =>
-              t.tokenAddress.toLowerCase() ===
-              redirectTokenAddress.toLowerCase()
-          );
-          self.updateActiveToken(token.symbol);
-          self.redirect("/tokendetail");
-          self.updateActiveTab("exchange");
-        } catch (e) {
-          console.log(e);
-          alert("Invalid Token Address !");
-          self.redirecting = false;
+    setTimeout(() => {
+      if (isIos() && !isInStandaloneMode()) {
+        let isShown = localStorage.getItem("isInstallMessageShown");
+        if (isShown !== "true") {
+          this.showModal("install_modal");
         }
-      }, 3000);
-      setTimeout(() => {
-        if (isIos() && !isInStandaloneMode()) {
-          let isShown = localStorage.getItem("isInstallMessageShown");
-          if (isShown !== "true") {
-            this.showModal("install_modal");
-          }
-        }
-      }, 3000);
-    }
+      }
+    }, 3000);
   }
 };
 </script>

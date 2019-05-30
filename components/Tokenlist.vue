@@ -25,6 +25,10 @@
         </b-list-group-item>
       </b-list-group>
     </b-card>
+    <Tokeninfo
+      :show="{shouldShow: showTokenInfoModal, timestamp: Date.now()}"
+      v-on:child-msg="closeTokenInfo"
+    />
     <div v-if="tokenList.length == 0">
       <b-spinner style="width: 2rem; height: 2rem;" label="Loading"></b-spinner>
     </div>
@@ -33,15 +37,17 @@
 
 <script>
 import Token from "~/components/Token.vue";
+import Tokeninfo from "~/components/Tokeninfo.vue";
 import { mapActions, mapGetters } from "vuex";
 import { getAllListedToken } from "../assets/js/utils";
 import * as R from "ramda";
 export default {
-  components: { Token },
+  components: { Token, Tokeninfo },
   data: function() {
     return {
       tokenAddresses: [],
-      hideZeroAmountTokens: true
+      hideZeroAmountTokens: true,
+      showTokenInfoModal: false
     };
   },
   created: async function() {
@@ -90,7 +96,12 @@ export default {
     }),
     changeTokenTab: function(event, tokenName) {
       this.updateActiveToken(tokenName);
-      this.$router.push("/tokendetail");
+      // this.$router.push("/tokendetail");
+      this.showTokenInfoModal = true;
+      console.log(this.showTokenInfoModal);
+    },
+    closeTokenInfo() {
+      this.showTokenInfoModal = false;
     },
     calculateBalance: function(balance) {
       if (!balance || balance === 0) return 0;
@@ -131,9 +142,6 @@ export default {
 }
 .tokenlist-section .card-body {
   padding: 0px;
-}
-.tokenlist-section h4 {
-  font-size: 16px;
 }
 .tokenlist-section .wallet-title-name {
   padding-left: 5px;

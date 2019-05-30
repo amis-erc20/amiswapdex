@@ -194,6 +194,7 @@ export default {
 }
 .transaction .row div {
   padding: 0px;
+  padding-top: 3px;
 }
 .transaction .modal-body {
   padding: 20px !important;
@@ -232,5 +233,8 @@ export default {
 }
 .tx-link:hover {
   text-decoration: none;
+}
+.arrow-column {
+  padding: 5px;
 }
 </style>

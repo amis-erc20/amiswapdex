@@ -3,17 +3,15 @@
     <div class="header-section">
       <div class="balance-summary">
         <p class="token-amount-usd" v-if="priceInUSD && currentRoute !== `/`">{{ priceInUSD }} USD</p>
-        <h2 v-if="getActiveTab === 'exchange' && getActiveToken === 'ETH'">
+        <h2 v-if="getActiveToken === 'ETH'">
           {{ calculateBalance(getBalance["ETH"]) }}
           <span>ETH</span>
         </h2>
-        <h2 v-if="getActiveTab === 'exchange' && getActiveToken === 'ULT'">
+        <h2 v-if="getActiveToken === 'ULT'">
           {{ calculateBalance(getBalance["ULT"]) }}
           <span>ULT</span>
         </h2>
-        <h2
-          v-if="getActiveTab === 'exchange' && getActiveToken !== 'ETH' && getActiveToken !== 'ULT'"
-        >
+        <h2 v-if="getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
           {{ calculateBalance(getBalance[getActiveToken]) }}
           <span>{{getActiveToken}}</span>
         </h2>

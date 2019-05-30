@@ -1,5 +1,6 @@
 <template>
   <section id="exchange-container">
+    <Loading v-if="redirecting"/>
     <b-form>
       <b-form-group>
         <b-form-input
@@ -201,133 +202,10 @@
     >
       <p>Please open a wallet containing ETH to list a new token</p>
     </b-modal>
-
-    <!-- Setting Modal -->
-    <b-modal
-      ref="settingModalInInfo_ref"
-      id="settingModalInInfo"
-      title="Wallet Setting"
-      :hide-footer="true"
-    >
-      <b-list-group v-if="getSignIn">
-        <b-list-group-item
-          v-if="getAccount.type === 'credentials'"
-          @click="redirect('/backup')"
-        >Remote Backup to Google Drive</b-list-group-item>
-        <b-list-group-item
-          v-if="getAccount.type === 'credentials'"
-          @click="redirect('/recoverysetup')"
-        >Setup Recovery Q & A</b-list-group-item>
-        <b-list-group-item
-          v-if="getAccount.type === 'credentials'"
-          @click="redirect('/resetpassword')"
-        >Change Password</b-list-group-item>
-        <b-list-group-item
-          v-if="getAccount.type === 'credentials' || getAccount.type === 'private_key'"
-          @click="redirect('/privatekey')"
-        >Show Private Key</b-list-group-item>
-        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
-        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
-        <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
-      </b-list-group>
-      <b-list-group v-else>
-        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
-        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
-      </b-list-group>
-    </b-modal>
-
-    <!-- Token Info Modal -->
-    <b-modal ref="token_info_modal" id="token_info_modal" :hide-footer="true">
-      <template slot="modal-header">
-        <font-awesome-icon
-          class="back-button-svg"
-          icon="chevron-left"
-          size="lg"
-          color="#fff"
-          @click="closeTokenInfoModal"
-        />
-        <div id="main-title-no-connection-container">
-          <div class="logo-title-container">
-            <img
-              class="logo-in-header"
-              v-if="getActiveToken==='ETH'"
-              src="../assets/eth-logo.png"
-              alt
-            >
-            <img class="logo-in-header" v-else-if="activeTokenLogo" :src="activeTokenLogo" alt>
-            <img
-              class="logo-in-header"
-              v-else-if="!activeTokenLogo"
-              src="../assets/default-token.png"
-              alt
-            >
-            <h4>{{ getActiveToken }}</h4>
-          </div>
-        </div>
-        <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
-          <font-awesome-icon icon="bars" size="lg" color="#fff"/>
-        </b-button>
-      </template>
-      <b-card no-body>
-        <b-tabs pills card id="token-info-tabs-container">
-          <b-tab
-            title="Info"
-            :active="activeTokenSubTab === 'info'"
-            @click="onTokenTabChange('info')"
-          >
-            <Info/>
-          </b-tab>
-          <b-tab
-            :active="activeTokenSubTab === 'balance'"
-            title="Balance"
-            @click="onTokenTabChange('balance')"
-          >
-            <Header v-if="getSignIn"/>
-            <Transactionlist v-if="getSignIn"/>
-            <Noaccount v-else/>
-          </b-tab>
-          <b-tab
-            :active="activeTokenSubTab === 'receive'"
-            title="Receive"
-            @click="onTokenTabChange('receive')"
-          >
-            <Receive v-if="getSignIn"/>
-            <Noaccount v-else/>
-          </b-tab>
-          <b-tab
-            :active="activeTokenSubTab === 'send'"
-            title="Send"
-            @click="onTokenTabChange('send')"
-          >
-            <b-card-text>
-              <Send v-if="getSignIn"/>
-              <Noaccount v-else/>
-            </b-card-text>
-          </b-tab>
-          <b-tab
-            :active="activeTokenSubTab === 'swap'"
-            title="Swap"
-            @click="onTokenTabChange('swap')"
-          >
-            <b-card-text>
-              <Swap v-if="getSignIn && getConnection"/>
-              <Noaccount v-else/>
-            </b-card-text>
-          </b-tab>
-          <b-tab
-            :active="activeTokenSubTab === 'pool'"
-            title="Pool"
-            v-if="getActiveToken !== 'ETH'"
-            @click="onTokenTabChange('pool')"
-          >
-            <b-card-text>
-              <Liquidity v-if="getSignIn && getConnection"/>
-              <Noaccount v-else/>
-            </b-card-text>
-          </b-tab>
-        </b-tabs>
-      </b-card>
-    </b-modal>
+    <Tokeninfo
+      :show="{shouldShow: showTokenInfoModal, timestamp: Date.now()}"
+      v-on:child-msg="closeTokenInfo"
+    />
   </section>
 </template>
 
@@ -344,6 +222,8 @@ import Send from "~/components/Send.vue";
 import Swap from "~/components/Swap.vue";
 import Liquidity from "~/components/Liquidity.vue";
 import Noaccount from "~/components/Noaccount.vue";
+import Tokeninfo from "~/components/Tokeninfo.vue";
+import Loading from "~/components/Loading.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
@@ -374,7 +254,9 @@ export default {
     Receive,
     Send,
     Swap,
-    Liquidity
+    Liquidity,
+    Tokeninfo,
+    Loading
   },
   data: function() {
     return {
@@ -390,8 +272,17 @@ export default {
       infoMessage: "",
       txHash: "",
       loading: false,
-      showLowLiquidityToken: false
+      showLowLiquidityToken: false,
+      showTokenInfoModal: false,
+      redirecting: false
     };
+  },
+  events: {
+    "child-msg": function(msg) {
+      // `this` in event callbacks are automatically bound
+      // to the instance that registered it
+      alert(msg);
+    }
   },
   computed: {
     ...mapGetters({
@@ -665,9 +556,11 @@ export default {
       // this.updateActiveToken(name);
       // this.redirect("/tokendetail");
       // this.updateActiveTab("exchange");
-      console.log(name);
       this.updateActiveToken(name);
-      this.showModal("token_info_modal");
+      this.showTokenInfoModal = true;
+    },
+    closeTokenInfo() {
+      this.showTokenInfoModal = false;
     },
     isExchangeTabActive() {
       if (this.$route.path === "/") return true;
@@ -711,6 +604,27 @@ export default {
   },
   mounted: async function() {
     let self = this;
+    let redirectTokenAddress = this.$route.query.token;
+    if (redirectTokenAddress) {
+      this.redirecting = true;
+      setTimeout(() => {
+        try {
+          let token = self.getAvailableTokenList.find(
+            t =>
+              t.tokenAddress.toLowerCase() ===
+              redirectTokenAddress.toLowerCase()
+          );
+          self.updateActiveToken(token.symbol);
+          self.updateActiveTab("exchange");
+          this.showTokenInfoModal = true;
+          self.redirecting = false;
+        } catch (e) {
+          console.log(e);
+          alert("Invalid Token Address !");
+          self.redirecting = false;
+        }
+      }, 1500);
+    }
     let summaryUpdator = setInterval(() => {
       self.getSummaryFromServer();
     }, config.refreshInterval);
@@ -797,6 +711,17 @@ export default {
   box-shadow: 0px 2px 5px #bcc0c1;
   transform: scale(1.03);
 }
+/* .exchangelist-section .list-group-item {
+  transition: 0.5s;
+  padding: 0;
+  max-height: 65px;
+  overflow: hidden;
+}
+.exchangelist-section .list-group-item:hover {
+  cursor: pointer;
+  box-shadow: 0px 2px 5px #bcc0c1;
+  transform: scale(1.03);
+} */
 .exchangelist-section .token .token-name {
   font-size: 14px;
   font-weight: bold;
@@ -807,7 +732,7 @@ export default {
 .exchangelist-section .token .token-name > div {
   margin-left: 10px;
 }
-.exchangelist-section .token .token-name > div > p:nth-of-type(1) {
+.exchangelist-section .token.token-name > div > p:nth-of-type(1) {
   font-size: 12px;
   text-align: left;
   margin-bottom: 5px;
@@ -894,10 +819,6 @@ export default {
   position: fixed;
   top: 150px;
 }
-#token_info_modal {
-  position: fixed;
-  top: 0px;
-}
 .modal-header,
 .modal-title {
   text-align: center;
@@ -935,166 +856,5 @@ export default {
   font-weight: normal;
   font-size: 12px;
   padding-top: 5px;
-}
-#token_info_modal .token-info-section {
-  height: auto;
-  width: 100%;
-  padding-top: 0px;
-}
-#token_info_modal {
-  position: fixed;
-  top: 0px;
-  width: 100%;
-  height: 100vh;
-  max-width: 100%;
-  padding: 0;
-  z-index: 2000;
-}
-#token_info_modal .modal-dialog {
-  width: 100%;
-  margin: 0 auto;
-}
-#token_info_modal .modal-body {
-  padding: 0;
-  background: #eceeef;
-}
-#token-info-tabs-container {
-  width: 100%;
-  margin: 0 auto;
-}
-#token-info-tabs-container .card-header {
-  position: relative;
-  padding: 0px;
-  height: 44px;
-  width: 100%;
-  margin: 0 auto;
-}
-#token-info-tabs-container .card-header-pills {
-  width: 100%;
-  margin: 0;
-}
-#token-info-tabs-container .card-body {
-  padding: 0px;
-}
-#token-info-tabs-container .card-header .nav-item {
-  height: 44px;
-  width: 16.666%;
-  background: #fff;
-  margin: 0;
-}
-#token-info-tabs-container .card-header .nav-item {
-  height: 44px;
-  width: 16.666%;
-  background: #fff;
-  margin: 0;
-  font-size: 13px;
-}
-#token-info-tabs-container .nav-pills .nav-link {
-  padding: 15px;
-  height: 44px;
-}
-#token-info-tabs-container .tab-content {
-  position: relative;
-  top: 0px;
-}
-#token-info-tabs-container .transactionlist-section {
-  box-shadow: 0px 4px 3px #eee;
-  padding-left: 10px;
-  padding-right: 10px;
-  /* overflow: scroll; */
-  /* max-height: 400px; */
-  margin-bottom: 15px;
-}
-#token-info-tabs-container .receive-section {
-  padding-top: 20px;
-}
-#token-info-tabs-container .modal-content {
-  background-color: #eceeef;
-  min-height: 100vh;
-  border-radius: 0px;
-}
-#token_info_modal .modal-dialog,
-#token-info-modal .modal-content {
-  background-color: #eceeef;
-  height: 100vh;
-  width: 100vw;
-  max-width: 100vw !important;
-  margin: 0px;
-  padding: 0;
-  border-radius: 0px;
-}
-#token_info_modal___BV_modal_content_ {
-  border: none;
-}
-#token-info-modal .modal-header .title {
-  text-align: center;
-  flex-grow: 3;
-  padding-left: 20px;
-  display: flex;
-  justify-content: center;
-}
-.logo-in-header {
-  margin-right: 15px;
-  width: 30px;
-  height: 30px;
-}
-#token-info-modal .modal-header a {
-  padding-top: 10px;
-}
-#token-info-modal .logo-title-container {
-  position: relative;
-  top: 5px;
-}
-#menu-button {
-  border: none !important;
-  outline: none !important;
-}
-.setting-container img {
-  width: 35px;
-  cursor: pointer;
-}
-#token-info-modal .modal-header h4 {
-  font-size: 22px;
-  padding-top: 10px;
-  margin: 0px;
-}
-#settingModalInInfo {
-  color: #333;
-  position: fixed;
-  top: 150px;
-  text-align: center;
-  z-index: 3000;
-}
-#settingModalInInfo .modal-header {
-  background: #2851e4;
-  text-align: center;
-}
-#settingModalInInfo .modal-title {
-  flex-grow: 2;
-}
-#settingModalInInfo .modal-body {
-  padding: 0px;
-}
-#settingModalInInfo .modal-body p {
-  padding: 20px 10px;
-}
-#menu-button:active,
-#menu-button:focus,
-#menu-button:hover {
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  color: #fff !important;
-  box-shadow: none;
-}
-#settingModalInInfo .list-group-item {
-  cursor: pointer;
-  font-size: 13px;
-}
-.back-button-svg {
-  position: relative;
-  cursor: pointer;
-  top: 5px;
-  left: 10px;
 }
 </style>

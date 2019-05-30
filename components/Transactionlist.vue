@@ -12,7 +12,14 @@
     </b-card>
     <div
       class="no-transaction-container"
-      v-if="getTxList.length === 0"
+      v-if="getTxList.length === 0 && getBalance[getActiveToken] > 0"
+    >
+      <div>Loading Transaction History for {{getActiveToken}}</div>
+      <b-spinner style="width: 2rem; height: 2rem;" label="Loading"></b-spinner>
+    </div>
+    <div
+      class="no-transaction-container"
+      v-if="getTxList.length === 0 && getBalance[getActiveToken] === 0"
     >No Transaction History for {{getActiveToken}}</div>
   </div>
 </template>
@@ -27,7 +34,8 @@ export default {
       getAccount: "account/getAccount",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
-      getActiveToken: "getActiveToken"
+      getActiveToken: "getActiveToken",
+      getBalance: "account/getBalance"
     }),
     getTxList: function() {
       if (this.getActiveToken === "ETH") return this.getTransactionList;

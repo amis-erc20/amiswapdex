@@ -1,38 +1,33 @@
 <template>
-  <nuxt-link to="/tokendetail">
-    <div class="token">
-      <div class="token-name">
-        <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
-        <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
-        <img v-else-if="token.src" :src="token.src" alt>
-        <img v-else src="../assets/default-token.png">
-        {{token.name}}
+  <div class="token">
+    <div class="token-name">
+      <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
+      <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
+      <img v-else-if="token.src" :src="token.src" alt>
+      <img v-else src="../assets/default-token.png">
+      {{token.name}}
+    </div>
+    <div class="token-price-container">
+      <div v-if="token.priceInUsd">
+        <p class="token-price-in-usd" v-if="token.priceInUsd < 1">${{ token.priceInUsd.toFixed(4) }}</p>
+        <p
+          class="token-price-in-usd"
+          v-if="token.priceInUsd >= 1"
+        >${{ token.priceInUsd.toFixed(2) }}</p>
       </div>
-      <div class="token-price-container">
-        <div v-if="token.priceInUsd">
-          <p
-            class="token-price-in-usd"
-            v-if="token.priceInUsd < 1"
-          >${{ token.priceInUsd.toFixed(4) }}</p>
-          <p
-            class="token-price-in-usd"
-            v-if="token.priceInUsd >= 1"
-          >${{ token.priceInUsd.toFixed(2) }}</p>
-        </div>
-        <div v-else>
-          <p class="token-price-in-usd">-</p>
-        </div>
-      </div>
-      <div class="token-amount-container">
-        <div v-if="token.balance !== `NaN`">
-          <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
-          <p class="token-amount-usd" v-else>-</p>
-          <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p>
-        </div>
-        <p class="token-amount" v-else>loading...</p>
+      <div v-else>
+        <p class="token-price-in-usd">-</p>
       </div>
     </div>
-  </nuxt-link>
+    <div class="token-amount-container">
+      <div v-if="token.balance !== `NaN`">
+        <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
+        <p class="token-amount-usd" v-else>-</p>
+        <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p>
+      </div>
+      <p class="token-amount" v-else>loading...</p>
+    </div>
+  </div>
 </template>
 
 <script>

@@ -49,7 +49,22 @@
           @click="onSelectSignInMethod('privatekey')"
         >Private Key</b-button>
         <!-- Metamask Modal -->
-        <b-modal ref="signin_modal" id="signin_modal" title="Sign In" :hide-footer="true">
+        <b-modal ref="signin_modal" id="signin_modal" :hide-footer="true">
+          <template slot="modal-header">
+            <font-awesome-icon
+              class="back-button-svg"
+              icon="chevron-left"
+              size="lg"
+              color="#fff"
+              @click="closeSignInModal"
+            />
+            <div id="main-title-no-connection-container">
+              <h4>Sign In</h4>
+            </div>
+            <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
+              <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+            </b-button>-->
+          </template>
           <Metamask v-if="signInMethod === 'metamask'"/>
           <Privatekey v-if="signInMethod === 'privatekey'"/>
           <Signin v-if="signInMethod === 'signin'"/>
@@ -95,6 +110,12 @@ export default {
     },
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();
+    },
+    hideModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].hide();
+    },
+    closeSignInModal() {
+      this.hideModal("signin_modal");
     }
   }
 };
@@ -126,6 +147,17 @@ export default {
 }
 .no-account-container > div:hover {
   box-shadow: 0px 4px 4px #dcdbdb;
+}
+#signin_modal .modal-dialog {
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+}
+#signin_modal .modal-content {
+  height: 100vh;
 }
 </style>
 
