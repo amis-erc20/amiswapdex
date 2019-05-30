@@ -202,13 +202,72 @@
       <p>Please open a wallet containing ETH to list a new token</p>
     </b-modal>
 
-    <!-- Token Info Modal -->
+    <!-- Setting Modal -->
     <b-modal
-      ref="token_info_modal"
-      id="token_info_modal"
-      :title="getActiveToken"
+      ref="settingModalInInfo_ref"
+      id="settingModalInInfo"
+      title="Wallet Setting"
       :hide-footer="true"
     >
+      <b-list-group v-if="getSignIn">
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/backup')"
+        >Remote Backup to Google Drive</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/recoverysetup')"
+        >Setup Recovery Q & A</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials'"
+          @click="redirect('/resetpassword')"
+        >Change Password</b-list-group-item>
+        <b-list-group-item
+          v-if="getAccount.type === 'credentials' || getAccount.type === 'private_key'"
+          @click="redirect('/privatekey')"
+        >Show Private Key</b-list-group-item>
+        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
+        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+        <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
+      </b-list-group>
+      <b-list-group v-else>
+        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
+        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+      </b-list-group>
+    </b-modal>
+
+    <!-- Token Info Modal -->
+    <b-modal ref="token_info_modal" id="token_info_modal" :hide-footer="true">
+      <template slot="modal-header">
+        <font-awesome-icon
+          class="back-button-svg"
+          icon="chevron-left"
+          size="lg"
+          color="#fff"
+          @click="closeTokenInfoModal"
+        />
+        <div id="main-title-no-connection-container">
+          <div class="logo-title-container">
+            <img
+              class="logo-in-header"
+              v-if="getActiveToken==='ETH'"
+              src="../assets/eth-logo.png"
+              alt
+            >
+            <img class="logo-in-header" v-else-if="activeTokenLogo" :src="activeTokenLogo" alt>
+            <img
+              class="logo-in-header"
+              v-else-if="!activeTokenLogo"
+              src="../assets/default-token.png"
+              alt
+            >
+            <h4>{{ getActiveToken }}</h4>
+          </div>
+        </div>
+        <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
+          <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+        </b-button>
+      </template>
       <b-card no-body>
         <b-tabs pills card id="token-info-tabs-container">
           <b-tab
@@ -446,6 +505,15 @@ export default {
         });
       }
       return sortedList.slice(0, this.showLimit);
+    },
+    activeTokenLogo() {
+      let self = this;
+      const token = this.getAvailableTokenList.find(
+        t => t.symbol === self.getActiveToken
+      );
+      if (token) return token.logo;
+      else if (this.getActiveToken === "ETH") return null;
+      else return null;
     }
   },
   methods: {
@@ -620,6 +688,9 @@ export default {
       } catch (e) {
         console.warn("Unable to refresh summary info!");
       }
+    },
+    closeTokenInfoModal() {
+      this.hideModal("token_info_modal");
     }
   },
   created: async function() {
@@ -819,10 +890,13 @@ export default {
 
 #list_token_modal,
 #success_modal,
-#no_wallet_modal,
-#token_info_modal {
+#no_wallet_modal {
   position: fixed;
   top: 150px;
+}
+#token_info_modal {
+  position: fixed;
+  top: 0px;
 }
 .modal-header,
 .modal-title {
@@ -869,14 +943,15 @@ export default {
 }
 #token_info_modal {
   position: fixed;
-  top: 50px;
+  top: 0px;
   width: 100%;
-  height: 85vh;
+  height: 100vh;
   max-width: 100%;
+  padding: 0;
+  z-index: 2000;
 }
 #token_info_modal .modal-dialog {
-  width: 95%;
-  max-width: 95%;
+  width: 100%;
   margin: 0 auto;
 }
 #token_info_modal .modal-body {
@@ -935,17 +1010,91 @@ export default {
 }
 #token-info-tabs-container .modal-content {
   background-color: #eceeef;
-  min-height: 90vh;
-  /* height: auto; */
+  min-height: 100vh;
+  border-radius: 0px;
 }
 #token_info_modal .modal-dialog,
 #token-info-modal .modal-content {
   background-color: #eceeef;
-  /* height: auto;
-  max-height: 500px !important; */
-  min-height: 90vh;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100vw !important;
+  margin: 0px;
+  padding: 0;
+  border-radius: 0px;
 }
 #token_info_modal___BV_modal_content_ {
   border: none;
+}
+#token-info-modal .modal-header .title {
+  text-align: center;
+  flex-grow: 3;
+  padding-left: 20px;
+  display: flex;
+  justify-content: center;
+}
+.logo-in-header {
+  margin-right: 15px;
+  width: 30px;
+  height: 30px;
+}
+#token-info-modal .modal-header a {
+  padding-top: 10px;
+}
+#token-info-modal .logo-title-container {
+  position: relative;
+  top: 5px;
+}
+#menu-button {
+  border: none !important;
+  outline: none !important;
+}
+.setting-container img {
+  width: 35px;
+  cursor: pointer;
+}
+#token-info-modal .modal-header h4 {
+  font-size: 22px;
+  padding-top: 10px;
+  margin: 0px;
+}
+#settingModalInInfo {
+  color: #333;
+  position: fixed;
+  top: 150px;
+  text-align: center;
+  z-index: 3000;
+}
+#settingModalInInfo .modal-header {
+  background: #2851e4;
+  text-align: center;
+}
+#settingModalInInfo .modal-title {
+  flex-grow: 2;
+}
+#settingModalInInfo .modal-body {
+  padding: 0px;
+}
+#settingModalInInfo .modal-body p {
+  padding: 20px 10px;
+}
+#menu-button:active,
+#menu-button:focus,
+#menu-button:hover {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+#settingModalInInfo .list-group-item {
+  cursor: pointer;
+  font-size: 13px;
+}
+.back-button-svg {
+  position: relative;
+  cursor: pointer;
+  top: 5px;
+  left: 10px;
 }
 </style>

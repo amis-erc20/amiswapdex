@@ -201,6 +201,7 @@ export default {
   position: fixed;
   top: 150px;
   text-align: center;
+  z-index: 3000;
 }
 #settingModal .modal-header {
   background: #2851e4;
