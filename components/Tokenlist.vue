@@ -69,12 +69,14 @@ export default {
         let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
         return {
           name: symbol,
+          fullname: token ? token.name : "-",
           balance: self.getBalance[symbol],
           priceInUsd: self.getPrice[symbol],
           src: token ? token.logo : null
         };
       });
       let ethToken = list.slice(0, 1);
+      ethToken.fullname = "Ether";
       let otherTokens = list.filter(token => {
         if (token.name === "ETH") return false;
         if (self.hideZeroAmountTokens) {

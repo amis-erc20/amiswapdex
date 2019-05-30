@@ -29,11 +29,19 @@
               <font-awesome-icon icon="qrcode" size="lg" color="#fff"/>
             </b-button>
           </div>
-          <b-form-invalid-feedback :state="validateTargetAddress">Invalid Receiver Address</b-form-invalid-feedback>
+          <b-form-invalid-feedback
+            v-if="form.targetAddress.length > 0"
+            :state="validateTargetAddress"
+          >Invalid Receiver Address</b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group v-if="form.currency !== null && validateTargetAddress === true">
-          <label for>Amount</label>
-          <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
+        <b-form-group v-if="form.currency !== null">
+          <div class="amount-label-container">
+            <label for>Amount</label>
+            <div>
+              <p class="current-balance">{{getBalance[getActiveToken]}} {{getActiveToken}}</p>
+              <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
+            </div>
+          </div>
           <b-form-input
             id="amount-input"
             type="text"
@@ -337,7 +345,7 @@ export default {
           {
             from: this.getAccount.address,
             to: this.form.targetAddress,
-            amount: this.getBalance["ETH"]
+            amount: this.getBalance[this.getActiveToken]
           },
           this.web3
         );
@@ -346,10 +354,8 @@ export default {
           (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
         if (this.form.currency === "ETH") {
           this.form.amount = parseFloat(this.getBalance["ETH"]) - this.txFee;
-        } else if (this.form.currency === "ULT") {
-          this.form.amount = parseFloat(this.getBalance["ULT"]);
-        } else if (this.form.currency === "DAI") {
-          this.form.amount = parseFloat(this.getBalance["DAI"]);
+        } else if (this.form.currency !== "ETH") {
+          this.form.amount = parseFloat(this.getBalance[this.getActiveToken]);
         }
       } catch (e) {
         console.log(e);
@@ -402,9 +408,6 @@ export default {
 .form-group {
   text-align: left;
 }
-.form-group label {
-  text-align: left;
-}
 .send-section form button {
   flex-grow: 1;
   margin: 20px 5px;
@@ -418,9 +421,22 @@ export default {
   top: 150px;
 }
 .use-all-funds {
-  float: right;
   color: #3571ad;
   cursor: pointer;
+  text-align: right;
+  width: 100px;
+}
+.amount-label-container {
+  display: flex;
+  justify-content: space-between;
+}
+.amount-label-container div {
+  display: flex;
+  justify-content: flex-end;
+  width: 80%;
+}
+.amount-label-container .current-balance {
+  font-size: 12px;
 }
 .use-all-funds:hover {
   color: #17508a;
@@ -433,6 +449,10 @@ export default {
 .qr-scanner-container {
   display: flex;
   justify-content: center;
+}
+#qr-toggle-btn {
+  margin: 0;
+  margin-left: 10px;
 }
 .qr-scanner-container,
 .qrcode-stream {

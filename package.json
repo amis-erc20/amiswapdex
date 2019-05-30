@@ -46,6 +46,7 @@
     "vue-qriously": "^1.1.1",
     "vue-select": "^3.0.2",
     "vue-spinner": "^1.0.3",
+    "vue-toasted": "^1.1.27",
     "web3": "^1.0.0-beta.33"
   },
   "devDependencies": {

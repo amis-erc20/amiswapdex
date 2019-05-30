@@ -16,9 +16,9 @@
               <!-- <Header/> -->
               <div id="total-summary">
                 <h5>TOTAL VALUE</h5>
-                <h2>$ {{ getTotalValue.toFixed(3) }}</h2>
+                <h2 v-if="getTotalValue >= 1">$ {{ getTotalValue.toFixed(2) }}</h2>
+                <h2 v-else>$ {{ getTotalValue.toFixed(4) }}</h2>
               </div>
-              <Newtoken/>
               <Tokenlist/>
               <periodic-backup :backupStatus="getBackupStatus()"/>
               <b-modal
@@ -88,6 +88,9 @@ import VueQriously from "vue-qriously";
 import Offline from "v-offline";
 import vSelect from "vue-select";
 import Noaccount from "~/components/Noaccount.vue";
+import Toasted from "vue-toasted";
+
+Vue.use(Toasted);
 
 import {
   getHistory,
@@ -104,6 +107,7 @@ import {
 
 Vue.use(VueQriously);
 Vue.use(BootstrapVue);
+// Vue.use(ToastPlugin);
 
 library.add(faLongArrowAltRight);
 library.add(faLongArrowAltLeft);
@@ -426,6 +430,12 @@ export default {
     let serverStatusUpdater = setInterval(() => {
       self.refreshServerStatus();
     }, 3000);
+    let signInChecker = setInterval(() => {
+      if (self.getSignIn) {
+        self.refreshWallet(web3);
+        clearInterval(signInChecker);
+      }
+    }, 3000);
   },
   mounted: async function() {
     let self = this;
@@ -522,6 +532,7 @@ div {
 }
 #total-summary {
   text-align: center;
+  margin-top: 15px;
 }
 #total-summary h2 {
   font-size: 45px;

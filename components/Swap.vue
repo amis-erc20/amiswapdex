@@ -1,10 +1,12 @@
 <template>
   <div>
     <div id="uniswap-convert-section">
-      <p style="text-align: center">
-        Buy or Sell
-        <strong>{{getActiveToken}}</strong>
-      </p>
+      <div>
+        <b-button-group class="buy-or-sell">
+          <b-button class="selected switch-buy">Buy</b-button>
+          <b-button class="switch-sell">Sell</b-button>
+        </b-button-group>
+      </div>
       <div v-if="!shouldRender" class="no-exchange-yet">
         <p>
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
@@ -1015,5 +1017,30 @@ form label {
   text-align: center;
   margin: 30px auto;
   line-height: 1.5;
+}
+.buy-or-sell .switch-buy,
+.buy-or-sell .switch-sell {
+  width: 100px;
+  outline: none;
+  border: none;
+  background: #aaa;
+  color: #333;
+}
+.buy-or-sell .switch-buy:hover,
+.buy-or-sell .switch-sell:hover {
+  outline: none;
+  border: none;
+  background: #aaa;
+}
+.buy-or-sell .switch-buy:focus,
+.buy-or-sell .switch-sell:focus {
+  outline: none;
+  border: none;
+}
+.buy-or-sell .selected,
+.buy-or-sell .selected:hover {
+  background: #2752e4;
+  color: #fff;
+  font-weight: bold;
 }
 </style>

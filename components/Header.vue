@@ -3,16 +3,8 @@
     <div class="header-section">
       <div class="balance-summary">
         <p class="token-amount-usd" v-if="priceInUSD && currentRoute !== `/`">{{ priceInUSD }} USD</p>
-        <h2 v-if="getActiveToken === 'ETH'">
-          {{ calculateBalance(getBalance["ETH"]) }}
-          <span>ETH</span>
-        </h2>
-        <h2 v-if="getActiveToken === 'ULT'">
-          {{ calculateBalance(getBalance["ULT"]) }}
-          <span>ULT</span>
-        </h2>
-        <h2 v-if="getActiveToken !== 'ETH' && getActiveToken !== 'ULT'">
-          {{ calculateBalance(getBalance[getActiveToken]) }}
+        <h2>
+          {{ calculateBalance(balanceList[getActiveToken]) }}
           <span>{{getActiveToken}}</span>
         </h2>
       </div>
@@ -30,7 +22,8 @@ import {
 export default {
   data: function() {
     return {
-      priceInUSD: 0
+      priceInUSD: 0,
+      balanceList: {}
     };
   },
   computed: {
@@ -63,7 +56,12 @@ export default {
       });
     }
   },
-  mounted: async function() {}
+  mounted: async function() {
+    let self = this;
+    setInterval(() => {
+      self.balanceList = self.getBalance;
+    }, 2000);
+  }
 };
 </script>
 

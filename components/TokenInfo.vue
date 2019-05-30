@@ -25,13 +25,13 @@
           v-if="getAccount.type === 'credentials' || getAccount.type === 'private_key'"
           @click="redirect('/privatekey')"
         >Show Private Key</b-list-group-item>
-        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
-        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+        <b-list-group-item @click="showPage('about')">About</b-list-group-item>
+        <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
         <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
       </b-list-group>
       <b-list-group v-else>
-        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
-        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+        <b-list-group-item @click="showPage('about')">About</b-list-group-item>
+        <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
       </b-list-group>
     </b-modal>
 
@@ -126,6 +126,24 @@
           </b-tab>
         </b-tabs>
       </b-card>
+      <!-- About/TOS Modal -->
+      <b-modal ref="about_tos_modal" id="about_tos_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="lg"
+            color="#fff"
+            @click="closeAboutTosModal"
+          />
+          <div id="main-title-no-connection-container">
+            <h4 v-if="pageToRender === 'about'">About UniswapDex</h4>
+            <h4 v-if="pageToRender === 'tos'">Term of Services</h4>
+          </div>
+        </template>
+        <About v-if="pageToRender === 'about'"/>
+        <Tos v-if="pageToRender === 'tos'"/>
+      </b-modal>
     </b-modal>
   </section>
 </template>
@@ -142,6 +160,8 @@ import Info from "~/components/Info.vue";
 import Send from "~/components/Send.vue";
 import Swap from "~/components/Swap.vue";
 import Liquidity from "~/components/Liquidity.vue";
+import Tos from "~/components/Tos.vue";
+import About from "~/components/About.vue";
 import Noaccount from "~/components/Noaccount.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
@@ -173,7 +193,9 @@ export default {
     Receive,
     Send,
     Swap,
-    Liquidity
+    Liquidity,
+    Tos,
+    About
   },
   props: ["show"],
   data: function() {
@@ -190,7 +212,8 @@ export default {
       infoMessage: "",
       txHash: "",
       loading: false,
-      showLowLiquidityToken: false
+      showLowLiquidityToken: false,
+      pageToRender: ""
     };
   },
   computed: {
@@ -232,6 +255,7 @@ export default {
     ...mapActions({
       updateAuthRedirectUrl: "updateAuthRedirectUrl",
       updateSummary: "updateSummary",
+      updateAuthStatus: "updateAuthStatus",
       updateActiveTab: "updateActiveTab",
       updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
@@ -243,6 +267,18 @@ export default {
       updateTokenTransactionListToken:
         "transaction/updateTokenTransactionListToken"
     }),
+    redirect(url) {
+      this.$router.push(url);
+    },
+    showPage(name) {
+      this.pageToRender = name;
+      this.hideModal("settingModalInInfo_ref");
+      this.showModal("about_tos_modal");
+    },
+    closeAboutTosModal() {
+      this.hideModal("about_tos_modal");
+      this.pageToRender = "";
+    },
     onTokenTabChange(tabName) {},
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();
@@ -292,13 +328,6 @@ export default {
 </script>
 
 <style>
-#token_info_modal {
-  position: fixed;
-  top: 0px;
-}
-#token_info_modal .modal-header {
-  border-radius: 0px !important;
-}
 .modal-header,
 .modal-title {
   text-align: center;
@@ -337,28 +366,7 @@ export default {
   font-size: 12px;
   padding-top: 5px;
 }
-#token_info_modal .token-info-section {
-  height: auto;
-  width: 100%;
-  padding-top: 0px;
-}
-#token_info_modal {
-  position: fixed;
-  top: 0px;
-  width: 100%;
-  height: 100vh;
-  max-width: 100%;
-  padding: 0;
-  z-index: 2000;
-}
-#token_info_modal .modal-dialog {
-  width: 100%;
-  margin: 0 auto;
-}
-#token_info_modal .modal-body {
-  padding: 0;
-  background: #eceeef;
-}
+
 #token-info-tabs-container {
   width: 100%;
   margin: 0 auto;
@@ -409,13 +417,52 @@ export default {
 #token-info-tabs-container .receive-section {
   padding-top: 20px;
 }
-#token-info-tabs-container .modal-content {
+/* #token-info-tabs-container .modal-content {
   background-color: #eceeef;
   min-height: 100vh;
   border-radius: 0px;
+} */
+
+#token_info_modal,
+#about_tos_modal {
+  position: fixed;
+  top: 0px;
+}
+#token_info_modal .modal-header,
+#about_tos_modal .modal-header {
+  border-radius: 0px !important;
+}
+
+#token_info_modal .token-info-section {
+  height: auto;
+  width: 100%;
+  padding-top: 0px;
+}
+#token_info_modal,
+#about_tos_modal {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100vh;
+  max-width: 100%;
+  padding: 0;
+  z-index: 2000;
 }
 #token_info_modal .modal-dialog,
-#token-info-modal .modal-content {
+#about_tos_modal .modal-dialog {
+  width: 100%;
+  margin: 0 auto;
+}
+#token_info_modal .modal-body,
+#about_tos_modal .modal-body {
+  padding: 0;
+  background: #eceeef;
+}
+
+#token_info_modal .modal-dialog,
+#token-info-modal .modal-content,
+#about_tos_modal .modal-dialog,
+#about_tos_modal .modal-content {
   background-color: #eceeef;
   height: 100vh;
   width: 100vw;
@@ -424,10 +471,15 @@ export default {
   padding: 0;
   border-radius: 0px;
 }
+#about_tos_modal .modal-dialog,
+#about_tos_modal .modal-content {
+  overflow: hidden;
+}
 #token_info_modal___BV_modal_content_ {
   border: none;
 }
-#token-info-modal .modal-header .title {
+#token-info-modal .modal-header .title,
+#about_tos_modal .modal-header .title {
   text-align: center;
   flex-grow: 3;
   padding-left: 20px;
@@ -439,7 +491,8 @@ export default {
   width: 30px;
   height: 30px;
 }
-#token-info-modal .modal-header a {
+#token-info-modal .modal-header a,
+#about_tos_modal .modal-header a {
   padding-top: 10px;
 }
 #token-info-modal .logo-title-container {

@@ -68,7 +68,18 @@ export default {
       // }
       // this.copyToClipboard(this.getAccount.address.toLowerCase());
       this.iosCopyClipboard(this.getAccount.address.toLowerCase());
-      this.$refs["copied-modal"].show();
+      // this.$refs["copied-modal"].show();
+      this.$toasted.show("Address is copied to clipboard.", {
+        theme: "outline",
+        position: "bottom-center",
+        duration: 5000,
+        action: {
+          text: "OK",
+          onClick: (e, toastObject) => {
+            toastObject.goAway(0);
+          }
+        }
+      });
     },
     isIosSafari() {
       var ua = window.navigator.userAgent;
@@ -142,8 +153,17 @@ export default {
 }
 
 #copied-modal {
-  color: #333;
+  /* color: #333;
   position: fixed;
   top: 150px;
+  width: 100%;
+  overflow: hidden; */
+}
+
+#copied-modal .modal-dialog,
+#copied-modal .modal-content {
+  /* height: 200px;
+  width: 300px;
+  max-width: 300px !important; */
 }
 </style>

@@ -5,7 +5,11 @@
       <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
       <img v-else-if="token.src" :src="token.src" alt>
       <img v-else src="../assets/default-token.png">
-      {{token.name}}
+      <div>
+        <div class="token-symbol">{{token.name}}</div>
+        <div class="token-fullname" v-if="token.name === 'ETH'">Ether</div>
+        <div class="token-fullname" v-else>{{token.fullname}}</div>
+      </div>
     </div>
     <div class="token-price-container">
       <div v-if="token.priceInUsd">
@@ -50,6 +54,10 @@ export default {
         else if (value < 1) return value.toFixed(4);
         else if (value === 1) return "-";
       } else return "-";
+    },
+    getFullName: function(tokenId) {
+      let summaryInfo = this.getSummary.find(s => s.token_id === tokenId);
+      return null;
     }
   },
   methods: {
@@ -77,20 +85,20 @@ export default {
   color: #fff;
   color: #333;
 }
-.token .token-name {
+.tokenlist-section .token .token-name {
   font-size: 14px;
   font-weight: bold;
   margin: 0;
   padding-top: 10px;
-  width: 100px;
+  width: 30%;
   text-align: left;
 }
-.token .token-amount {
+.tokenlist-section .token .token-amount {
   font-size: 11px;
   font-weight: normal;
   margin: 0;
 }
-.token .token-amount-usd {
+.tokenlist-section .token .token-amount-usd {
   font-size: 13px;
   font-weight: bolder;
   color: #1980ff;
@@ -98,10 +106,13 @@ export default {
   margin-bottom: 5px;
   text-align: right;
 }
-.token .token-price-container {
+.tokenlist-section .token .token-price-container {
   width: 100px;
+  left: -30px;
+  position: relative;
+  text-align: right;
 }
-.token .token-price-in-usd {
+.tokenlist-section .token .token-price-in-usd {
   font-size: 13px;
   margin: 0;
   margin-bottom: 5px;
@@ -109,13 +120,28 @@ export default {
   padding-top: 15px;
   font-weight: normal;
 }
-.token-name img {
+.tokenlist-section .token-name img {
   width: 30px;
+  margin-right: 10px;
 }
-.tokenlist-section a {
+.tokenlist-section .token-name {
+  display: flex;
+}
+.tokenlist-section .token-name .token-symbol {
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: 5px;
+}
+.tokenlist-section .token-name .token-fullname {
+  font-size: 11px;
+  text-align: left;
+  color: #666;
+  font-weight: normal;
+}
+.tokenlist-section .tokenlist-section a {
   text-decoration: none !important;
 }
-.token-amount-container {
+.tokenlist-section .token-amount-container {
   display: flex;
   justify-content: center;
   flex-direction: column;

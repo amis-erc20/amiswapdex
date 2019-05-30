@@ -3,12 +3,7 @@
     <Nav/>
     <div id="about-description">
       <img src="../assets/logo.svg" alt>
-      <p>
-        The UniswapDEX.com provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by
-        <a
-          href="https://uniswap.io/"
-        >Uniswap.io</a>.
-      </p>
+      <p>The UniswapDEX.com provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by <a href="https://uniswap.io/">Uniswap.io</a>.</p>
       <p>
         <strong>Version: {{version}}</strong>
       </p>
@@ -38,9 +33,9 @@ export default {
 }
 #about-description {
   position: relative;
+  top: 64px;
   display: flex;
   height: 100vh;
-  overflow: hidden;
   flex-direction: column;
   justify-content: flex-start;
   width: 90%;
@@ -57,9 +52,8 @@ export default {
   margin: 0 auto;
 }
 #about-description p {
-  text-align: center;
+    text-align: center;
   line-height: 1.5;
   font-weight: normal;
-  color: #333;
 }
 </style>

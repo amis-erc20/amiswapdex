@@ -47,14 +47,35 @@
           v-if="getAccount.type === 'credentials' || getAccount.type === 'private_key'"
           @click="redirect('/privatekey')"
         >Show Private Key</b-list-group-item>
-        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
-        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+        <b-list-group-item @click="showPage('about')">About</b-list-group-item>
+        <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
         <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
       </b-list-group>
       <b-list-group v-else>
-        <b-list-group-item @click="redirect('/about')">About</b-list-group-item>
-        <b-list-group-item @click="redirect('/tos')">Terms of Services</b-list-group-item>
+        <b-list-group-item @click="showPage('about')">About</b-list-group-item>
+        <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
       </b-list-group>
+    </b-modal>
+    <!-- Metamask Modal -->
+    <b-modal ref="about_tos_modal" id="about_tos_modal" :hide-footer="true">
+      <template slot="modal-header">
+        <font-awesome-icon
+          class="back-button-svg"
+          icon="chevron-left"
+          size="lg"
+          color="#fff"
+          @click="closeSigninModal"
+        />
+        <div id="main-title-no-connection-container">
+          <h4 v-if="pageToRender === 'about'">About UniswapDex</h4>
+          <h4 v-if="pageToRender === 'tos'">Term of Services</h4>
+        </div>
+        <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
+              <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+        </b-button>-->
+      </template>
+      <About v-if="pageToRender === 'about'"/>
+      <Tos v-if="pageToRender === 'tos'"/>
     </b-modal>
   </div>
 </template>
@@ -62,11 +83,22 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
+import Tos from "~/components/Tos.vue";
+import About from "~/components/About.vue";
 export default {
+  components: {
+    Tos,
+    About
+  },
   props: {
     refreshInterval: {
       type: Number
     }
+  },
+  data: function() {
+    return {
+      pageToRender: ""
+    };
   },
   computed: {
     ...mapGetters({
@@ -121,6 +153,14 @@ export default {
     hideModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].hide();
     },
+    showModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].show();
+    },
+    showPage(name) {
+      this.hideModal("settingModal_ref");
+      this.pageToRender = name;
+      this.showModal("about_tos_modal");
+    },
     onLogout() {
       this.updateAuthStatus(false);
       this.removeAccount();
@@ -148,6 +188,10 @@ export default {
           tokenSubTab: "info"
         });
       }
+    },
+    closeSigninModal() {
+      this.hideModal("about_tos_modal");
+      this.pageToRender = "";
     }
   }
 };
