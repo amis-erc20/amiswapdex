@@ -97,8 +97,8 @@ export default {
   font-weight: lighter;
 }
 .balance-summary h2 {
-  margin: 30px 20px;
-  font-size: 38px;
+  margin: 25px 20px;
+  margin-top: 15px;
   font-weight: normal;
   position: relative;
   left: -20px;

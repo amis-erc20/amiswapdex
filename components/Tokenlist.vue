@@ -98,9 +98,7 @@ export default {
     }),
     changeTokenTab: function(event, tokenName) {
       this.updateActiveToken(tokenName);
-      // this.$router.push("/tokendetail");
       this.showTokenInfoModal = true;
-      console.log(this.showTokenInfoModal);
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;
@@ -132,7 +130,7 @@ export default {
 .tokenlist-section {
   width: 100%;
   max-width: 650px;
-  margin: 55px auto;
+  margin: 30px auto;
   margin-bottom: 0px;
 }
 .tokenlist-section .card {

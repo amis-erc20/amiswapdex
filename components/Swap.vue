@@ -28,7 +28,29 @@
             :options="availableInputTokens"
             @change="onCurrencyChange"
             :disabled="form.inputCurrency === getActiveToken"
+            style="display: none"
           />
+          <v-select
+            :options="tokenList"
+            label="title"
+            placeholder="Please select a curreny"
+            @input="onSelectInputCurrency"
+            :disabled="isSellSelected"
+            :value="form.inputCurrency"
+            :clearable="false"
+          >
+            <template slot="option" slot-scope="option">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px">
+              <img
+                v-else-if="option.title==='ETH'"
+                src="../assets/eth-logo.png"
+                height="20px"
+                width="20px"
+              >
+              <img v-else src="../assets/default-token.png" height="20px" width="20px">
+              {{ option.title }}
+            </template>
+          </v-select>
         </b-form-group>
 
         <b-button variant="primary" @click="onCurrencySwap" id="currency-swap-button">
@@ -42,7 +64,30 @@
             :options="availableOutputTokens"
             @change="onCurrencyChange"
             :disabled="form.outputCurrency === getActiveToken"
+            :value="form.outputCurrency"
+            style="display: none"
           />
+          <v-select
+            :options="tokenList"
+            label="title"
+            placeholder="Please select a curreny"
+            @input="onSelectOutputCurrency"
+            :disabled="isBuySelected"
+            :value="form.outputCurrency"
+            :clearable="false"
+          >
+            <template slot="option" slot-scope="option">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px">
+              <img
+                v-else-if="option.title==='ETH'"
+                src="../assets/eth-logo.png"
+                height="20px"
+                width="20px"
+              >
+              <img v-else src="../assets/default-token.png" height="20px" width="20px">
+              {{ option.title }}
+            </template>
+          </v-select>
         </b-form-group>
 
         <b-form-group v-if="this.validateCurrency" prepend="@">
@@ -51,7 +96,7 @@
             <div>
               <p
                 class="current-balance"
-              >{{getBalance[form.inputCurrency || 'ETH']}} {{form.inputCurrency || ETH}}</p>
+              >{{getBalance[form.inputCurrency || 'ETH'] || 0.0}} {{form.inputCurrency || ETH}}</p>
               <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
             </div>
           </div>
@@ -278,6 +323,16 @@ export default {
       options.unshift({ value: null, text: "Please select currency" });
       return options;
     },
+    tokenList: function() {
+      let options = this.getAvailableTokenList.map(token => {
+        return {
+          title: token.symbol,
+          src: token.logo
+        };
+      });
+      options.unshift({ title: "ETH", src: null });
+      return options;
+    },
     availableInputTokens() {
       let outputCurrency = this.form.outputCurrency;
       if (this.form.outputCurrency === null) return this.availableTokens;
@@ -376,6 +431,9 @@ export default {
       this.form.inputCurrency = this.getActiveToken;
     }
   },
+  errorCaptured: function(err, component, info) {
+    console.log(err, info);
+  },
   mounted: async function() {
     this.form.outputCurrency = this.getActiveToken;
     this.form.inputCurrency = null;
@@ -404,6 +462,37 @@ export default {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    onSelectInputCurrency(value) {
+      if (!value) return;
+      console.log(`${value.title} is selected as input`);
+      this.form.inputCurrency = value.title;
+      this.onCurrencyChange();
+    },
+    onSelectOutputCurrency(value) {
+      if (!value) return;
+      console.log(`${value.title} is selected as output`);
+      this.form.outputCurrency = value.title;
+      this.onCurrencyChange();
+    },
+    showSuccessToast(txHash) {
+      let successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
+      this.$toasted.show(successHTML, {
+        theme: "outline",
+        type: "success",
+        position: "top-center",
+        duration: 10000,
+        fullWidth: true,
+        action: [
+          {
+            text: "View it On etherscan.io",
+            onClick: (e, toastObject) => {
+              toastObject.goAway(0);
+              window.open(`https://etherscan.io/tx/${txHash}`, "_blank");
+            }
+          }
+        ]
+      });
+    },
     showScanner() {
       this.scanning = true;
       this.camera = defaultCamera;
@@ -421,7 +510,12 @@ export default {
     },
     async useAllFunds() {
       const contractAddress = exchangeAddresses[this.form.inputCurrency];
-      let estimatedGas = await this.getEstimatedGas(contractAddress);
+      let estimatedGas;
+      if (this.form.inputCurrency === "ETH") {
+        estimatedGas = await this.getEstimatedGas(this.form.outputCurrency);
+      } else {
+        estimatedGas = await this.getEstimatedGas(contractAddress);
+      }
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
@@ -460,18 +554,35 @@ export default {
     },
     async onCurrencyChange() {
       if (!this.validateCurrency) return;
-      this.onAmountChange();
-
-      const contractAddress = exchangeAddresses[this.form.inputCurrency];
-      let estimatedGas = await this.getEstimatedGas(contractAddress);
-      if (estimatedGas * 1.6 > this.gasLimit)
-        this.gasLimit = estimatedGas * 1.6;
-      if (
-        this.swapType === "TOKEN_TO_TOKEN" &&
-        this.gasLimit < estimatedGas * 2.5
-      )
-        this.gasLimit = estimatedGas * 2.5;
-      console.log(estimatedGas, this.gasPrice, this.gasLimit);
+      try {
+        this.onAmountChange();
+        if (this.form.inputCurrency === "ETH") {
+          const contractAddress = exchangeAddresses[this.form.outputCurrency];
+          let estimatedGas = await this.getEstimatedGas(contractAddress);
+          if (estimatedGas * 1.6 > this.gasLimit)
+            this.gasLimit = estimatedGas * 1.6;
+          if (
+            this.swapType === "TOKEN_TO_TOKEN" &&
+            this.gasLimit < estimatedGas * 2.5
+          )
+            this.gasLimit = estimatedGas * 2.5;
+          console.log(estimatedGas, this.gasPrice, this.gasLimit);
+        } else {
+          const contractAddress = exchangeAddresses[this.form.inputCurrency];
+          let estimatedGas = await this.getEstimatedGas(contractAddress);
+          if (estimatedGas * 1.6 > this.gasLimit)
+            this.gasLimit = estimatedGas * 1.6;
+          if (
+            this.swapType === "TOKEN_TO_TOKEN" &&
+            this.gasLimit < estimatedGas * 2.5
+          )
+            this.gasLimit = estimatedGas * 2.5;
+          console.log(estimatedGas, this.gasPrice, this.gasLimit);
+        }
+      } catch (e) {
+        console.log("some error");
+        console.log(e);
+      }
     },
     onCurrencySwap() {
       if (this.isSellSelected) {
@@ -665,7 +776,8 @@ export default {
           this.updateActiveToken(this.form.outputCurrency);
           this.onReset();
           this.loading = false;
-          this.showModal("success_modal_ref");
+          // this.showModal("success_modal_ref");
+          this.showSuccessToast(this.txHash);
         } else {
           this.onReset();
           this.loading = false;
@@ -732,7 +844,8 @@ export default {
             this.updateActiveToken(this.form.outputCurrency);
             this.onReset();
             this.loading = false;
-            this.showModal("success_modal_ref");
+            // this.showModal("success_modal_ref");
+            this.showSuccessToast(this.txHash);
           } else if (type === "TOKEN_TO_ETH") {
             exchangeContract = exchangeContracts[inputCurrency];
             const tokenSold = new BigNumber(inputValue * Math.pow(10, 18));
@@ -787,7 +900,8 @@ export default {
             this.updateActiveToken(this.form.outputCurrency);
             this.onReset();
             this.loading = false;
-            this.showModal("success_modal_ref");
+            // this.showModal("success_modal_ref");
+            this.showSuccessToast(this.txHash);
           } else if (type === "TOKEN_TO_TOKEN") {
             exchangeContract = exchangeContracts[inputCurrency];
             const contractAddress = exchangeAddresses[inputCurrency];
@@ -860,7 +974,8 @@ export default {
             this.updateActiveToken(this.form.outputCurrency);
             this.onReset();
             this.loading = false;
-            this.showModal("success_modal_ref");
+            // this.showModal("success_modal_ref");
+            this.showSuccessToast(this.txHash);
           }
         } catch (e) {
           console.log(e);
@@ -1045,8 +1160,16 @@ form label {
   margin-bottom: 60px;
 }
 #uniswap-convert-section img {
-  width: 120px;
-  margin: 20px auto;
+  /* width: 120px; */
+  /* margin: 20px auto; */
+}
+.v-select {
+  height: 40px;
+  background: #fff;
+}
+.vs--searchable .vs__dropdown-toggle {
+  cursor: text;
+  height: 40px;
 }
 #unlock_request_modal button[type="submit"] {
   width: 100%;

@@ -103,7 +103,6 @@ export default {
       let foundToken = self.getAvailableTokenList.find(
         t => t.symbol == self.selectedToken.title
       );
-      console.log(foundToken);
       this.addToken({
         symbol: foundToken.symbol,
         balance: 0,

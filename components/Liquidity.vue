@@ -1094,7 +1094,7 @@ export default {
   margin-bottom: 30px;
 }
 #uniswap-liquidity-section {
-  padding-top: 100px;
+  padding-top: 40px;
   width: 90%;
   max-width: 650px;
   margin: 0 auto;

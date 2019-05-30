@@ -108,7 +108,7 @@ export default {
 }
 .tokenlist-section .token .token-price-container {
   width: 100px;
-  left: -30px;
+  left: -90px;
   position: relative;
   text-align: right;
 }
@@ -116,7 +116,7 @@ export default {
   font-size: 13px;
   margin: 0;
   margin-bottom: 5px;
-  text-align: left;
+  text-align: right;
   padding-top: 15px;
   font-weight: normal;
 }

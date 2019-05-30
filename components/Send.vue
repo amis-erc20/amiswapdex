@@ -235,6 +235,25 @@ export default {
         (1.6 * this.gasLimit * parseInt(this.gasPrice) * 1000000000) /
         Math.pow(10, 18);
     },
+    showSuccessToast(txHash) {
+      let successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
+      this.$toasted.show(successHTML, {
+        theme: "outline",
+        type: "success",
+        position: "top-center",
+        duration: 10000,
+        fullWidth: true,
+        action: [
+          {
+            text: "View it On etherscan.io",
+            onClick: (e, toastObject) => {
+              toastObject.goAway(0);
+              window.open(`https://etherscan.io/tx/${txHash}`, "_blank");
+            }
+          }
+        ]
+      });
+    },
     async onSubmit(evt) {
       evt.preventDefault();
       if (!this.getConnection) {
@@ -274,7 +293,8 @@ export default {
             this.updateActiveToken(this.form.currency);
             this.onReset();
             this.loading = false;
-            this.showModal("success_modal_ref");
+            // this.showModal("success_modal_ref");
+            this.showSuccessToast(this.txHash);
           } else {
             this.onReset();
             this.loading = false;
@@ -481,5 +501,10 @@ export default {
   z-index: 1000;
   color: #e61209;
   font-weight: bolder;
+}
+.toasted.outline.success {
+  padding-top: 15px;
+  color: #4caf50;
+  border-color: #4caf50;
 }
 </style>
