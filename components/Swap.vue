@@ -3,8 +3,16 @@
     <div id="uniswap-convert-section">
       <div>
         <b-button-group class="buy-or-sell">
-          <b-button class="selected switch-buy">Buy</b-button>
-          <b-button class="switch-sell">Sell</b-button>
+          <b-button
+            v-bind:class="{ selected: isBuySelected }"
+            class="switch-buy"
+            @click="changeSelected('buy')"
+          >Buy</b-button>
+          <b-button
+            v-bind:class="{ selected: isSellSelected }"
+            class="switch-sell"
+            @click="changeSelected('sell')"
+          >Sell</b-button>
         </b-button-group>
       </div>
       <div v-if="!shouldRender" class="no-exchange-yet">
@@ -38,8 +46,15 @@
         </b-form-group>
 
         <b-form-group v-if="this.validateCurrency" prepend="@">
-          <label for>Enter {{form.inputCurrency}} amount to sell</label>
-          <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
+          <div class="amount-label-container">
+            <label for>Enter {{form.inputCurrency}} amount to sell</label>
+            <div>
+              <p
+                class="current-balance"
+              >{{getBalance[form.inputCurrency || 'ETH']}} {{form.inputCurrency || ETH}}</p>
+              <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
+            </div>
+          </div>
           <b-form-input
             id="inputValue"
             type="text"
@@ -230,7 +245,9 @@ export default {
       unlockTxHash: "",
       inputErrorMessage: "Please input a valid amount",
       outputErrorMessage: "Please input a valid amount",
-      slippage: null
+      slippage: null,
+      isBuySelected: true,
+      isSellSelected: false
     };
   },
   computed: {
@@ -346,8 +363,22 @@ export default {
       );
     }
   },
+  updated: function() {
+    if (
+      this.isBuySelected &&
+      this.form.outputCurrency !== this.getActiveToken
+    ) {
+      this.form.outputCurrency = this.getActiveToken;
+    } else if (
+      this.isSellSelected &&
+      this.form.inputCurrency !== this.getActiveToken
+    ) {
+      this.form.inputCurrency = this.getActiveToken;
+    }
+  },
   mounted: async function() {
-    this.form.inputCurrency = this.getActiveToken;
+    this.form.outputCurrency = this.getActiveToken;
+    this.form.inputCurrency = null;
     this.web3 = await getWeb3();
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {
@@ -443,12 +474,37 @@ export default {
       console.log(estimatedGas, this.gasPrice, this.gasLimit);
     },
     onCurrencySwap() {
-      let input = this.form.inputCurrency;
-      let output = this.form.outputCurrency;
-      this.form.inputCurrency = output;
-      this.form.outputCurrency = input;
+      if (this.isSellSelected) {
+        let savedOutput = this.form.outputCurrency;
+        this.changeSelected("buy");
+        this.form.inputCurrency = savedOutput;
+      } else if (this.isBuySelected) {
+        let savedInput = this.form.inputCurrency;
+        this.changeSelected("sell");
+        this.form.outputCurrency = savedInput;
+      }
       this.lastEditedField === "input";
       this.onAmountChange();
+    },
+    onBuySellChange(method) {
+      if (method === "buy") {
+        this.form.inputCurrency = null;
+        this.form.outputCurrency = this.getActiveToken;
+      } else if (method === "sell") {
+        this.form.inputCurrency = this.getActiveToken;
+        this.form.outputCurrency = null;
+      }
+    },
+    changeSelected(method) {
+      if (method === "buy") {
+        this.isBuySelected = true;
+        this.isSellSelected = false;
+        this.onBuySellChange("buy");
+      } else if (method === "sell") {
+        this.isBuySelected = false;
+        this.isSellSelected = true;
+        this.onBuySellChange("sell");
+      }
     },
     async onAmountChange() {
       if (!this.form.inputCurrency || !this.form.outputCurrency) return;
@@ -1036,6 +1092,7 @@ form label {
 .buy-or-sell .switch-sell:focus {
   outline: none;
   border: none;
+  box-shadow: none;
 }
 .buy-or-sell .selected,
 .buy-or-sell .selected:hover {

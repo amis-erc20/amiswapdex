@@ -111,8 +111,8 @@
                 <img v-else-if="token.src" :src="token.src" alt>
                 <img v-else src="../assets/default-token.png">
                 <div>
-                  <p>{{token.name}}</p>
-                  <p>{{token.fullname}}</p>
+                  <p class="exchange-token-symbol">{{token.name}}</p>
+                  <p class="exchange-token-fullname">{{token.fullname}}</p>
                 </div>
               </div>
               <div class="token-price-container">
@@ -703,7 +703,7 @@ export default {
   justify-content: space-around;
   background: #fff;
   color: #333;
-  padding-top: 10px;
+  padding: 10px 5px;
   transition: 0.5s;
 }
 .exchangelist-section .token:hover {
@@ -732,12 +732,12 @@ export default {
 .exchangelist-section .token .token-name > div {
   margin-left: 10px;
 }
-.exchangelist-section .token.token-name > div > p:nth-of-type(1) {
+.exchange-token-symbol {
   font-size: 12px;
   text-align: left;
   margin-bottom: 5px;
 }
-.exchangelist-section .token .token-name > div > p:nth-of-type(2) {
+.exchange-token-fullname {
   font-size: 10px;
   text-align: left;
   color: #666;
@@ -761,6 +761,7 @@ export default {
 }
 .exchangelist-section .token .token-name {
   width: 20px !important;
+  padding-top: 5px;
 }
 .exchangelist-section .token .token-order-container {
   width: 30px !important;
