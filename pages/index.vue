@@ -89,8 +89,17 @@ import Offline from "v-offline";
 import vSelect from "vue-select";
 import Noaccount from "~/components/Noaccount.vue";
 import Toasted from "vue-toasted";
+import VueMq from "vue-mq";
 
 Vue.use(Toasted);
+Vue.use(VueMq, {
+  breakpoints: {
+    mobile: 450,
+    tablet: 900,
+    laptop: 1250,
+    desktop: Infinity
+  }
+});
 
 import {
   getHistory,

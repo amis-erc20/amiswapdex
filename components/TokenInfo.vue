@@ -551,4 +551,11 @@ export default {
   top: 5px;
   left: 10px;
 }
+@media screen and (max-width: 450px) {
+  #token-info-tabs-container .nav-pills .nav-link {
+    padding: 15px 0px;
+    height: 44px;
+    font-size: 12px;
+  }
+}
 </style>

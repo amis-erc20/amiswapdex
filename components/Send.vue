@@ -18,13 +18,16 @@
         <b-form-group id="exampleInputGroup1" v-if="form.currency !== null">
           <label for>Receiver Address</label>
           <div id="address-qr-btn-container">
-            <b-form-input
-              type="text"
-              v-model="form.targetAddress"
-              required
-              placeholder="Enter receiver address"
-              :state="validateTargetAddress"
-            />
+            <div class="input-field-container address-field-container">
+              <b-form-input
+                type="text"
+                v-model="form.targetAddress"
+                required
+                placeholder="Enter receiver address"
+                :state="validateTargetAddress"
+              />
+              <button type="button" id="erase" @click="form.targetAddress = ''"></button>
+            </div>
             <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
               <font-awesome-icon icon="qrcode" size="lg" color="#fff"/>
             </b-button>
@@ -42,16 +45,23 @@
               <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
             </div>
           </div>
-          <b-form-input
-            id="amount-input"
-            type="text"
-            v-model="form.amount"
-            required
-            :placeholder="`Enter amount in ${form.currency}`"
+          <div class="input-field-container">
+            <b-form-input
+              id="amount-input"
+              type="text"
+              v-model="form.amount"
+              required
+              :placeholder="`Enter amount in ${form.currency}`"
+              :state="validateAmount"
+              v-on:change="updateGasLimitAndTxFee"
+            />
+            <button type="button" id="erase" @click="form.amount = ''"></button>
+          </div>
+
+          <b-form-invalid-feedback
+            v-if="form.amount.length > 0"
             :state="validateAmount"
-            v-on:change="updateGasLimitAndTxFee"
-          />
-          <b-form-invalid-feedback :state="validateAmount">{{ inputErrorMessage }}</b-form-invalid-feedback>
+          >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <b-form-group v-if="form.currency !== null && validateTargetAddress">
@@ -79,7 +89,7 @@
             type="submit"
             variant="primary"
             :disabled="loading || !validateTargetAddress || !validateAmount"
-          >Submit</b-button>
+          >Send</b-button>
         </div>
       </b-form>
       <b-modal
@@ -167,6 +177,9 @@ export default {
       return isValidAddress(this.form.targetAddress);
     },
     validateAmount() {
+      var reg = /^[+-]?\d+(\.\d+)?$/;
+      let check = reg.test(this.form.amount);
+      if (!check) return false;
       let amount = parseFloat(this.form.amount);
       const isNaN = Number.isNaN(amount);
       if (isNaN || amount <= 0) return false;
@@ -179,7 +192,6 @@ export default {
         }
       } else if (this.form.currency !== "ETH") {
         let tokenBalance = parseFloat(this.getBalance[this.form.currency]);
-        console.log(`Token Balance: ${tokenBalance}`);
         if (amount > tokenBalance || txFee > ethBalance) {
           this.inputErrorMessage =
             "Not enough token balance or transaction fee";
@@ -195,6 +207,9 @@ export default {
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
     this.gasPrice =
       parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+  },
+  updated: async function() {
+    this.form.currency = this.getActiveToken;
   },
   methods: {
     ...mapActions({
@@ -417,7 +432,7 @@ export default {
   color: #333;
   width: 90%;
   max-width: 650px;
-  margin: 30px auto;
+  margin: 20px auto;
   text-align: center;
   padding-top: 20px;
 }
@@ -449,6 +464,7 @@ export default {
 .amount-label-container {
   display: flex;
   justify-content: space-between;
+  align-items: flex-end;
 }
 .amount-label-container div {
   display: flex;
@@ -506,5 +522,33 @@ export default {
   padding-top: 15px;
   color: #4caf50;
   border-color: #4caf50;
+}
+.send-section .form-group {
+  height: 80px;
+}
+.clear-button {
+  border: 1px solid red !important;
+  width: 50px;
+}
+.input-field-container {
+  position: relative;
+  width: 100%;
+}
+.input-field-container.address-field-container {
+  position: relative;
+  width: 90%;
+}
+#erase {
+  position: absolute;
+  width: 40px !important;
+  height: 35px !important;
+  right: -5px;
+  border: 0px solid #0cc7ae !important;
+  top: -19px;
+  outline: none;
+  text-align: center;
+  font-weight: bold;
+  padding: 2px;
+  background: transparent;
 }
 </style>

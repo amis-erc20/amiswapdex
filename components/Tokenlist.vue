@@ -11,7 +11,7 @@
     <div class="exchangelist-title">
       <div class="wallet-title-name">Token</div>
       <div class="wallet-title-price">Price</div>
-      <div class="wallet-title-price">Balance</div>
+      <div class="wallet-title-balance">Balance</div>
     </div>
     <b-card style="border-top: 0px; background: red">
       <b-list-group flush>
@@ -146,6 +146,10 @@ export default {
 .tokenlist-section .wallet-title-name {
   padding-left: 5px;
 }
+.tokenlist-section .wallet-title-price {
+  left: -15px;
+  position: relative;
+}
 .show-zero-balance-tokens {
   text-align: center;
   margin-bottom: 20px;
@@ -153,5 +157,11 @@ export default {
 .show-zero-balance-tokens label {
   font-weight: normal;
   padding-top: 5px;
+}
+@media screen and (max-width: 450px) {
+  .tokenlist-section .wallet-title-price {
+    left: 10px;
+    position: relative;
+  }
 }
 </style>

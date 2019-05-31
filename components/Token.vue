@@ -1,6 +1,6 @@
 <template>
-  <div class="token">
-    <div class="token-name">
+  <b-row class="token row">
+    <b-col class="token-name">
       <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
       <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
       <img v-else-if="token.src" :src="token.src" alt>
@@ -10,8 +10,8 @@
         <div class="token-fullname" v-if="token.name === 'ETH'">Ether</div>
         <div class="token-fullname" v-else>{{token.fullname}}</div>
       </div>
-    </div>
-    <div class="token-price-container">
+    </b-col>
+    <b-col class="token-price-container">
       <div v-if="token.priceInUsd">
         <p class="token-price-in-usd" v-if="token.priceInUsd < 1">${{ token.priceInUsd.toFixed(4) }}</p>
         <p
@@ -22,16 +22,16 @@
       <div v-else>
         <p class="token-price-in-usd">-</p>
       </div>
-    </div>
-    <div class="token-amount-container">
+    </b-col>
+    <b-col class="token-amount-container">
       <div v-if="token.balance !== `NaN`">
         <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
         <p class="token-amount-usd" v-else>-</p>
         <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p>
       </div>
       <p class="token-amount" v-else>loading...</p>
-    </div>
-  </div>
+    </b-col>
+  </b-row>
 </template>
 
 <script>
@@ -97,6 +97,7 @@ export default {
   font-size: 11px;
   font-weight: normal;
   margin: 0;
+  text-align: right;
 }
 .tokenlist-section .token .token-amount-usd {
   font-size: 13px;
@@ -122,6 +123,7 @@ export default {
 }
 .tokenlist-section .token-name img {
   width: 30px;
+  height: 30px;
   margin-right: 10px;
 }
 .tokenlist-section .token-name {
@@ -145,5 +147,13 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: column;
+}
+@media screen and (max-width: 450px) {
+  .tokenlist-section .token .token-price-container {
+    width: 100px;
+    left: 0px;
+    position: relative;
+    text-align: right;
+  }
 }
 </style>

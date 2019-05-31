@@ -55,6 +55,7 @@ export default {
   text-align: center;
   display: block;
   margin: 0 auto;
+  color: #333;
 }
 #about-description p {
   text-align: center;

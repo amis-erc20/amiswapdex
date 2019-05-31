@@ -42,6 +42,7 @@
     "shardus-crypto-web": "gitlab:shardus/shardus-crypto-web",
     "tls": "0.0.1",
     "v-offline": "^1.1.0",
+    "vue-mq": "^1.0.1",
     "vue-qrcode-reader": "^1.4.0",
     "vue-qriously": "^1.1.1",
     "vue-select": "^3.0.2",

@@ -50,6 +50,7 @@ export default {
   text-align: center;
   display: block;
   margin: 0 auto;
+  color: #333;
 }
 #tos-description p {
   text-align: left;

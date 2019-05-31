@@ -57,7 +57,7 @@
             size="xs"
           />
         </div>
-        <div class="title-price" @click="changeOrder(`change`)">
+        <div class="title-price" @click="changeOrder(`change`)" v-if="$mq !== 'mobile'">
           24H Change
           <font-awesome-icon
             v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
@@ -71,7 +71,7 @@
           />
         </div>
 
-        <div class="title-volume" @click="changeOrder(`volume`)">
+        <div class="title-volume" @click="changeOrder(`volume`)" v-if="$mq !== 'mobile'">
           24H Volume
           <font-awesome-icon
             v-if="orderBy[0] === 'volume' && orderBy[1] === 'desc'"
@@ -122,7 +122,7 @@
                 >${{ numberWithCommas(token.price.toFixed(4)) }}</p>
                 <p v-else class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
               </div>
-              <div class="token-price-container">
+              <div class="token-price-container" v-if="$mq !== 'mobile'">
                 <p
                   v-if="token.change > 0"
                   class="token-price-usd positive-change"
@@ -134,7 +134,7 @@
                 <p v-if="token.change == 0" class="token-price-usd zero-change">0.00%</p>
               </div>
 
-              <div class="token-volume-container">
+              <div class="token-volume-container" v-if="$mq !== 'mobile'">
                 <p class="token-volume">${{ numberWithCommas(token.volume.toFixed(0)) }}</p>
               </div>
               <div class="token-liquidity-container">
@@ -857,5 +857,11 @@ export default {
   font-weight: normal;
   font-size: 12px;
   padding-top: 5px;
+}
+@media screen and (max-width: 450px) {
+  .exchangelist-title .title-price {
+    left: 0px;
+    position: relative;
+  }
 }
 </style>

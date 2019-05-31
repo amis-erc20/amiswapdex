@@ -7,22 +7,23 @@
             v-bind:class="{ selected: isBuySelected }"
             class="switch-buy"
             @click="changeSelected('buy')"
-          >Buy</b-button>
+          >Buy {{ getActiveToken }}</b-button>
           <b-button
             v-bind:class="{ selected: isSellSelected }"
             class="switch-sell"
             @click="changeSelected('sell')"
-          >Sell</b-button>
+          >Sell {{ getActiveToken }}</b-button>
         </b-button-group>
       </div>
+      <!-- <h4>{{getActiveToken}}</h4> -->
       <div v-if="!shouldRender" class="no-exchange-yet">
         <p>
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
         </p>
       </div>
       <b-form @submit="onSubmit" @reset="onReset" v-if="shouldRender">
-        <label>Pay With</label>
-        <b-form-group id="exampleInputGroup1">
+        <b-form-group v-if="isBuySelected" id="exampleInputGroup1">
+          <label>Pay With</label>
           <b-form-select
             v-model="form.inputCurrency"
             :options="availableInputTokens"
@@ -53,11 +54,11 @@
           </v-select>
         </b-form-group>
 
-        <b-button variant="primary" @click="onCurrencySwap" id="currency-swap-button">
+        <!-- <b-button variant="primary" @click="onCurrencySwap" id="currency-swap-button">
           <font-awesome-icon icon="exchange-alt" size="lg" color="#fff"/>
-        </b-button>
+        </b-button>-->
 
-        <b-form-group id="exampleInputGroup1">
+        <b-form-group v-if="isSellSelected" id="exampleInputGroup1">
           <label>Receive In</label>
           <b-form-select
             v-model="form.outputCurrency"
@@ -90,7 +91,7 @@
           </v-select>
         </b-form-group>
 
-        <b-form-group v-if="this.validateCurrency" prepend="@">
+        <b-form-group v-if="this.validateCurrency" prepend="@" class="input-form-group">
           <div class="amount-label-container">
             <label for>Enter {{form.inputCurrency}} amount to sell</label>
             <div>
@@ -100,32 +101,42 @@
               <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
             </div>
           </div>
-          <b-form-input
-            id="inputValue"
-            type="text"
-            v-model="form.inputValue"
-            required
-            :state="validateinputValue && validateBalance && validateSlippage"
-            @keyup="onAmountChange"
-            @focus="onInputFocus"
-          />
+          <div class="input-field-container">
+            <b-form-input
+              id="inputValue"
+              type="text"
+              v-model="form.inputValue"
+              required
+              :state="validateinputValue && validateBalance && validateSlippage"
+              @keyup="onAmountChange"
+              @focus="onInputFocus"
+            />
+            <button type="button" id="erase" @click="form.inputValue = ''"></button>
+          </div>
           <b-form-invalid-feedback
+            v-if="form.inputValue.length > 0"
             :state="validateinputValue && validateBalance && validateSlippage"
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-form-group v-if="this.validateCurrency">
+        <b-form-group v-if="this.validateCurrency" class="input-form-group">
           <label for>{{form.outputCurrency}} amount to recieve</label>
-          <b-form-input
-            id="inputValue"
-            type="text"
-            v-model="form.outputValue"
-            required
+          <div class="input-field-container">
+            <b-form-input
+              id="inputValue"
+              type="text"
+              v-model="form.outputValue"
+              required
+              :state="validateOutputAmount"
+              @keyup="onAmountChange"
+              @focus="onOutputFocus"
+            />
+            <button type="button" id="erase" @click="form.outputValue = ''"></button>
+          </div>
+          <b-form-invalid-feedback
+            v-if="form.outputValue.length > 0"
             :state="validateOutputAmount"
-            @keyup="onAmountChange"
-            @focus="onOutputFocus"
-          />
-          <b-form-invalid-feedback :state="validateOutputAmount">{{ outputErrorMessage }}</b-form-invalid-feedback>
+          >{{ outputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <div
@@ -163,7 +174,18 @@
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button type="submit" variant="primary" :disabled="shouldDisableSwapButton">Swap</b-button>
+          <b-button
+            type="submit"
+            v-if="isBuySelected"
+            variant="primary"
+            :disabled="shouldDisableSwapButton"
+          >Buy</b-button>
+          <b-button
+            type="submit"
+            v-if="isSellSelected"
+            variant="primary"
+            :disabled="shouldDisableSwapButton"
+          >Sell</b-button>
         </div>
       </b-form>
       <!-- Success Modal -->
@@ -1155,9 +1177,15 @@ form label {
   font-size: 13px;
   text-align: left;
   width: 100%;
+  margin-bottom: 10px;
+  height: auto;
 }
 #uniswap-convert-section form {
   margin-bottom: 60px;
+  margin-top: 25px;
+}
+#uniswap-convert-section .input-form-group {
+  height: 80px;
 }
 #uniswap-convert-section img {
   /* width: 120px; */
@@ -1199,10 +1227,12 @@ form label {
 }
 .buy-or-sell .switch-buy,
 .buy-or-sell .switch-sell {
-  width: 100px;
+  width: 170px;
+  height: 50px;
+  font-size: 13px;
   outline: none;
   border: none;
-  background: #aaa;
+  background: #bbc1c3;
   color: #333;
 }
 .buy-or-sell .switch-buy:hover,

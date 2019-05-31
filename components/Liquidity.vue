@@ -6,28 +6,56 @@
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
         </p>
       </div>
-      <b-form-group v-if="shouldRender" id="exampleInputGroup1">
+      <div>
+        <b-button-group class="buy-or-sell">
+          <b-button
+            v-bind:class="{ selected: (liquidity === 'add') }"
+            class="switch-buy"
+            @click="changeSelected('add_liquidity')"
+          >Add Liquidity</b-button>
+          <b-button
+            v-bind:class="{ selected: (liquidity === 'remove') }"
+            class="switch-sell"
+            @click="changeSelected('remove_liquidity')"
+          >Remove Liquidity</b-button>
+        </b-button-group>
+      </div>
+      <!-- <b-form-group v-if="shouldRender" id="exampleInputGroup1">
         <label>Add Liquidity / Remove Liquidity / Create Exchange</label>
         <b-form-select
           v-model="liquidity"
           :options="[{text: `Select an option to start`, value: ''}, {text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
           @change="onSelectLiquidityType"
         />
-      </b-form-group>
-      <b-form @submit="onAddLiquidity" @reset="onReset" v-if="liquidity === `add`">
-        <label>Deposit ETH</label>
-        <!-- <label class="use-all-funds" @click="useAllFunds">Use All Funds</label> -->
-        <b-form-group id="exampleInputGroup1">
-          <b-form-input
-            id="eth-input-text-field"
-            type="text"
-            v-model="form.inputValue"
-            required
-            :state="validateinputValue && validateETHBalance"
-            @keyup="onAmountChange"
-            @focus="onInputFocus"
-          />
+      </b-form-group>-->
+      <b-form
+        class="liquidity-form"
+        @submit="onAddLiquidity"
+        @reset="onReset"
+        v-if="liquidity === `add`"
+      >
+        <div class="amount-label-container">
+          <label for>Deposit ETH</label>
+          <div>
+            <p class="current-balance">{{getBalance["ETH"]}} ETH</p>
+            <label class="use-all-funds" @click="useAllFunds('ETH')">Use All Funds</label>
+          </div>
+        </div>
+        <b-form-group id="exampleInputGroup1" class="input-form-group">
+          <div class="input-field-container">
+            <b-form-input
+              id="eth-input-text-field"
+              type="text"
+              v-model="form.inputValue"
+              required
+              :state="validateinputValue && validateETHBalance"
+              @keyup="onAmountChange"
+              @focus="onInputFocus"
+            />
+            <button type="button" id="erase" @click="form.inputValue = ''"></button>
+          </div>
           <b-form-invalid-feedback
+            v-if="form.inputValue.length > 0"
             :state="validateinputValue && validateETHBalance"
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
@@ -36,17 +64,30 @@
           <font-awesome-icon icon="plus" size="lg" color="#fff"/>
         </b-button>
 
-        <b-form-group id="exampleInputGroup1">
-          <label>Deposit {{getActiveToken}}</label>
-          <b-form-input
-            id="inputValue"
-            type="text"
-            v-model="form.outputValue"
-            required
+        <b-form-group id="exampleInputGroup1" class="input-form-group">
+          <div class="amount-label-container">
+            <label>Deposit {{getActiveToken}}</label>
+            <div>
+              <p class="current-balance">{{getBalance[getActiveToken]}} {{getActiveToken}}</p>
+              <label class="use-all-funds" @click="useAllFunds(getActiveToken)">Use All Funds</label>
+            </div>
+          </div>
+          <div class="input-field-container">
+            <b-form-input
+              id="inputValue"
+              type="text"
+              v-model="form.outputValue"
+              required
+              :state="validateOutputAmount && validateTokenBalance"
+              @keyup="onAmountChange"
+              @focus="onOutputFocus"
+            />
+            <button type="button" id="erase" @click="form.outputValue = ''"></button>
+          </div>
+          <b-form-invalid-feedback
+            v-if="form.outputValue.length > 0"
             :state="validateOutputAmount && validateTokenBalance"
-            @keyup="onAmountChange"
-            @focus="onOutputFocus"
-          />
+          >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <div
@@ -85,23 +126,39 @@
       </b-form>
 
       <!-- REMOVE LIQUIDITY FORM -->
-      <b-form @submit="onRemoveLiquidity" @reset="onReset" v-if="liquidity === `remove`">
-        <b-form-group id="exampleInputGroup1">
-          <label>Amount of Pool Token</label>
-          <label class="use-all-funds">
-            Liquidity Balance:
-            <span id="liquidity-balance"></span>
-          </label>
-          <b-form-input
-            id="inputValue"
-            type="text"
-            v-model="form.inputValue"
-            required
+      <b-form
+        class="liquidity-form"
+        @submit="onRemoveLiquidity"
+        @reset="onReset"
+        v-if="liquidity === `remove`"
+      >
+        <b-form-group id="exampleInputGroup1" class="input-form-group">
+          <div class="amount-label-container">
+            <label>Amount of Pool Token</label>
+            <div>
+              <p class="current-balance">
+                Pool Token Balance:
+                <span id="liquidity-balance"></span>
+              </p>
+              <label class="use-all-funds" @click="useAllFunds('LIQUIDITY')">Use All Funds</label>
+            </div>
+          </div>
+          <div class="input-field-container">
+            <b-form-input
+              id="inputValue"
+              type="text"
+              v-model="form.inputValue"
+              required
+              :state="validateLiquidityInput"
+              @keyup="onRemoveAmountChange"
+              @focus="onInputFocus"
+            />
+            <button type="button" id="erase" @click="form.inputValue = ''"></button>
+          </div>
+          <b-form-invalid-feedback
+            v-if="form.inputValue.length > 0"
             :state="validateLiquidityInput"
-            @keyup="onRemoveAmountChange"
-            @focus="onInputFocus"
-          />
-          <b-form-invalid-feedback :state="validateLiquidityInput">{{ inputErrorMessage }}</b-form-invalid-feedback>
+          >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
         <b-button variant="primary" id="pool-swap-button">
@@ -427,20 +484,16 @@ export default {
       if (!this.validateinputValue) return false;
       let amount = parseFloat(this.form.inputValue * 1);
       let txFee = this.txFee;
-      let ethBalance = parseFloat(this.getBalance["ETH"] / Math.pow(10, 18));
-
+      let ethBalance = parseFloat(this.getBalance["ETH"]);
       if (this.form.inputCurrency === "ETH") {
         if (amount + txFee > ethBalance) {
-          this.inputErrorMessage = "Not enough ETH balance or transaction fee";
+          this.inputErrorMessage = "Not enough balance or transaction fee";
           return false;
         }
       } else {
-        let tokenBalance = parseFloat(
-          this.getBalance[this.form.inputCurrency] / Math.pow(10, 18)
-        );
+        let tokenBalance = parseFloat(this.getBalance[this.form.inputCurrency]);
         if (amount > tokenBalance || txFee > ethBalance) {
-          this.inputErrorMessage =
-            "Not enough token balance or transaction fee";
+          this.inputErrorMessage = "Not enough balance or transaction fee";
           return false;
         }
       }
@@ -449,11 +502,9 @@ export default {
     validateTokenBalance() {
       if (!this.validateOutputAmount) return false;
       let tokenAmount = parseFloat(this.form.outputValue * 1);
-      let tokenBalance = parseFloat(
-        this.getBalance[this.form.outputCurrency] / Math.pow(10, 18)
-      );
+      let tokenBalance = parseFloat(this.getBalance[this.form.outputCurrency]);
       if (tokenAmount > tokenBalance) {
-        this.outputErrorMessage = "Not enough token balance";
+        this.outputErrorMessage = "Not enough balance";
         return false;
       }
       return true;
@@ -489,6 +540,7 @@ export default {
   },
   mounted: async function() {
     this.form.inputCurrency = "ETH";
+    this.liquidity = "add";
     this.form.outputCurrency = this.getActiveToken;
     if (this.getAccount.type === "metamask") {
       this.web3 = await getWeb3Metamask();
@@ -552,23 +604,25 @@ export default {
         return false;
       }
     },
-    async useAllFunds() {
-      const contractAddress = exchangeAddresses[this.form.inputCurrency];
-      let estimatedGas = await this.getEstimatedGas(contractAddress);
+    async useAllFunds(tokenName) {
+      let estimatedGas = await this.getEstimatedGas(factoryAddress);
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
-      if (this.form.inputCurrency === "ETH") {
-        console.log(this.getBalance["ETH"] / Math.pow(10, 18), this.txFee);
-        this.form.inputValue =
-          parseFloat(this.getBalance["ETH"] / Math.pow(10, 18)) - this.txFee;
+      if (tokenName === "ETH") {
+        console.log(this.getBalance["ETH"], this.txFee);
+        this.form.inputValue = parseFloat(this.getBalance["ETH"]) - this.txFee;
+        this.onInputFocus();
+        this.onAmountChange();
+      } else if (tokenName === "LIQUIDITY") {
+        this.form.inputValue = this.liquidityBalance;
+        this.onInputFocus();
+        this.onRemoveAmountChange();
       } else {
-        this.form.inputValue = parseFloat(
-          this.getBalance[this.form.inputCurrency] / Math.pow(10, 18)
-        );
+        this.form.outputValue = parseFloat(this.getBalance[tokenName]);
+        this.onOutputFocus();
+        this.onAmountChange();
       }
-      this.lastEditedField = "input";
-      this.onAmountChange();
     },
     async getEstimatedGas(toAddress) {
       let value = this.form.inputValue || 1;
@@ -1023,6 +1077,14 @@ export default {
         this.updateLiquidityBalance();
       }
     },
+    changeSelected(method) {
+      if (method === "add_liquidity") {
+        this.liquidity = "add";
+      } else if (method === "remove_liquidity") {
+        this.liquidity = "remove";
+        this.updateLiquidityBalance();
+      }
+    },
     async onCreateExchange(e) {
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
@@ -1094,7 +1156,7 @@ export default {
   margin-bottom: 30px;
 }
 #uniswap-liquidity-section {
-  padding-top: 40px;
+  padding-top: 20px;
   width: 90%;
   max-width: 650px;
   margin: 0 auto;
@@ -1117,6 +1179,10 @@ label {
 }
 #uniswap-liquidity-section form {
   margin-bottom: 60px;
+  margin-top: 35px;
+}
+#uniswap-liquidity-section .input-form-group {
+  height: 80px;
 }
 #uniswap-liquidity-section img {
   width: 120px;
@@ -1133,7 +1199,8 @@ label {
   width: 50px;
   height: 50px;
   display: block;
-  margin: 20px auto !important;
+  margin: 0px auto !important;
+  margin-bottom: 15px !important;
 }
 .exchange-info-container {
   display: flex;
