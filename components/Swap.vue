@@ -536,8 +536,10 @@ export default {
       if (!token) return false;
       let summary = this.getSummary.find(s => s.token_id === token.id);
       if (!summary) return false;
-      console.log(`${this.form.inputCurrency} liquidity: ${summary.liquidity}`);
-      return true;
+
+      // console.log(`${this.form.inputCurrency} liquidity: ${summary.liquidity}`);
+      if (summary.liquidity > 0) return true;
+      else return false;
     },
     validateOutputLiquidity() {
       if (this.form.outputCurrency === "ETH") return true;
@@ -548,10 +550,11 @@ export default {
       if (!token) return false;
       let summary = this.getSummary.find(s => s.token_id === token.id);
       if (!summary) return false;
-      console.log(
-        `${this.form.outputCurrency} liquidity: ${summary.liquidity}`
-      );
-      return true;
+      // console.log(
+      //   `${this.form.outputCurrency} liquidity: ${summary.liquidity}`
+      // );
+      if (summary.liquidity > 0) return true;
+      else return false;
     }
   },
   updated: function() {
