@@ -166,9 +166,32 @@
       <b-form @submit="onListToken">
         <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
         <b-alert v-if="infoMessage.length > 0" show fade variant="info">{{infoMessage}}</b-alert>
-        <b-form-group id="exampleInputGroup1">
+        <!-- <b-form-group id="exampleInputGroup1">
           <label>Token Address</label>
           <b-form-input type="text" v-model="form.tokenAddress"/>
+        </b-form-group>-->
+        <b-form-group id="exampleInputGroup1">
+          <label>Select Your Token</label>
+          <v-select
+            :options="listabeTokenList"
+            label="title"
+            placeholder="Please select a token"
+            v-model="form.selectedTokenToList"
+            @input="onSelectTokenToList"
+            :clearable="false"
+          >
+            <template slot="option" slot-scope="option">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px">
+              <img
+                v-else-if="option.title==='ETH'"
+                src="../assets/eth-logo.png"
+                height="20px"
+                width="20px"
+              >
+              <img v-else src="../assets/default-token.png" height="20px" width="20px">
+              {{ option.title }}
+            </template>
+          </v-select>
         </b-form-group>
         <b-button type="submit" variant="primary" :disabled="loading">List Token</b-button>
       </b-form>
@@ -259,7 +282,8 @@ export default {
     return {
       form: {
         query: "",
-        tokenAddress: ""
+        tokenAddress: "",
+        selectedTokenToList: ""
       },
       summary: [],
       showLimit: 20,
@@ -295,6 +319,7 @@ export default {
       getTokenTransactionListToken: "transaction/getTokenTransactionListToken",
       getCredentials: "getCredentials",
       getTokenList: "account/getTokenList",
+      getOwnedTokenList: "account/getOwnedTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
       getAuthRedirectUrl: "getAuthRedirectUrl",
       getActiveTab: "getActiveTab",
@@ -394,6 +419,25 @@ export default {
       }
       return sortedList.slice(0, this.showLimit);
     },
+    listabeTokenList: function() {
+      let self = this;
+      let list = this.getTokenList
+        .map(symbol => {
+          let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+          if (token)
+            return {
+              title: symbol,
+              balance: self.getBalance[symbol],
+              priceInUsd: self.getPrice[symbol],
+              src: token ? token.logo : null
+            };
+          else return null;
+        })
+        .filter(t => t !== null)
+        .filter(t => t.balance > 0 && t.title !== self.form.outputCurrency)
+        .sort((a, b) => b.priceInUsd - a.priceInUsd);
+      return list;
+    },
     activeTokenLogo() {
       let self = this;
       const token = this.getAvailableTokenList.find(
@@ -455,6 +499,13 @@ export default {
       this.errorMessage = "";
       this.infoMessage = "";
     },
+    onSelectTokenToList() {
+      let self = this;
+      let foundToken = this.getOwnedTokenList.find(
+        t => t.symbol === self.form.selectedTokenToList.title
+      );
+      this.form.tokenAddress = foundToken.tokenAddress.toLowerCase();
+    },
     async updateUSDPrices() {
       let ultUSD = await getULTToUSDPrice();
       this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
@@ -491,9 +542,15 @@ export default {
           exchangeAddress &&
           exchangeAddress !== "0x0000000000000000000000000000000000000000"
         ) {
-          console.log("Exchange address already existed for selected token");
+          console.log(
+            `Exchange address already existed for ${
+              this.form.selectedTokenToList.title
+            } token`
+          );
           this.resetMessages();
-          this.errorMessage = `Exchange address (${exchangeAddress}) already existed for selected token address.`;
+          this.errorMessage = `Exchange address (${exchangeAddress}) already existed for ${
+            this.form.selectedTokenToList.title
+          }`;
           this.form.tokenAddress = "";
           this.loading = false;
         } else if (

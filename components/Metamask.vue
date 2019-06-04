@@ -8,7 +8,7 @@
       <img src="../assets/metamask.png" alt="metamask logo">
 
       <!-- ACCESS METAMASK -->
-      <b-form @submit="onAccessMetamask" v-if="shouldRender">
+      <b-form @submit="onAccessMetamask" v-if="shouldRender && !loading">
         <b-form-group>
           <!-- <b-form-checkbox
             id="accept-checkbox"
