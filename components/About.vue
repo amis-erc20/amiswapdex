@@ -2,7 +2,7 @@
   <div class="about-view">
     <Nav/>
     <div id="about-description">
-      <img src="../assets/logo.svg" alt>
+      <img src="../assets/uniswapdex-logo.png" alt>
       <p>
         The UniswapDEX.com provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by
         <a
@@ -54,7 +54,7 @@ export default {
   width: 150px;
   text-align: center;
   display: block;
-  margin: 0 auto;
+  margin: 20px auto;
 }
 #about-description p {
   text-align: center;

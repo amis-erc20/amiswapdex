@@ -357,7 +357,6 @@ export default {
           });
           if (res.ok) {
             let data = await res.json();
-            console.log(data);
             return data;
           } else {
             console.log(e);

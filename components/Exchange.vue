@@ -861,5 +861,23 @@ export default {
     left: 0px;
     position: relative;
   }
+  .exchangelist-section .token .token-name {
+    width: 85px;
+    font-size: 10px;
+    text-align: left;
+    padding: 0px;
+    position: relative;
+    top: 10px;
+  }
+  .exchangelist-section .token .token-liquidity-usd,
+  .exchangelist-section .token .token-price-usd,
+  .exchangelist-section .token .token-volume {
+    width: 85px;
+    font-size: 10px;
+    text-align: right;
+    padding: 0px;
+    position: relative;
+    top: 20px;
+  }
 }
 </style>

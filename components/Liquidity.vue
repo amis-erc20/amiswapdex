@@ -205,56 +205,12 @@
         </div>
       </b-form>
 
-      <!-- ADD EXCHANGE FORM -->
-      <b-form @submit="onCreateExchange" @reset="onReset" v-if="liquidity === `create`">
-        <label>Token Address</label>
-        <b-form-group id="exampleInputGroup1">
-          <b-form-input
-            id="inputValue"
-            type="text"
-            v-model="form.tokenAddress"
-            required
-            @focus="onInputFocus"
-          />
-        </b-form-group>
-
-        <b-form-group v-if="form.inputCurrency !== null">
-          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
-        </b-form-group>
-        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
-          <b-form-input
-            type="range"
-            id="range-1"
-            v-model="gasPrice"
-            min="2"
-            max="30"
-            @change="updateGasLimitAndTxFee"
-          />
-          <p>Estimated Tx Fee: {{txFee}} ETH</p>
-        </b-form-group>
-        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit"/>
-        </b-form-group>
-
-        <div class="submit-button-group">
-          <b-button type="reset" variant="outline-dark">Reset</b-button>
-          <b-button
-            type="submit"
-            variant="primary"
-            :disabled="shouldDisableCreateExchangeButton"
-          >Create Exchange</b-button>
-        </div>
-      </b-form>
-
       <!-- Success Modal -->
       <b-modal
         ref="success_modal_ref"
         id="success_modal"
         title="Transaction Submitted"
         :hide-footer="true"
-        @hide="redirect"
       >
         <p>Your transaction is successfully submitted to Ethereum Network. Click link below to view your transaction on etherscan.io</p>
         <a
@@ -283,10 +239,11 @@
       >
         <b-form @submit="onUnlock" v-if="approvedStatus === false">
           <b-form-group id="exampleInputGroup1">
-            <label>Amount to Unlock</label>
+            <p>Please unlock your token before using it to add liquidity.</p>
+            <label>Amount to Unlock ({{getActiveToken}})</label>
             <b-form-input type="text" v-model="form.approvedAmount"/>
           </b-form-group>
-          <b-button type="submit" variant="outline-danger">Approve</b-button>
+          <b-button type="submit" variant="primary">Approve</b-button>
         </b-form>
 
         <p v-else-if="approvedStatus === `waiting`">Approving...pls wait a few moments</p>
@@ -320,6 +277,7 @@ import {
   signAndSendETH,
   swapTokenToEth,
   unlockToken,
+  unlockTokenMetamask,
   swapEthToToken,
   swapTokenToToken,
   addLiquidity,
@@ -343,10 +301,6 @@ export default {
   data() {
     return {
       config: {
-        mainToken: {
-          symbol: "ULT",
-          exchangeAddress: "0x28d9353611C5A0d5a026A648c05E5d6523e41CBf"
-        },
         tokenListUrl: "https://beta.shardus.com/assets/js/tokenDB.json",
         chartServerUrl: "https://bounty.shardus.com:8889",
         colorScheme: {
@@ -358,7 +312,6 @@ export default {
       },
       web3: null,
       ALLOWED_SLIPPAGE: 0.025,
-      mainToken: "ULT",
       account: null,
       form: {
         inputCurrency: null,
@@ -550,9 +503,6 @@ export default {
       if (this.scanning) this.hideScanner();
       else this.showScanner();
     },
-    redirect() {
-      this.$router.push("/tokendetail");
-    },
     async validateTokenAddress() {
       let tokenAddress = this.form.tokenAddress;
       let exchangeAddress = await getExchangeAddress(tokenAddress);
@@ -577,7 +527,6 @@ export default {
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (tokenName === "ETH") {
-        console.log(this.getBalance["ETH"], this.txFee);
         this.form.inputValue = parseFloat(this.getBalance["ETH"]) - this.txFee;
         this.onInputFocus();
         this.onAmountChange();
@@ -634,7 +583,7 @@ export default {
       if (!this.form.inputCurrency || !this.form.outputCurrency) return;
       if (this.lastEditedField === "input") {
         if (!this.validateinputValue) {
-          this.form.outputValue = "";
+          // this.form.outputValue = "";
           return;
         }
         const absPrice = await getAbsPrice(
@@ -642,13 +591,14 @@ export default {
           this.form.outputCurrency,
           this.web3
         );
+        if (absPrice.toFixed(0) == "NaN") return;
         if (!Number.isNaN(absPrice.toNumber()))
           this.form.outputValue = absPrice
             .multipliedBy(this.form.inputValue)
             .toFixed(8);
       } else if (this.lastEditedField === "output") {
         if (!this.validateOutputAmount) {
-          this.form.inputValue = "";
+          // this.form.inputValue = "";
           return;
         }
         const absPrice = await getAbsPrice(
@@ -656,6 +606,7 @@ export default {
           this.form.outputCurrency,
           this.web3
         );
+        if (absPrice.toFixed(0) == "NaN") return;
         if (!Number.isNaN(absPrice.toNumber()))
           this.form.inputValue = new BigNumber(this.form.outputValue)
             .dividedBy(absPrice)
@@ -672,7 +623,6 @@ export default {
       let outputCurrency = this.form.outputCurrency;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
-
       const blockNumber = await web3.eth.getBlockNumber();
       const block = await web3.eth.getBlock(blockNumber);
       const deadline = block.timestamp + 300;
@@ -711,6 +661,7 @@ export default {
       ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
     },
     async onUnlock(evt) {
+      evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -719,40 +670,66 @@ export default {
         alert("Connection Issue to Server !");
         return;
       }
-      evt.preventDefault();
-      this.approvedStatus = "waiting";
-      let currencyToCheck = this.form.approvedCurrency
-        ? this.form.approvedCurrency
-        : this.form.inputCurrency;
-      this.unlockTxHash = await unlockToken(
-        {
-          from: this.getAccount.address,
-          approvedAmount: this.form.approvedAmount * Math.pow(10, 18),
-          gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-          gasLimit: parseInt(this.gasLimit)
-        },
-        currencyToCheck,
-        {
-          web3: this.web3,
-          exchangeAddress: this.getAvailableExchangeAddresses[currencyToCheck],
-          privateKey: this.getAccount.privateKey
-        }
-      );
+      try {
+        this.approvedStatus = "waiting";
+        let currencyToCheck = this.form.approvedCurrency
+          ? this.form.approvedCurrency
+          : this.form.inputCurrency;
 
-      // checking allowance
-      let self = this;
-
-      const check = setInterval(async () => {
-        console.log(`Checking allowance for ${currencyToCheck} token`);
-        const allowance = await self.getAllowance(currencyToCheck);
-        if (
-          allowance == parseInt(self.form.approvedAmount * Math.pow(10, 18))
-        ) {
-          clearInterval(check);
-          self.approvedStatus = true;
-          self.form.approvedCurrency = "";
+        if (this.getAccount.type === "metamask") {
+          this.unlockTxHash = await unlockTokenMetamask(
+            {
+              from: this.getAccount.address,
+              approvedAmount: this.form.approvedAmount * Math.pow(10, 18),
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit)
+            },
+            currencyToCheck,
+            {
+              web3: this.web3,
+              exchangeAddress: this.getAvailableExchangeAddresses[
+                currencyToCheck
+              ],
+              privateKey: this.getAccount.privateKey
+            }
+          );
+        } else {
+          this.unlockTxHash = await unlockToken(
+            {
+              from: this.getAccount.address,
+              approvedAmount: this.form.approvedAmount * Math.pow(10, 18),
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit)
+            },
+            currencyToCheck,
+            {
+              web3: this.web3,
+              exchangeAddress: this.getAvailableExchangeAddresses[
+                currencyToCheck
+              ],
+              privateKey: this.getAccount.privateKey
+            }
+          );
         }
-      }, 1000);
+
+        // checking allowance
+        let self = this;
+        const check = setInterval(async () => {
+          console.log(`Checking allowance for ${currencyToCheck} token`);
+          const allowance = await self.getAllowance(currencyToCheck);
+          if (
+            allowance == parseInt(self.form.approvedAmount * Math.pow(10, 18))
+          ) {
+            clearInterval(check);
+            self.approvedStatus = true;
+            self.form.approvedCurrency = "";
+          }
+        }, 1000);
+      } catch (e) {
+        alert("Unable to Unlock your token.");
+        console.log("Unable to Unlock your token.");
+        console.log(e);
+      }
     },
     async getAllowance(inputCurrency) {
       try {
@@ -777,6 +754,25 @@ export default {
       this.form.outputCurrency = null;
       this.form.inputValue = "";
       this.form.outputValue = "";
+    },
+    showSuccessToast(txHash) {
+      let successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
+      this.$toasted.show(successHTML, {
+        theme: "outline",
+        type: "success",
+        position: "top-center",
+        duration: 10000,
+        fullWidth: true,
+        action: [
+          {
+            text: "View it On etherscan.io",
+            onClick: (e, toastObject) => {
+              toastObject.goAway(0);
+              window.open(`https://etherscan.io/tx/${txHash}`, "_blank");
+            }
+          }
+        ]
+      });
     },
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();
@@ -814,6 +810,7 @@ export default {
       }
     },
     async onAddLiquidity(evt) {
+      evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -822,24 +819,23 @@ export default {
         alert("Connection Issue to Server !");
         return;
       }
-      evt.preventDefault();
       this.loading = true;
       let web3 = this.web3;
       let inputValue = this.form.inputValue;
       let inputCurrency = this.form.inputCurrency;
       let outputValue = this.form.outputValue;
-      let outputCurrency = this.form.outputCurrency;
+      let outputCurrency = this.getActiveToken;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
 
-      const allowance = await this.getAllowance(this.form.outputCurrency);
+      const allowance = await this.getAllowance(outputCurrency);
       const input = this.form.outputValue * Math.pow(10, 18);
-      console.log(`Current token allowance is: ${allowance}`);
+      console.log(`Current token allowance is: ${allowance} ${outputCurrency}`);
       if (input > allowance) {
         this.loading = false;
         this.approvedStatus = false;
         this.form.approvedAmount = this.form.outputValue * 1.5;
-        this.form.approvedCurrency = this.form.outputCurrency;
+        this.form.approvedCurrency = outputCurrency;
         this.showModal("unlock_request_modal_ref");
         return;
       }
@@ -852,7 +848,6 @@ export default {
       const contractAddress = this.getAvailableExchangeAddresses[
         outputCurrency
       ];
-
       let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
       let tokenAmount = new BigNumber(outputValue).multipliedBy(10 ** 18);
       let ethReserve = await web3.eth.getBalance(contractAddress);
@@ -860,11 +855,14 @@ export default {
       const totalLiquidity = await exchangeContract.methods
         .totalSupply()
         .call();
-      const liquidityMinted = new BigNumber(totalLiquidity).multipliedBy(
+      let liquidityMinted = new BigNumber(totalLiquidity).multipliedBy(
         ethAmount.dividedBy(ethReserve)
       );
+      if (Number.isNaN(liquidityMinted) || liquidityMinted == "NaN")
+        liquidityMinted = new BigNumber(0);
 
       console.log(`total liquidity: ${totalLiquidity}`);
+      console.log(`eth reserve: ${ethReserve}`);
       console.log(`minted liquidity: ${liquidityMinted}`);
 
       const MAX_LIQUIDITY_SLIPPAGE = 0.025;
@@ -872,7 +870,6 @@ export default {
         1 - MAX_LIQUIDITY_SLIPPAGE
       );
       const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
-      // await this.updateGasLimitAndTxFee();
       try {
         if (this.getAccount.type === "metamask") {
           this.txHash = await metamaskAddLiquidity(
@@ -917,12 +914,13 @@ export default {
         this.showModal("failed_model_ref");
         return;
       }
-      this.updateActiveToken(this.form.outputCurrency);
+      this.updateActiveToken(outputCurrency);
       this.onReset();
       this.loading = false;
-      this.showModal("success_modal_ref");
+      this.showSuccessToast(this.txHash);
     },
     async onRemoveLiquidity(evt) {
+      evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -931,13 +929,12 @@ export default {
         alert("Connection Issue to Server !");
         return;
       }
-      evt.preventDefault();
       this.loading = true;
       let web3 = this.web3;
       let inputValue = this.form.inputValue;
       let inputCurrency = this.form.inputCurrency;
       let outputValue = this.form.outputValue;
-      let outputCurrency = this.form.outputCurrency;
+      let outputCurrency = this.getActiveToken;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
 
@@ -970,16 +967,16 @@ export default {
         ethBalance.dividedBy(ethReserve)
       );
 
-      console.log(`eth balance: ${ethBalance.dividedBy(10 ** 18).toFixed(6)}`);
-      console.log(
-        `liquidityBalance: ${liquidityBalance.dividedBy(10 ** 18).toFixed(6)}`
-      );
-      console.log(
-        `eth withdrawn: ${ethWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
-      );
-      console.log(
-        `token withdrawn: ${tokenWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
-      );
+      // console.log(`eth balance: ${ethBalance.dividedBy(10 ** 18).toFixed(6)}`);
+      // console.log(
+      //   `liquidityBalance: ${liquidityBalance.dividedBy(10 ** 18).toFixed(6)}`
+      // );
+      // console.log(
+      //   `eth withdrawn: ${ethWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
+      // );
+      // console.log(
+      //   `token withdrawn: ${tokenWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
+      // );
 
       document.querySelector(
         "#withdrawn-eth"
@@ -1026,16 +1023,16 @@ export default {
         console.log(e);
         console.log("error occoured while adding liquidity...");
       }
-      if (this.txHash) console.log(this.txHash);
       if (!this.txHash) {
         this.loading = false;
         this.showModal("failed_model_ref");
         return;
       }
+      if (this.txHash) console.log(this.txHash);
       this.updateActiveToken(this.form.outputCurrency);
       this.onReset();
       this.loading = false;
-      this.showModal("success_modal_ref");
+      this.showSuccessToast(this.txHash);
     },
     async updateLiquidityBalance() {
       let web3 = this.web3;
@@ -1063,63 +1060,6 @@ export default {
         this.liquidity = "remove";
         this.updateLiquidityBalance();
       }
-    },
-    async onCreateExchange(e) {
-      if (!this.getConnection) {
-        alert("No Internet Connection Detected !");
-        return;
-      }
-      if (!this.getServerStatus) {
-        alert("Connection Issue to Server !");
-        return;
-      }
-      e.preventDefault();
-      this.loading = true;
-      let tokenAddress = this.form.tokenAddress;
-      let exchangeAddress = await getExchangeAddress(tokenAddress);
-      if (
-        exchangeAddress &&
-        exchangeAddress !== "0x0000000000000000000000000000000000000000"
-      ) {
-        alert("Exchange address already existed for selected token");
-        console.log(exchangeAddress);
-      } else if (
-        !exchangeAddress ||
-        exchangeAddress === "0x0000000000000000000000000000000000000000"
-      ) {
-        let estimatedGas = await estimateGas(
-          {
-            from: this.getAccount.address,
-            to: factoryAddress,
-            amount: 1
-          },
-          this.web3
-        );
-        console.log(`Estimate gas: ${estimatedGas}`);
-        this.gasLimit = 51000 * 2;
-        // TODO: implement create new exchange
-        // this.txHash = await createNewExchange(
-        //   {
-        //     from: this.getAccount.address,
-        //     gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-        //     gasLimit: parseInt(this.gasLimit)
-        //   },
-        //   tokenAddress,
-        //   this.getAccount.privateKey,
-        //   this.web3
-        // );
-      } else {
-        alert("Invalid token address");
-      }
-      if (this.txHash) console.log(this.txHash);
-      if (!this.txHash) {
-        this.loading = false;
-        this.showModal("failed_model_ref");
-        return;
-      }
-      this.onReset();
-      this.loading = false;
-      this.showModal("success_modal_ref");
     }
   }
 };
@@ -1151,6 +1091,19 @@ export default {
 #unlock_request_modal {
   position: fixed;
   top: 150px;
+}
+#success_modal .modal-dialog,
+#unlock_request_modal .modal-dialog {
+  width: 50% !important;
+  margin: 0 auto !important;
+  height: auto !important;
+}
+#unlock_request_modal .modal-body,
+#success_modal .modal-body {
+  padding: 15px !important;
+}
+#unlock_request_modal form {
+  margin-bottom: 15px !important;
 }
 label {
   font-weight: bolder;
