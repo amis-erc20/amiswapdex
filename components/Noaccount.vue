@@ -59,7 +59,8 @@
               @click="closeSignInModal"
             />
             <div id="main-title-no-connection-container">
-              <h4>Sign In</h4>
+              <h4 v-if="signInMethod === 'signup'">Create Wallet</h4>
+              <h4 v-else>Sign In</h4>
             </div>
             <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
               <font-awesome-icon icon="bars" size="lg" color="#fff"/>

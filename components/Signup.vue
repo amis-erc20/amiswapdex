@@ -316,9 +316,10 @@ export default {
 </script>
 
 <style>
-#signup-section {
+#token_info_modal #signup-section {
   width: 100%;
-  margin: 0 auto;
+  max-width: 650px;
+  margin: 45px auto;
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -4,6 +4,12 @@
     <div class="main-tab">
       <b-card no-body>
         <b-tabs pills card justified>
+          <b-tab title="Market" :active="getActiveTab === `market`" @click="onTabChange">
+            <b-card-text>
+              <Loading v-if="redirecting"/>
+              <Market v-else/>
+            </b-card-text>
+          </b-tab>
           <b-tab title="Exchange" :active="getActiveTab === `exchange`" @click="onTabChange">
             <b-card-text>
               <Loading v-if="redirecting"/>
@@ -60,6 +66,7 @@ import Tokenlist from "~/components/Tokenlist.vue";
 import PeriodicBackup from "~/components/PeriodicBackup.vue";
 import Loading from "~/components/Loading.vue";
 import Exchange from "~/components/Exchange.vue";
+import Market from "~/components/Market.vue";
 import NoConnection from "~/components/NoConnection.vue";
 import BootstrapVue from "bootstrap-vue";
 import axios from "axios";
@@ -158,7 +165,8 @@ export default {
     Exchange,
     NoConnection,
     Noaccount,
-    Loading
+    Loading,
+    Market
   },
   data: function() {
     return {
@@ -273,6 +281,10 @@ export default {
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
               self.addToken(token);
+              // self.updateBalance({
+              //   symbol: token.symbol,
+              //   balance: token.balance
+              // });
             });
             self.setOwnedTokenList(newTokenHolding);
           }
@@ -283,14 +295,20 @@ export default {
     },
     checkTokenHoldingUpdate(tokenHolding) {
       let self = this;
-      for (let i = 0; i < tokenHolding.length; i++) {
-        let token = tokenHolding[i];
-        if (token.balance !== self.getBalance[token.symbol]) {
-          console.log(`Token balance is updated for ${token.symbol}`);
-          return true;
-        }
-      }
-      return false;
+      // for (let i = 0; i < tokenHolding.length; i++) {
+      //   let token = tokenHolding[i];
+      //   console.log(token.symbol);
+      //   console.log(token.balance, self.getBalance[token.symbol]);
+      //   if (
+      //     token.balance > self.getBalance[token.symbol] ||
+      //     token.balance < self.getBalance[token.symbol]
+      //   ) {
+      //     console.log(`Token balance is updated for ${token.symbol}`);
+      //     return true;
+      //   }
+      // }
+      // return false;
+      return true;
     },
     async checkRemoteBackup(web3) {
       if (!this.getSignIn) return;
@@ -367,7 +385,7 @@ export default {
     async refreshTokenList(web3) {
       if (
         !this.isExchangeTabActive() ||
-        this.getActiveTab !== "exchange" ||
+        this.getActiveTab === "wallet" ||
         !this.getConnection
       )
         return;
@@ -402,9 +420,11 @@ export default {
     // let availableTokens = await getAllListedToken();
     // this.setAvailableTokenList(availableTokens);
     // await initContracts(web3, availableTokens);
+    this.updateActiveTab("market");
     this.refreshServerStatus();
     await this.refreshTokenList(web3);
     await this.refreshTokenPrices();
+
     if (self.getSignIn) {
       let accountType = self.getAccount.type;
       if (accountType === "metamask") {
@@ -476,8 +496,8 @@ export default {
   background: #eceeef;
 }
 .modal-header {
-  background: #2851e4;
-  color: #fff;
+  background: #ffffff;
+  color: #b14ae2;
 }
 #backup_advice_modal {
   color: #333;
@@ -513,25 +533,29 @@ export default {
 }
 .nav-pills .nav-link {
   height: 64px;
-  padding: 20px;
+  padding: 25px;
   text-transform: uppercase;
   color: #777777;
+  font-size: 14px;
 }
 .nav-pills .nav-link.active {
-  background: #fff;
-  color: #2752e4 !important;
+  background: #f8fafb !important;
+  color: #a41ce3 !important;
   font-weight: bold;
-  border-bottom: 2px solid #4d62ac;
+  border-bottom: 2px solid #a41de4;
   border-radius: 0px;
 }
 .main-tab .card-header .nav-item {
   height: 64px;
-  width: 50%;
-  background: #fff;
+  width: 33.333%;
+  background: #f8fafb;
 }
 .main-tab .tab-content {
   position: relative;
   top: 50px;
+}
+.main-tab .tablist {
+  box-shadow: 0px 2px 2px #e2e2e2;
 }
 div {
   outline: none;
@@ -562,5 +586,27 @@ div {
 .modal-header .close {
   font-size: 30px;
   color: #fff;
+}
+.btn-primary {
+  color: #fff;
+  background-color: #773894;
+  border-color: #773894;
+}
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus,
+.btn-primary:disabled {
+  color: #fff;
+  background-color: #5f1f7b;
+  border-color: #5f1e7b;
+}
+.btn-outline-primary {
+  color: #773894;
+  border-color: #773894;
+}
+.btn-outline-primary:hover {
+  color: #fff;
+  background: #773894;
+  border-color: #773894;
 }
 </style>

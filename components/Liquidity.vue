@@ -60,9 +60,9 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button variant="primary" id="pool-swap-button">
+        <!-- <b-button variant="primary" id="pool-swap-button">
           <font-awesome-icon icon="plus" size="lg" color="#fff"/>
-        </b-button>
+        </b-button>-->
 
         <b-form-group id="exampleInputGroup1" class="input-form-group">
           <div class="amount-label-container">
@@ -161,9 +161,9 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button variant="primary" id="pool-swap-button">
+        <!-- <b-button variant="primary" id="pool-swap-button">
           <font-awesome-icon icon="arrow-down" size="lg" color="#fff"/>
-        </b-button>
+        </b-button>-->
 
         <b-form-group id="exampleInputGroup1">
           <label>Withdrawn Amount</label>

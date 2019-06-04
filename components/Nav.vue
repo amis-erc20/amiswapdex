@@ -6,21 +6,7 @@
     <div class="title">
       <div id="main-title-no-connection-container">
         <div class="logo-title-container">
-          <img
-            v-if="currentRoute === '/tokendetail' && getActiveToken==='ETH'"
-            src="../assets/eth-logo.png"
-            alt
-          >
-          <img
-            v-else-if="currentRoute === '/tokendetail' && activeTokenLogo"
-            :src="activeTokenLogo"
-            alt
-          >
-          <img
-            v-else-if="currentRoute === '/tokendetail' && !activeTokenLogo"
-            src="../assets/default-token.png"
-            alt
-          >
+          <img id="uniswapdex-logo" src="../assets/uniswapdex-logo.png" alt>
           <h4>{{ title }}</h4>
         </div>
         <no-connection/>
@@ -29,7 +15,7 @@
     <b-button v-b-modal.settingModal variant="outline-light">
       <font-awesome-icon icon="bars" size="lg" color="#fff"/>
     </b-button>
-    <b-modal ref="settingModal_ref" id="settingModal" title="Wallet Setting" :hide-footer="true">
+    <b-modal ref="settingModal_ref" id="settingModal" title="Options" :hide-footer="true">
       <b-list-group v-if="getSignIn">
         <b-list-group-item
           v-if="getAccount.type === 'credentials'"
@@ -203,8 +189,8 @@ export default {
   display: flex;
   justify-content: center;
   padding: 10px 15px;
-  background: #2851e4;
-  color: #fff;
+  background: #ffffff;
+  color: #333;
   align-self: center;
   width: 100% !important;
   position: fixed;
@@ -236,9 +222,11 @@ export default {
   cursor: pointer;
 }
 .nav-section h4 {
-  font-size: 22px;
-  padding-top: 10px;
+  font-size: 20px;
+  padding-top: 3px;
   margin: 0px;
+  color: #a41de4;
+  font-weight: bold;
 }
 #settingModal {
   color: #333;
@@ -248,11 +236,12 @@ export default {
   z-index: 3000;
 }
 #settingModal .modal-header {
-  background: #2851e4;
+  background: #773894;
   text-align: center;
 }
 #settingModal .modal-title {
   flex-grow: 2;
+  color: #fff;
 }
 #settingModal .modal-body {
   padding: 0px;
@@ -263,6 +252,9 @@ export default {
 .nav-section .btn-outline-light {
   border: none;
   outline: none;
+}
+.nav-section .btn-outline-light svg {
+  color: #a41de4;
 }
 .nav-section .btn-outline-light:active,
 .nav-section .btn-outline-light:focus {
@@ -286,5 +278,13 @@ export default {
   display: flex;
   flex-direction: row;
   justify-content: center;
+}
+#uniswapdex-logo {
+  width: 40px;
+  height: 29px;
+  margin: 0;
+  margin-right: 10px;
+  position: relative;
+  top: -5px;
 }
 </style>

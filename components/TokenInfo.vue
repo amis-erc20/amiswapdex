@@ -5,7 +5,7 @@
     <b-modal
       ref="settingModalInInfo_ref"
       id="settingModalInInfo"
-      title="Wallet Setting"
+      title="Options"
       :hide-footer="true"
     >
       <b-list-group v-if="getSignIn">
@@ -259,6 +259,11 @@ export default {
       updateActiveTab: "updateActiveTab",
       updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
+      removeAccount: "account/removeAccount",
+      resetAllBalances: "account/resetAllBalances",
+      resetTransactionList: "transaction/resetTransactionList",
+      resetTokenTransactionList: "transaction/resetTokenTransactionList",
+      resetTokenList: "account/resetTokenList",
       addToken: "account/addToken",
       setRefresher: "account/setRefresher",
       setAvailableTokenList: "account/setAvailableTokenList",
@@ -394,7 +399,7 @@ export default {
 #token-info-tabs-container .card-header .nav-item {
   height: 44px;
   width: 16.666%;
-  background: #fff;
+  background: #f8fafb;
   margin: 0;
   font-size: 13px;
 }
@@ -431,6 +436,7 @@ export default {
 #token_info_modal .modal-header,
 #about_tos_modal .modal-header {
   border-radius: 0px !important;
+  border: none;
 }
 
 #token_info_modal .token-info-section {
@@ -500,8 +506,12 @@ export default {
   top: 5px;
 }
 #menu-button {
+  color: #a41de4;
+}
+#menu-button svg {
   border: none !important;
   outline: none !important;
+  color: #a41de4;
 }
 .setting-container img {
   width: 35px;
@@ -520,11 +530,12 @@ export default {
   z-index: 3000;
 }
 #settingModalInInfo .modal-header {
-  background: #2851e4;
+  background: #773894;
   text-align: center;
 }
 #settingModalInInfo .modal-title {
   flex-grow: 2;
+  color: #fff;
 }
 #settingModalInInfo .modal-body {
   padding: 0px;
@@ -550,6 +561,7 @@ export default {
   cursor: pointer;
   top: 5px;
   left: 10px;
+  color: #a41de4;
 }
 @media screen and (max-width: 450px) {
   #token-info-tabs-container .nav-pills .nav-link {

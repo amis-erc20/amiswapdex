@@ -442,20 +442,40 @@ export const swapTokenToEth = async function (
   console.log(tx)
   let myAddress = tx.from
   let count = await web3.eth.getTransactionCount(myAddress)
-  let transaction = await web3.eth.accounts.signTransaction(
-    {
-      from: myAddress,
-      gasPrice: web3.utils.toHex(tx.gasPrice),
-      gasLimit: web3.utils.toHex(tx.gasLimit),
-      to: contractAddress,
-      value: '0x0',
-      data: exchangeContract.methods
-        .tokenToEthSwapInput(tx.tokenSold, tx.minEth, tx.deadline)
-        .encodeABI(),
-      nonce: web3.utils.toHex(count)
-    },
-    privateKey
-  )
+  let transaction
+  if (tx.recipient && tx.recipient.length > 0) {
+    console.log(`Recipient: ${tx.recipient}`)
+    transaction = await web3.eth.accounts.signTransaction(
+      {
+        from: myAddress,
+        gasPrice: web3.utils.toHex(tx.gasPrice),
+        gasLimit: web3.utils.toHex(tx.gasLimit),
+        to: contractAddress,
+        value: '0x0',
+        data: exchangeContract.methods
+          .tokenToEthTransferInput(tx.tokenSold, tx.minEth, tx.deadline, tx.recipient)
+          .encodeABI(),
+        nonce: web3.utils.toHex(count)
+      },
+      privateKey
+    )
+  } else {
+    transaction = await web3.eth.accounts.signTransaction(
+      {
+        from: myAddress,
+        gasPrice: web3.utils.toHex(tx.gasPrice),
+        gasLimit: web3.utils.toHex(tx.gasLimit),
+        to: contractAddress,
+        value: '0x0',
+        data: exchangeContract.methods
+          .tokenToEthSwapInput(tx.tokenSold, tx.minEth, tx.deadline)
+          .encodeABI(),
+        nonce: web3.utils.toHex(count)
+      },
+      privateKey
+    )
+  }
+
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
@@ -479,20 +499,39 @@ export const swapEthToToken = async function (
 
   return new Promise(async resolve => {
     try {
-      let transaction = await web3.eth.accounts.signTransaction(
-        {
-          from: myAddress,
-          gasPrice: web3.utils.toHex(tx.gasPrice),
-          gasLimit: web3.utils.toHex(tx.gasLimit),
-          to: contractAddress,
-          value: web3.utils.toHex(tx.ethSold),
-          data: exchangeContract.methods
-            .ethToTokenSwapInput(tx.minimumTokenBought, tx.deadline)
-            .encodeABI(),
-          nonce: web3.utils.toHex(count)
-        },
-        privateKey
-      )
+      let transaction
+      if (tx.recipient && tx.recipient.length > 0) {
+        console.log(`Recipient: ${tx.recipient}`)
+        transaction = await web3.eth.accounts.signTransaction(
+          {
+            from: myAddress,
+            gasPrice: web3.utils.toHex(tx.gasPrice),
+            gasLimit: web3.utils.toHex(tx.gasLimit),
+            to: contractAddress,
+            value: web3.utils.toHex(tx.ethSold),
+            data: exchangeContract.methods
+              .ethToTokenTransferInput(tx.minimumTokenBought, tx.deadline, tx.recipient)
+              .encodeABI(),
+            nonce: web3.utils.toHex(count)
+          },
+          privateKey
+        )
+      } else {
+        transaction = await web3.eth.accounts.signTransaction(
+          {
+            from: myAddress,
+            gasPrice: web3.utils.toHex(tx.gasPrice),
+            gasLimit: web3.utils.toHex(tx.gasLimit),
+            to: contractAddress,
+            value: web3.utils.toHex(tx.ethSold),
+            data: exchangeContract.methods
+              .ethToTokenSwapInput(tx.minimumTokenBought, tx.deadline)
+              .encodeABI(),
+            nonce: web3.utils.toHex(count)
+          },
+          privateKey
+        )
+      }
       web3.eth
         .sendSignedTransaction(transaction.rawTransaction)
         .on('error', function (error) {
@@ -518,26 +557,53 @@ export const swapTokenToToken = async function (
 ) {
   let myAddress = tx.from
   let count = await web3.eth.getTransactionCount(myAddress)
-  let transaction = await web3.eth.accounts.signTransaction(
-    {
-      from: myAddress,
-      gasPrice: web3.utils.toHex(tx.gasPrice),
-      gasLimit: web3.utils.toHex(tx.gasLimit),
-      to: contractAddress,
-      value: '0x0',
-      data: exchangeContract.methods
-        .tokenToTokenSwapInput(
-          tx.tokenASold,
-          tx.minEth,
-          tx.minTokenBBought,
-          tx.deadline,
-          tx.outputTokenAddress
-        )
-        .encodeABI(),
-      nonce: web3.utils.toHex(count)
-    },
-    privateKey
-  )
+  let transaction
+  if (tx.recipient && tx.recipient.length > 0) {
+    console.log(`Recipient: ${tx.recipient}`)
+    transaction = await web3.eth.accounts.signTransaction(
+      {
+        from: myAddress,
+        gasPrice: web3.utils.toHex(tx.gasPrice),
+        gasLimit: web3.utils.toHex(tx.gasLimit),
+        to: contractAddress,
+        value: '0x0',
+        data: exchangeContract.methods
+          .tokenToTokenTransferInput(
+            tx.tokenASold,
+            tx.minEth,
+            tx.minTokenBBought,
+            tx.deadline,
+            tx.recipient,
+            tx.outputTokenAddress
+          )
+          .encodeABI(),
+        nonce: web3.utils.toHex(count)
+      },
+      privateKey
+    )
+  } else {
+    transaction = await web3.eth.accounts.signTransaction(
+      {
+        from: myAddress,
+        gasPrice: web3.utils.toHex(tx.gasPrice),
+        gasLimit: web3.utils.toHex(tx.gasLimit),
+        to: contractAddress,
+        value: '0x0',
+        data: exchangeContract.methods
+          .tokenToTokenSwapInput(
+            tx.tokenASold,
+            tx.minEth,
+            tx.minTokenBBought,
+            tx.deadline,
+            tx.outputTokenAddress
+          )
+          .encodeABI(),
+        nonce: web3.utils.toHex(count)
+      },
+      privateKey
+    )
+  }
+
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
@@ -712,7 +778,7 @@ export const metamaskRemoveLiquidity = async function (
 export const metamaskSwap = async function (data) {
   const ALLOWED_SLIPPAGE = 0.02
   let web3Metamask = await getWeb3Metamask()
-  let { inputValue, inputCurrency, outputValue, outputCurrency, type } = data
+  let { inputValue, inputCurrency, outputValue, outputCurrency, type, recipient } = data
   const blockNumber = await web3Metamask.eth.getBlockNumber()
   const block = await web3Metamask.eth.getBlock(blockNumber)
   const deadline = block.timestamp + 300
@@ -727,15 +793,28 @@ export const metamaskSwap = async function (data) {
     const amount = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
 
     return new Promise((resolve, reject) => {
-      exchangeContract.methods.ethToTokenSwapInput(min_token, deadline)
-        .send({ from: accounts[0], value: amount }, (err, data) => {
-          if (err) {
-            console.log(err)
-            reject(err)
-          } else {
-            resolve(data)
-          }
-        })
+      if (recipient) {
+        console.log(`Recipient is ${recipient}`)
+        exchangeContract.methods.ethToTokenTransferInput(min_token, deadline, recipient)
+          .send({ from: accounts[0], value: amount }, (err, data) => {
+            if (err) {
+              console.log(err)
+              reject(err)
+            } else {
+              resolve(data)
+            }
+          })
+      } else {
+        exchangeContract.methods.ethToTokenSwapInput(min_token, deadline)
+          .send({ from: accounts[0], value: amount }, (err, data) => {
+            if (err) {
+              console.log(err)
+              reject(err)
+            } else {
+              resolve(data)
+            }
+          })
+      }
     })
   } else if (type === 'TOKEN_TO_ETH') {
     exchangeContract = new web3Metamask.eth.Contract(
@@ -746,16 +825,30 @@ export const metamaskSwap = async function (data) {
     const minEth = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
     const exchangeRate = parseFloat(outputValue / inputValue)
     return new Promise((resolve, reject) => {
-      exchangeContract.methods.tokenToEthSwapInput(tokenSold, minEth, deadline)
-        .send({ from: accounts[0] }, (err, data) => {
-          if (err) {
-            console.log(`Transaction is not submitted`)
-            console.log(err)
-            reject(err)
-          } else {
-            resolve(data)
-          }
-        })
+      if (recipient) {
+        console.log(`Recipient is ${recipient}`)
+        exchangeContract.methods.tokenToEthTransferInput(tokenSold, minEth, deadline, recipient)
+          .send({ from: accounts[0] }, (err, data) => {
+            if (err) {
+              console.log(`Transaction is not submitted`)
+              console.log(err)
+              reject(err)
+            } else {
+              resolve(data)
+            }
+          })
+      } else {
+        exchangeContract.methods.tokenToEthSwapInput(tokenSold, minEth, deadline)
+          .send({ from: accounts[0] }, (err, data) => {
+            if (err) {
+              console.log(`Transaction is not submitted`)
+              console.log(err)
+              reject(err)
+            } else {
+              resolve(data)
+            }
+          })
+      }
     })
   } else if (type === 'TOKEN_TO_TOKEN') {
     exchangeContract = new web3Metamask.eth.Contract(
@@ -769,20 +862,39 @@ export const metamaskSwap = async function (data) {
     const outputTokenAddress = tokenAddresses[outputCurrency]
     console.log(`Minimum required token is: ${minToken / Math.pow(10, 18)} ${outputCurrency}`)
     return new Promise((resolve, reject) => {
-      exchangeContract.methods.tokenToTokenSwapInput(
-        tokenSold,
-        minToken,
-        minEth,
-        deadline,
-        outputTokenAddress
-      ).send({ from: accounts[0] }, (err, data) => {
-        if (err) {
-          console.log(err)
-          reject(err)
-        } else {
-          resolve(data)
-        }
-      })
+      if (recipient) {
+        console.log(`Recipient is ${recipient}`)
+        exchangeContract.methods.tokenToTokenTransferInput(
+          tokenSold,
+          minToken,
+          minEth,
+          deadline,
+          recipient,
+          outputTokenAddress
+        ).send({ from: accounts[0] }, (err, data) => {
+          if (err) {
+            console.log(err)
+            reject(err)
+          } else {
+            resolve(data)
+          }
+        })
+      } else {
+        exchangeContract.methods.tokenToTokenSwapInput(
+          tokenSold,
+          minToken,
+          minEth,
+          deadline,
+          outputTokenAddress
+        ).send({ from: accounts[0] }, (err, data) => {
+          if (err) {
+            console.log(err)
+            reject(err)
+          } else {
+            resolve(data)
+          }
+        })
+      }
     })
   }
 }

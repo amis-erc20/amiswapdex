@@ -444,6 +444,7 @@ export default {
 <style>
 #signin-section {
   width: 100%;
+  max-width: 650px;
   overflow: hidden;
   margin: 0 auto;
   display: flex;

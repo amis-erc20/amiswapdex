@@ -204,6 +204,7 @@ export default {
 <style>
 #metamask-section {
   width: 100%;
+  max-width: 650px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -241,11 +242,11 @@ export default {
   font-weight: bold;
   height: 50px;
   color: #fff;
-  background-color: #e8811c;
-  border-color: #e8811c;
+  background-color: #773894;
+  border-color: #773894;
 }
 #metamask-access-btn:hover {
-  background-color: #d36c16;
-  border-color: #e8811c;
+  background-color: #773894;
+  border-color: #773894;
 }
 </style>

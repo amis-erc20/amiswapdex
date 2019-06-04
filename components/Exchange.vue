@@ -318,7 +318,7 @@ export default {
       let ethToUsd = this.ethToUsd;
       let unsortedList = this.getAvailableTokenList
         .map(token => {
-          let summaryInfo = self.summary.find(s => s.token_id === token.id);
+          let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
           if (!summaryInfo)
             return {
               name: token.symbol,
@@ -588,12 +588,12 @@ export default {
   },
   created: async function() {
     this.summary = this.getSummary;
-    if (this.getConnection) {
-      await this.getSummaryFromServer();
-      await this.updateSummary(this.summary);
-    } else {
-      this.summary = this.getSummary;
-    }
+    // if (this.getConnection) {
+    //   await this.getSummaryFromServer();
+    //   await this.updateSummary(this.summary);
+    // } else {
+    //   this.summary = this.getSummary;
+    // }
     let ethPrice = this.getPrice["ETH"];
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
@@ -650,7 +650,7 @@ export default {
   padding: 10px 15px;
   font-size: 12px;
   font-weight: bolder;
-  background: #dfdfe0;
+  background: #d0d0d0;
   margin-bottom: 5px;
   cursor: pointer;
 }
@@ -797,8 +797,9 @@ export default {
 }
 
 .token-price-usd {
-  color: #2752e4;
+  color: #7338cc;
   font-weight: bolder;
+  padding-right: 15px;
 }
 
 .positive-change {

@@ -1,6 +1,17 @@
 <template>
   <div>
-    <div id="uniswap-convert-section">
+    <div class="qr-scanner-container" v-if="scanning">
+      <p class="camera-error-message">{{this.cameraErrorMessage}}</p>
+      <qrcode-stream
+        v-if="!cameraErrorMessage"
+        @decode="onDecode"
+        @init="onInit"
+        :paused="!scanning"
+        :camera="camera"
+      />
+      <b-button variant="primary" @click="hideScanner" class="cancel-scanner-btn">Cancel</b-button>
+    </div>
+    <div id="uniswap-convert-section" v-show="!scanning">
       <div>
         <b-button-group class="buy-or-sell">
           <b-button
@@ -32,7 +43,7 @@
             style="display: none"
           />
           <v-select
-            :options="tokenList"
+            :options="inputTokenList"
             label="title"
             placeholder="Please select a curreny"
             @input="onSelectInputCurrency"
@@ -153,9 +164,33 @@
           </b-form-group>
         </div>
 
-        <b-form-group v-if="form.inputCurrency !== null">
+        <b-form-group v-if="form.inputCurrency !== null" class="advanced-toggle-group">
           <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
         </b-form-group>
+
+        <b-form-group id="exampleInputGroup1" v-if="form.inputCurrency !== null && showAdvanced">
+          <label for>Receiver Address</label>
+          <div id="address-qr-btn-container">
+            <div class="input-field-container address-field-container">
+              <b-form-input
+                type="text"
+                v-model="form.targetAddress"
+                required
+                placeholder="Enter receiver address"
+                :state="validateTargetAddress"
+              />
+              <button type="button" id="erase" @click="form.targetAddress = ''"></button>
+            </div>
+            <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
+              <font-awesome-icon icon="qrcode" size="lg" color="#fff"/>
+            </b-button>
+          </div>
+          <b-form-invalid-feedback
+            v-if="form.targetAddress.length > 0"
+            :state="validateTargetAddress"
+          >Invalid Receiver Address</b-form-invalid-feedback>
+        </b-form-group>
+
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
           <b-form-input
@@ -264,9 +299,21 @@ import {
   swapEthToToken,
   swapTokenToToken,
   metamaskSwap,
-  hasTokenUniswap
+  hasTokenUniswap,
+  isValidAddress
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
+import Vue from "vue";
+import VueQrcodeReader from "vue-qrcode-reader";
+const defaultCamera = {
+  audio: false, // don't request microphone access
+  video: {
+    facingMode: { ideal: "environment" }, // use rear camera if available
+    width: { min: 360, ideal: 680, max: 1920 }, // constrain video width resolution
+    height: { min: 240, ideal: 480, max: 1080 } // constrain video height resolution
+  }
+};
+Vue.use(VueQrcodeReader);
 
 let tokenSymbols = Object.keys(exchangeAddresses);
 let exchangeContracts = {};
@@ -299,7 +346,8 @@ export default {
         outputCurrency: null,
         inputValue: "",
         outputValue: "",
-        approvedAmount: 0
+        approvedAmount: 0,
+        targetAddress: ""
       },
       loading: false,
       showAdvanced: false,
@@ -314,12 +362,17 @@ export default {
       outputErrorMessage: "Please input a valid amount",
       slippage: null,
       isBuySelected: true,
-      isSellSelected: false
+      isSellSelected: false,
+      scanning: false,
+      camera: null,
+      cameraErrorMessage: ""
     };
   },
   computed: {
     ...mapGetters({
       getAccount: "account/getAccount",
+      getTokenList: "account/getTokenList",
+      getPrice: "account/getPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance",
@@ -332,6 +385,7 @@ export default {
       else return false;
     },
     availableTokens: function() {
+      let self = this;
       let options = this.getAvailableTokenList
         .map(token => token.symbol)
         .sort()
@@ -355,7 +409,52 @@ export default {
       options.unshift({ title: "ETH", src: null });
       return options;
     },
+    inputTokenList: function() {
+      let self = this;
+      let list = this.getTokenList
+        .map(symbol => {
+          let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+          return {
+            title: symbol,
+            balance: self.getBalance[symbol],
+            priceInUsd: self.getPrice[symbol],
+            src: token ? token.logo : null
+          };
+        })
+        .sort((a, b) => b.priceInUsd - a.priceInUsd);
+
+      // let options = this.getAvailableTokenList
+      //   .filter(token => {
+      //     let currentBalance = self.getBalance[token.symbol];
+      //     console.log(token.symbol, currentBalance);
+      //     if (currentBalance && currentBalance > 0) return true;
+      //     else return false;
+      //   })
+      // .map(token => {
+      //   return {
+      //     ...token,
+      //     balance: self.getBalance[token.symbol]
+      //   };
+      // })
+      // .map(token => {
+      //   console.log(token);
+      //   return {
+      //     ...token
+      //   };
+      // })
+      // .sort((a, b) => b.balance - a.balance)
+      // .map(token => {
+      //   return {
+      //     title: token.symbol,
+      //     src: token.logo
+      //   };
+      // });
+      // console.log(list);
+      // list.unshift({ title: "ETH", src: null });
+      return list;
+    },
     availableInputTokens() {
+      let self = this;
       let outputCurrency = this.form.outputCurrency;
       if (this.form.outputCurrency === null) return this.availableTokens;
       else
@@ -438,6 +537,9 @@ export default {
         !this.validateBalance ||
         !this.validateSlippage
       );
+    },
+    validateTargetAddress() {
+      return isValidAddress(this.form.targetAddress);
     }
   },
   updated: function() {
@@ -524,6 +626,8 @@ export default {
       this.camera = null;
     },
     toggleScanner() {
+      console.log("toggling...");
+      console.log(this.scanning);
       if (this.scanning) this.hideScanner();
       else this.showScanner();
     },
@@ -567,6 +671,33 @@ export default {
     async updateGasLimitAndTxFee() {
       this.txFee =
         (2.0 * this.gasLimit * this.gasPrice * 1000000000) / Math.pow(10, 18);
+    },
+    onDecode(decodedString) {
+      this.form.targetAddress = decodedString;
+      this.hideScanner();
+    },
+    async onInit(promise) {
+      try {
+        await promise;
+      } catch (error) {
+        console.log(error);
+        if (error.name === "NotAllowedError") {
+          this.cameraErrorMessage =
+            "ERROR: you need to grant camera access permisson";
+        } else if (error.name === "NotFoundError") {
+          this.cameraErrorMessage = "ERROR: no camera on this device";
+        } else if (error.name === "NotSupportedError") {
+          this.cameraErrorMessage =
+            "ERROR: secure context required (HTTPS, localhost)";
+        } else if (error.name === "NotReadableError") {
+          this.cameraErrorMessage = "ERROR: is the camera already in use?";
+        } else if (error.name === "OverconstrainedError") {
+          this.cameraErrorMessage = "ERROR: installed cameras are not suitable";
+        } else if (error.name === "StreamApiNotSupportedError") {
+          this.cameraErrorMessage =
+            "ERROR: Stream API is not supported in this browser";
+        }
+      }
     },
     onInputFocus() {
       this.lastEditedField = "input";
@@ -777,6 +908,7 @@ export default {
       let inputCurrency = this.form.inputCurrency;
       let outputValue = this.form.outputValue;
       let outputCurrency = this.form.outputCurrency;
+      let recipient = this.form.targetAddress || null;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
       let exchangeContract = exchangeContracts[outputCurrency];
@@ -787,6 +919,7 @@ export default {
             inputCurrency,
             outputValue,
             outputCurrency,
+            recipient,
             type,
             exchangeContract
           });
@@ -846,7 +979,8 @@ export default {
                   gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
                   gasLimit: parseInt(this.gasLimit),
                   minimumTokenBought,
-                  deadline
+                  deadline,
+                  recipient
                 },
                 exchangeContract,
                 contractAddress,
@@ -912,7 +1046,8 @@ export default {
                 gasLimit: parseInt(this.gasLimit),
                 tokenSold,
                 minEth,
-                deadline
+                deadline,
+                recipient
               },
               exchangeContract,
               contractAddress,
@@ -986,7 +1121,8 @@ export default {
                 minEth,
                 minTokenBBought,
                 deadline,
-                outputTokenAddress
+                outputTokenAddress,
+                recipient
               },
               exchangeContract,
               contractAddress,
@@ -1252,5 +1388,46 @@ form label {
   background: #2752e4;
   color: #fff;
   font-weight: bold;
+}
+.qr-scanner-container {
+  display: flex;
+  justify-content: center;
+  background: #333;
+}
+#qr-toggle-btn {
+  margin: 0;
+  margin-left: 10px;
+}
+.qr-scanner-container,
+.qrcode-stream {
+  height: calc(100vh - 64px);
+  width: 100%;
+}
+.qrcode-stream__inner-wrapper {
+  height: 100vh;
+  width: 100%;
+  margin: 0 auto;
+}
+.qrcode-stream__camera,
+.qrcode-stream__pause-frame {
+  width: 100%;
+  height: calc(100vh);
+}
+.cancel-scanner-btn {
+  bottom: 100px;
+  width: 110px;
+  height: 50px;
+  position: fixed;
+}
+.camera-error-message {
+  position: fixed;
+  top: 160px;
+  z-index: 1000;
+  color: #e61209;
+  font-weight: bolder;
+}
+.advanced-toggle-group {
+  height: auto !important;
+  padding-top: 5px;
 }
 </style>

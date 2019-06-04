@@ -94,7 +94,7 @@ body {
   font-size: 14px;
 }
 #no_internet_modal .modal-header {
-  background: #2851e4;
+  background: #773894;
   color: #fff;
   text-align: center;
   height: 40px;

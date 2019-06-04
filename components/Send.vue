@@ -64,7 +64,10 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-form-group v-if="form.currency !== null && validateTargetAddress">
+        <b-form-group
+          v-if="form.currency !== null && validateTargetAddress"
+          class="advanced-toggle-group"
+        >
           <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
         </b-form-group>
         <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
@@ -460,6 +463,7 @@ export default {
   cursor: pointer;
   text-align: right;
   width: 100px;
+  margin-bottom: 10px;
 }
 .amount-label-container {
   display: flex;
@@ -473,6 +477,7 @@ export default {
 }
 .amount-label-container .current-balance {
   font-size: 12px;
+  margin-bottom: 10px;
 }
 .use-all-funds:hover {
   color: #17508a;
@@ -481,10 +486,12 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 40px;
 }
 .qr-scanner-container {
   display: flex;
   justify-content: center;
+  background: #333;
 }
 #qr-toggle-btn {
   margin: 0;
@@ -550,5 +557,9 @@ export default {
   font-weight: bold;
   padding: 2px;
   background: transparent;
+}
+.advanced-toggle-group {
+  height: auto !important;
+  padding-top: 5px;
 }
 </style>

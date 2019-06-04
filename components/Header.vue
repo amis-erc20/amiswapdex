@@ -4,9 +4,10 @@
       <div class="balance-summary">
         <p class="token-amount-usd" v-if="priceInUSD && currentRoute !== `/`">{{ priceInUSD }} USD</p>
         <h2>
-          {{ calculateBalance(balanceList[getActiveToken]) }}
+          {{ calculateBalance(getBalance[getActiveToken]) }}
           <span>{{getActiveToken}}</span>
         </h2>
+        <!-- <p>{{ getBalance }}</p> -->
       </div>
     </div>
   </div>
@@ -39,6 +40,9 @@ export default {
     currentRoute() {
       return this.$route.path;
     }
+    // getBalance() {
+    //   return this.$store.state.account.balance;
+    // }
   },
   methods: {
     ...mapActions({
@@ -58,9 +62,10 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    setInterval(() => {
-      self.balanceList = self.getBalance;
-    }, 2000);
+    // setInterval(() => {
+    //   self.balanceList = self.getBalance;
+    //   console.log(self.balanceList);
+    // }, 2000);
   }
 };
 </script>
@@ -125,8 +130,8 @@ export default {
   font-weight: bolder;
 }
 #send-button {
-  border: 2px solid #2851e4;
-  color: #2851e4;
+  border: 2px solid #773894;
+  color: #773894;
   font-weight: bolder;
 }
 #swap-button {

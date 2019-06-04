@@ -206,7 +206,7 @@ export default {
   font-size: 12px;
 }
 .transaction .modal .modal-header {
-  background: #2851e4;
+  background: #773894;
   text-align: center;
 }
 .transaction .modal .modal-title {
