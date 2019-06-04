@@ -20,6 +20,20 @@ export const getters = {
   getOwnedTokenList: state => state.ownedTokenList,
   getTotalValue: state => state.totalValue,
   getAvailableTokenList: state => state.availableTokenList,
+  getAvailableTokenAddresses: state => {
+    let tokenAddressess = {}
+    state.availableTokenList.forEach(t => {
+      tokenAddressess[t.symbol] = t.tokenAddress
+    })
+    return tokenAddressess
+  },
+  getAvailableExchangeAddresses: state => {
+    let exchangeAddressess = {}
+    state.availableTokenList.forEach(t => {
+      exchangeAddressess[t.symbol] = t.exchangeAddress
+    })
+    return exchangeAddressess
+  },
   getRefresher: state => state.refresher
 }
 

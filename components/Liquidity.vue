@@ -6,7 +6,7 @@
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
         </p>
       </div>
-      <div>
+      <div v-if="shouldRender">
         <b-button-group class="buy-or-sell">
           <b-button
             v-bind:class="{ selected: (liquidity === 'add') }"
@@ -20,19 +20,11 @@
           >Remove Liquidity</b-button>
         </b-button-group>
       </div>
-      <!-- <b-form-group v-if="shouldRender" id="exampleInputGroup1">
-        <label>Add Liquidity / Remove Liquidity / Create Exchange</label>
-        <b-form-select
-          v-model="liquidity"
-          :options="[{text: `Select an option to start`, value: ''}, {text: `Add Liquidity`, value: `add`}, {text: `Remove Liquidity`, value: `remove`}]"
-          @change="onSelectLiquidityType"
-        />
-      </b-form-group>-->
       <b-form
         class="liquidity-form"
         @submit="onAddLiquidity"
         @reset="onReset"
-        v-if="liquidity === `add`"
+        v-if="liquidity === `add` && shouldRender"
       >
         <div class="amount-label-container">
           <label for>Deposit ETH</label>
@@ -319,11 +311,7 @@
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import { exchangeABI, tokenABI, ERC20_ABI } from "../assets/js/abi";
-import {
-  tokenAddresses,
-  exchangeAddresses,
-  factoryAddress
-} from "../assets/js/token";
+import { factoryAddress } from "../assets/js/token";
 import {
   getWeb3,
   estimateGas,
@@ -346,7 +334,6 @@ import {
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
-let tokenSymbols = Object.keys(exchangeAddresses);
 let exchangeContracts = {};
 let tokenAddressess = {};
 let tokenContracts = {};
@@ -404,39 +391,15 @@ export default {
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
-      getServerStatus: "getServerStatus"
+      getServerStatus: "getServerStatus",
+      getAvailableTokenList: "account/getAvailableTokenList",
+      getAvailableTokenAddresses: "account/getAvailableTokenAddresses",
+      getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses"
     }),
     shouldRender: function() {
       if (this.getActiveToken === "ETH") return false;
       if (hasTokenUniswap(this.getActiveToken)) return true;
       else return false;
-    },
-    availableTokens: function() {
-      let options = tokenSymbols.map(symbol => {
-        return {
-          value: symbol,
-          text: symbol
-        };
-      });
-      options.unshift({ value: "ETH", text: "ETH" });
-      options.unshift({ value: null, text: "Please select currency" });
-      return options;
-    },
-    availableInputTokens() {
-      let outputCurrency = this.form.outputCurrency;
-      if (this.form.outputCurrency === null) return this.availableTokens;
-      else
-        return this.availableTokens.filter(
-          token => token.value !== outputCurrency
-        );
-    },
-    availableOutputTokens() {
-      let inputCurrency = this.form.inputCurrency;
-      if (this.form.inputCurrency === null) return this.availableTokens;
-      else
-        return this.availableTokens.filter(
-          token => token.value !== inputCurrency
-        );
     },
     swapType() {
       if (
@@ -539,6 +502,8 @@ export default {
     }
   },
   mounted: async function() {
+    let self = this;
+    let tokenSymbols = this.getAvailableTokenList.map(t => t.symbol);
     this.form.inputCurrency = "ETH";
     this.liquidity = "add";
     this.form.outputCurrency = this.getActiveToken;
@@ -551,15 +516,17 @@ export default {
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       exchangeContracts[tokenSymbols[i]] = new this.web3.eth.Contract(
         exchangeABI,
-        exchangeAddresses[tokenSymbols[i]]
+        this.getAvailableExchangeAddresses[tokenSymbols[i]]
       );
     }
     tokenSymbols.forEach(async token => {
       const contract = exchangeContracts[token];
-      tokenAddressess[token] = await contract.methods.tokenAddress().call();
+      self.getAvailableTokenAddresses[
+        token
+      ] = await contract.methods.tokenAddress().call();
       tokenContracts[token] = new this.web3.eth.Contract(
         tokenABI,
-        tokenAddressess[token]
+        self.getAvailableTokenAddresses[token]
       );
     });
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
@@ -650,7 +617,9 @@ export default {
       if (!this.validateCurrency) return;
       this.onAmountChange();
 
-      const contractAddress = exchangeAddresses[this.form.inputCurrency];
+      const contractAddress = this.getAvailableExchangeAddresses[
+        this.form.inputCurrency
+      ];
       let estimatedGas = await this.getEstimatedGas(contractAddress);
       if (estimatedGas * 1.6 > this.gasLimit)
         this.gasLimit = estimatedGas * 1.6;
@@ -673,9 +642,10 @@ export default {
           this.form.outputCurrency,
           this.web3
         );
-        this.form.outputValue = absPrice
-          .multipliedBy(this.form.inputValue)
-          .toFixed(8);
+        if (!Number.isNaN(absPrice.toNumber()))
+          this.form.outputValue = absPrice
+            .multipliedBy(this.form.inputValue)
+            .toFixed(8);
       } else if (this.lastEditedField === "output") {
         if (!this.validateOutputAmount) {
           this.form.inputValue = "";
@@ -686,9 +656,10 @@ export default {
           this.form.outputCurrency,
           this.web3
         );
-        this.form.inputValue = new BigNumber(this.form.outputValue)
-          .dividedBy(absPrice)
-          .toFixed(8);
+        if (!Number.isNaN(absPrice.toNumber()))
+          this.form.inputValue = new BigNumber(this.form.outputValue)
+            .dividedBy(absPrice)
+            .toFixed(8);
       }
       this.updateExchangeRateAndSlippage();
     },
@@ -707,7 +678,9 @@ export default {
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
-      const contractAddress = exchangeAddresses[outputCurrency];
+      const contractAddress = this.getAvailableExchangeAddresses[
+        outputCurrency
+      ];
       let tokenContract = tokenContracts[outputCurrency];
 
       let ethReserve = await web3.eth.getBalance(contractAddress);
@@ -761,7 +734,7 @@ export default {
         currencyToCheck,
         {
           web3: this.web3,
-          exchangeAddress: exchangeAddresses[currencyToCheck],
+          exchangeAddress: this.getAvailableExchangeAddresses[currencyToCheck],
           privateKey: this.getAccount.privateKey
         }
       );
@@ -783,8 +756,8 @@ export default {
     },
     async getAllowance(inputCurrency) {
       try {
-        let exchangeAddress = exchangeAddresses[inputCurrency];
-        let tokenAddress = tokenAddressess[inputCurrency];
+        let exchangeAddress = this.getAvailableExchangeAddresses[inputCurrency];
+        let tokenAddress = this.getAvailableTokenAddresses[inputCurrency];
         const accounts = await this.web3.eth.getAccounts();
         const contract = new this.web3.eth.Contract(ERC20_ABI, tokenAddress);
         let exchangeContract = exchangeContracts[inputCurrency];
@@ -823,7 +796,9 @@ export default {
         symbol: "ULT"
       };
       if (inputCurrency === "ETH") {
-        let tokenExchangeAddress = exchangeAddresses[outputCurrency];
+        let tokenExchangeAddress = this.getAvailableExchangeAddresses[
+          outputCurrency
+        ];
         let tokenContract = tokenContracts[outputCurrency];
         let ethReserve = await web3.eth.getBalance(tokenExchangeAddress);
         let tokenRserve = await tokenContract.methods
@@ -874,7 +849,9 @@ export default {
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
-      const contractAddress = exchangeAddresses[outputCurrency];
+      const contractAddress = this.getAvailableExchangeAddresses[
+        outputCurrency
+      ];
 
       let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
       let tokenAmount = new BigNumber(outputValue).multipliedBy(10 ** 18);
@@ -969,7 +946,9 @@ export default {
       const deadline = block.timestamp + 300;
 
       let exchangeContract = exchangeContracts[outputCurrency];
-      const contractAddress = exchangeAddresses[outputCurrency];
+      const contractAddress = this.getAvailableExchangeAddresses[
+        outputCurrency
+      ];
       let tokenContract = tokenContracts[outputCurrency];
 
       let ethReserve = await web3.eth.getBalance(contractAddress);

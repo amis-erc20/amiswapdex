@@ -17,11 +17,13 @@
     <div v-if="tokenList.length == 0 && form.query.length > 0">
       <b-alert show variant="danger">
         Token
-        <strong>{{form.query}}</strong> is not listed on Uniswap Exchange
+        <strong>{{form.query}}</strong>
+        is not listed on Uniswap Exchange or liquidiy is less than 1 ETH for
+        <strong>{{form.query}}</strong> exchange contract.
       </b-alert>
-      <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
+      <!-- <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button> -->
     </div>
-    <div v-if="tokenList.length > 0" class="exchangelist-section">
+    <div v-if="tokenList" class="exchangelist-section">
       <div class="show-low-liquidity">
         <b-form-checkbox
           v-model="showLowLiquidityToken"
@@ -29,7 +31,7 @@
           switch
         >Show tokens with liquidity less than 1 ETH</b-form-checkbox>
       </div>
-      <div class="exchangelist-title">
+      <div v-if="tokenList.length > 0" class="exchangelist-title">
         <div class="title-order">No</div>
         <div class="title-name" @click="changeOrder(`name`)">
           Name
@@ -143,20 +145,15 @@
             </div>
           </b-list-group-item>
         </b-list-group>
-        <b-button
-          variant="outline-primary"
-          id="add-token-button"
-          @click="loadMoreToken"
-        >Load More Tokens</b-button>
       </b-card>
     </div>
 
     <b-button
-      v-if="tokenList.length > 0"
-      id="listToken"
-      variant="primary"
-      @click="showListToken"
-    >+ List ERC-20 Token</b-button>
+      variant="outline-primary"
+      id="add-token-button"
+      @click="loadMoreToken"
+    >Load More Tokens</b-button>
+    <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
 
     <!-- LIST TOKEN MODAL -->
     <b-modal

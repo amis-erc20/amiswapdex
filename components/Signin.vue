@@ -474,7 +474,8 @@ export default {
 .alert {
   font-size: 12px;
   width: 100%;
-  max-width: 450px;
+  max-width: 650px;
+  margin: 10px auto;
 }
 #signin-btn {
   width: 100%;

@@ -4,7 +4,7 @@ import { exchangeABI, tokenABI, ERC20_ABI, factoryABI } from './abi'
 import { factoryAddress } from './token'
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
-import * as R from "ramda";
+import * as R from 'ramda'
 
 let exchangeAddresses = {}
 let tokenAddresses = {}
@@ -23,17 +23,26 @@ export const initContracts = async function (web3, availableTokens) {
     exchangeAddresses[token.symbol] = token.exchangeAddress
   })
   for (let i = 0; i < tokenSymbols.length; i += 1) {
-    exchangeContracts[tokenSymbols[i]] = new web3.eth.Contract(
-      exchangeABI,
-      exchangeAddresses[tokenSymbols[i]]
-    )
+    try {
+      exchangeContracts[tokenSymbols[i]] = new web3.eth.Contract(
+        exchangeABI,
+        exchangeAddresses[tokenSymbols[i]]
+      )
+    } catch (e) {
+      console.log(`Error while creating exchange contract for ${tokenSymbols[i]}`)
+      console.log(e)
+    }
   }
   for (let i = 0; i < tokenSymbols.length; i += 1) {
-    const contract = exchangeContracts[tokenSymbols[i]]
-    tokenContracts[tokenSymbols[i]] = new web3.eth.Contract(
-      tokenABI,
-      tokenAddresses[tokenSymbols[i]]
-    )
+    try {
+      tokenContracts[tokenSymbols[i]] = new web3.eth.Contract(
+        tokenABI,
+        tokenAddresses[tokenSymbols[i]]
+      )
+    } catch (e) {
+      console.log(`Error while creating token contract for ${tokenSymbols[i]}`)
+      console.log(e)
+    }
   }
 }
 export const createNewCotract = async function (web3, token) {
@@ -51,7 +60,7 @@ export const hasTokenUniswap = function (symbol) {
     return true
   } else return false
 }
-async function getCurrentReserve(exchangeAddress, tokenContract, web3) {
+async function getCurrentReserve (exchangeAddress, tokenContract, web3) {
   let ethReserve = await web3.eth.getBalance(exchangeAddress)
 
   // https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress=0x862Da0A691bb0b74038377295f8fF523D0493eB4&apikey=YourApiKeyToken
@@ -275,8 +284,6 @@ export const estimateGasForSwap = async function (transaction, web3, exchangeAdd
           resolve(gasAmount)
         })
         .catch(function (error) {
-          console.log('estimate gas error')
-          console.error(error)
           resolve(0)
         })
     })
@@ -914,7 +921,6 @@ export const metamaskSendEth = async function (data) {
     data: ''
   }
   return new Promise((resolve, reject) => {
-
     web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {
       console.log('Tx hash: ', hash)
       resolve(hash)
@@ -964,7 +970,6 @@ export const metamaskSendToken = async function (data) {
         console.log('Error while trying to transfer using metamask extension')
         reject(e)
       })
-
   })
 }
 
@@ -999,7 +1004,7 @@ export const getAllListedToken = async () => {
   tokens = tokens.map(token => {
     let checkedUrl
     if (token.logo) {
-      let protocol = token.logo.split(":")[0]
+      let protocol = token.logo.split(':')[0]
       if (protocol === 'http') {
         checkedUrl = `https://uniswapdex.com:8889/static/${token.tokenAddress.toLowerCase()}.png`
       }
@@ -1076,7 +1081,7 @@ export const isValidPrivateKey = (key) => {
   return finalKey
 }
 
-function wait(ms) {
+function wait (ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
   })

@@ -261,7 +261,7 @@ export default {
       let account = this.getAccount;
       try {
         if (account) {
-          console.log("Refreshing Wallet");
+          // console.log("Refreshing Wallet");
           let txList = await getHistory(account.address);
           let tokenTxList = await getTokenHistory(account.address);
           if (!Array.isArray(txList) || !Array.isArray(tokenTxList)) return;
@@ -276,7 +276,7 @@ export default {
             tokenTxList.length !== this.getTokenTransactionList.length ||
             isTokenHoldingUpdated
           ) {
-            console.log("UPDATING TXS and WALLET BALANCES");
+            // console.log("UPDATING TXS and WALLET BALANCES");
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
@@ -417,9 +417,9 @@ export default {
     let self = this;
     let web3 = await getWeb3();
     let metamaskWeb3 = await getWeb3Metamask();
-    // let availableTokens = await getAllListedToken();
-    // this.setAvailableTokenList(availableTokens);
-    // await initContracts(web3, availableTokens);
+    let availableTokens = await getAllListedToken();
+    this.setAvailableTokenList(availableTokens);
+    await initContracts(web3, availableTokens);
     this.updateActiveTab("market");
     this.refreshServerStatus();
     await this.refreshTokenList(web3);
@@ -585,7 +585,7 @@ div {
 }
 .modal-header .close {
   font-size: 30px;
-  color: #fff;
+  color: #a41de4;
 }
 .btn-primary {
   color: #fff;

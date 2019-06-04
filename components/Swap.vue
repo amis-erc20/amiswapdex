@@ -11,7 +11,22 @@
       />
       <b-button variant="primary" @click="hideScanner" class="cancel-scanner-btn">Cancel</b-button>
     </div>
-    <div id="uniswap-convert-section" v-show="!scanning">
+    <b-alert
+      v-if="!validateInputLiquidity"
+      show
+      fade
+      variant="danger"
+    >{{form.inputCurrency}} has no liquidity</b-alert>
+    <b-alert
+      v-if="!validateOutputLiquidity"
+      show
+      fade
+      variant="danger"
+    >{{form.outputCurrency}} has no liquidity</b-alert>
+    <div
+      id="uniswap-convert-section"
+      v-show="!scanning && validateInputLiquidity && validateOutputLiquidity"
+    >
       <div>
         <b-button-group class="buy-or-sell">
           <b-button
@@ -35,15 +50,8 @@
       <b-form @submit="onSubmit" @reset="onReset" v-if="shouldRender">
         <b-form-group v-if="isBuySelected" id="exampleInputGroup1">
           <label>Pay With</label>
-          <b-form-select
-            v-model="form.inputCurrency"
-            :options="availableInputTokens"
-            @change="onCurrencyChange"
-            :disabled="form.inputCurrency === getActiveToken"
-            style="display: none"
-          />
           <v-select
-            :options="inputTokenList"
+            :options="availableInputTokens"
             label="title"
             placeholder="Please select a curreny"
             @input="onSelectInputCurrency"
@@ -71,16 +79,8 @@
 
         <b-form-group v-if="isSellSelected" id="exampleInputGroup1">
           <label>Receive In</label>
-          <b-form-select
-            v-model="form.outputCurrency"
-            :options="availableOutputTokens"
-            @change="onCurrencyChange"
-            :disabled="form.outputCurrency === getActiveToken"
-            :value="form.outputCurrency"
-            style="display: none"
-          />
           <v-select
-            :options="tokenList"
+            :options="availableOutputTokens"
             label="title"
             placeholder="Please select a curreny"
             @input="onSelectOutputCurrency"
@@ -168,7 +168,11 @@
           <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
         </b-form-group>
 
-        <b-form-group id="exampleInputGroup1" v-if="form.inputCurrency !== null && showAdvanced">
+        <b-form-group
+          class="input-form-group"
+          id="exampleInputGroup1"
+          v-if="form.inputCurrency !== null && showAdvanced"
+        >
           <label for>Receiver Address</label>
           <div id="address-qr-btn-container">
             <div class="input-field-container address-field-container">
@@ -286,7 +290,6 @@
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import { exchangeABI, tokenABI, ERC20_ABI } from "../assets/js/abi";
-import { tokenAddresses, exchangeAddresses } from "../assets/js/token";
 import {
   getWeb3,
   estimateGas,
@@ -315,7 +318,6 @@ const defaultCamera = {
 };
 Vue.use(VueQrcodeReader);
 
-let tokenSymbols = Object.keys(exchangeAddresses);
 let exchangeContracts = {};
 let tokenAddressess = {};
 let tokenContracts = {};
@@ -374,10 +376,13 @@ export default {
       getTokenList: "account/getTokenList",
       getPrice: "account/getPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getAvailableTokenAddresses: "account/getAvailableTokenAddresses",
+      getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses",
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
-      getServerStatus: "getServerStatus"
+      getServerStatus: "getServerStatus",
+      getSummary: "getSummary"
     }),
     shouldRender: function() {
       if (this.getActiveToken === "ETH") return true;
@@ -409,66 +414,47 @@ export default {
       options.unshift({ title: "ETH", src: null });
       return options;
     },
-    inputTokenList: function() {
+    availableInputTokens: function() {
       let self = this;
       let list = this.getTokenList
         .map(symbol => {
           let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
-          return {
-            title: symbol,
-            balance: self.getBalance[symbol],
-            priceInUsd: self.getPrice[symbol],
-            src: token ? token.logo : null
-          };
+          if (token)
+            return {
+              title: symbol,
+              balance: self.getBalance[symbol],
+              priceInUsd: self.getPrice[symbol],
+              src: token ? token.logo : null
+            };
+          else return null;
         })
+        .filter(t => t !== null)
+        .filter(t => t.balance > 0 && t.title !== self.form.outputCurrency)
         .sort((a, b) => b.priceInUsd - a.priceInUsd);
-
-      // let options = this.getAvailableTokenList
-      //   .filter(token => {
-      //     let currentBalance = self.getBalance[token.symbol];
-      //     console.log(token.symbol, currentBalance);
-      //     if (currentBalance && currentBalance > 0) return true;
-      //     else return false;
-      //   })
-      // .map(token => {
-      //   return {
-      //     ...token,
-      //     balance: self.getBalance[token.symbol]
-      //   };
-      // })
-      // .map(token => {
-      //   console.log(token);
-      //   return {
-      //     ...token
-      //   };
-      // })
-      // .sort((a, b) => b.balance - a.balance)
-      // .map(token => {
-      //   return {
-      //     title: token.symbol,
-      //     src: token.logo
-      //   };
-      // });
-      // console.log(list);
-      // list.unshift({ title: "ETH", src: null });
+      list.unshift({ title: "ETH", src: null });
       return list;
     },
-    availableInputTokens() {
-      let self = this;
-      let outputCurrency = this.form.outputCurrency;
-      if (this.form.outputCurrency === null) return this.availableTokens;
-      else
-        return this.availableTokens.filter(
-          token => token.value !== outputCurrency
-        );
-    },
     availableOutputTokens() {
+      let self = this;
       let inputCurrency = this.form.inputCurrency;
-      if (this.form.inputCurrency === null) return this.availableTokens;
-      else
-        return this.availableTokens.filter(
-          token => token.value !== inputCurrency
-        );
+      let tokenList = this.getAvailableTokenList
+        .map(token => {
+          let summary = self.getSummary.find(t => t.token_id === token.id);
+          return {
+            ...token,
+            liquidity: summary ? summary.liquidity : 0
+          };
+        })
+        .filter(token => token.liquidity > 0)
+        .map(token => {
+          return {
+            title: token.symbol,
+            src: token.logo
+          };
+        });
+      tokenList.unshift({ title: "ETH", src: null });
+      if (this.form.inputCurrency === null) return tokenList;
+      else return tokenList.filter(token => token.title !== inputCurrency);
     },
     swapType() {
       if (
@@ -540,6 +526,32 @@ export default {
     },
     validateTargetAddress() {
       return isValidAddress(this.form.targetAddress);
+    },
+    validateInputLiquidity() {
+      if (this.form.inputCurrency === "ETH") return true;
+      if (this.form.inputCurrency === null) return true;
+      let token = this.getAvailableTokenList.find(
+        t => t.symbol === this.form.inputCurrency
+      );
+      if (!token) return false;
+      let summary = this.getSummary.find(s => s.token_id === token.id);
+      if (!summary) return false;
+      console.log(`${this.form.inputCurrency} liquidity: ${summary.liquidity}`);
+      return true;
+    },
+    validateOutputLiquidity() {
+      if (this.form.outputCurrency === "ETH") return true;
+      if (this.form.outputCurrency === null) return true;
+      let token = this.getAvailableTokenList.find(
+        t => t.symbol === this.form.outputCurrency
+      );
+      if (!token) return false;
+      let summary = this.getSummary.find(s => s.token_id === token.id);
+      if (!summary) return false;
+      console.log(
+        `${this.form.outputCurrency} liquidity: ${summary.liquidity}`
+      );
+      return true;
     }
   },
   updated: function() {
@@ -556,9 +568,10 @@ export default {
     }
   },
   errorCaptured: function(err, component, info) {
-    console.log(err, info);
+    console.log("Unexpected Error.");
   },
   mounted: async function() {
+    let tokenSymbols = this.getAvailableTokenList.map(t => t.symbol);
     this.form.outputCurrency = this.getActiveToken;
     this.form.inputCurrency = null;
     this.web3 = await getWeb3();
@@ -566,7 +579,7 @@ export default {
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       exchangeContracts[tokenSymbols[i]] = new this.web3.eth.Contract(
         exchangeABI,
-        exchangeAddresses[tokenSymbols[i]]
+        this.getAvailableExchangeAddresses[tokenSymbols[i]]
       );
     }
     tokenSymbols.forEach(async token => {
@@ -635,7 +648,9 @@ export default {
       this.$router.push("/tokendetail");
     },
     async useAllFunds() {
-      const contractAddress = exchangeAddresses[this.form.inputCurrency];
+      const contractAddress = this.getAvailableExchangeAddresses[
+        this.form.inputCurrency
+      ];
       let estimatedGas;
       if (this.form.inputCurrency === "ETH") {
         estimatedGas = await this.getEstimatedGas(this.form.outputCurrency);
@@ -710,7 +725,9 @@ export default {
       try {
         this.onAmountChange();
         if (this.form.inputCurrency === "ETH") {
-          const contractAddress = exchangeAddresses[this.form.outputCurrency];
+          const contractAddress = this.getAvailableExchangeAddresses[
+            this.form.outputCurrency
+          ];
           let estimatedGas = await this.getEstimatedGas(contractAddress);
           if (estimatedGas * 1.6 > this.gasLimit)
             this.gasLimit = estimatedGas * 1.6;
@@ -721,7 +738,9 @@ export default {
             this.gasLimit = estimatedGas * 2.5;
           console.log(estimatedGas, this.gasPrice, this.gasLimit);
         } else {
-          const contractAddress = exchangeAddresses[this.form.inputCurrency];
+          const contractAddress = this.getAvailableExchangeAddresses[
+            this.form.inputCurrency
+          ];
           let estimatedGas = await this.getEstimatedGas(contractAddress);
           if (estimatedGas * 1.6 > this.gasLimit)
             this.gasLimit = estimatedGas * 1.6;
@@ -874,7 +893,9 @@ export default {
         this.form.inputCurrency,
         {
           web3: this.web3,
-          exchangeAddress: exchangeAddresses[this.form.inputCurrency],
+          exchangeAddress: this.getAvailableExchangeAddresses[
+            this.form.inputCurrency
+          ],
           privateKey: this.getAccount.privateKey
         }
       );
@@ -949,7 +970,9 @@ export default {
 
           if (type === "ETH_TO_TOKEN") {
             exchangeContract = exchangeContracts[outputCurrency];
-            const contractAddress = exchangeAddresses[outputCurrency];
+            const contractAddress = this.getAvailableExchangeAddresses[
+              outputCurrency
+            ];
             let minimumTokenBought = new BigNumber(outputValue - 1)
               .multipliedBy(10 ** 18)
               .toNumber(0);
@@ -1016,7 +1039,9 @@ export default {
                 .multipliedBy(10 ** 18)
                 .toNumber(0);
             }
-            const contractAddress = exchangeAddresses[inputCurrency];
+            const contractAddress = this.getAvailableExchangeAddresses[
+              inputCurrency
+            ];
             await this.updateGasLimitAndTxFee();
             const allowance = await this.getAllowance(this.form.inputCurrency);
 
@@ -1061,7 +1086,9 @@ export default {
             this.showSuccessToast(this.txHash);
           } else if (type === "TOKEN_TO_TOKEN") {
             exchangeContract = exchangeContracts[inputCurrency];
-            const contractAddress = exchangeAddresses[inputCurrency];
+            const contractAddress = this.getAvailableExchangeAddresses[
+              inputCurrency
+            ];
             const tokenASold = new BigNumber(
               inputValue * Math.pow(10, 18)
             ).toNumber(0);
@@ -1144,7 +1171,7 @@ export default {
     },
     async getAllowance(inputCurrency) {
       try {
-        let exchangeAddress = exchangeAddresses[inputCurrency];
+        let exchangeAddress = this.getAvailableExchangeAddresses[inputCurrency];
         let tokenAddress = tokenAddressess[inputCurrency];
         const accounts = await this.web3.eth.getAccounts();
         const contract = new this.web3.eth.Contract(ERC20_ABI, tokenAddress);
@@ -1185,7 +1212,9 @@ export default {
       };
       if (inputCurrency !== "ETH") {
         if (outputCurrency !== "ETH") {
-          let tokenExchangeAddressA = exchangeAddresses[inputCurrency];
+          let tokenExchangeAddressA = this.getAvailableExchangeAddresses[
+            inputCurrency
+          ];
           let tokenContractA = tokenContracts[inputCurrency];
           let ethReserveA = await web3.eth.getBalance(tokenExchangeAddressA);
           let tokenRserveA = await tokenContractA.methods
@@ -1195,7 +1224,9 @@ export default {
           tokenRserveA = new BigNumber(tokenRserveA);
           let absPriceA = tokenRserveA.dividedBy(ethReserveA);
 
-          let tokenExchangeAddressB = exchangeAddresses[outputCurrency];
+          let tokenExchangeAddressB = this.getAvailableExchangeAddresses[
+            outputCurrency
+          ];
           let tokenContractB = tokenContracts[outputCurrency];
           let ethReserveB = await web3.eth.getBalance(tokenExchangeAddressB);
           let tokenReserveB = await tokenContractB.methods
@@ -1213,7 +1244,9 @@ export default {
           this.slippage =
             (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
         } else if (outputCurrency === "ETH") {
-          let tokenExchangeAddress = exchangeAddresses[inputCurrency];
+          let tokenExchangeAddress = this.getAvailableExchangeAddresses[
+            inputCurrency
+          ];
           let tokenContract = tokenContracts[inputCurrency];
           let ethReserve = await web3.eth.getBalance(tokenExchangeAddress);
           let tokenRserve = await tokenContract.methods
@@ -1231,7 +1264,9 @@ export default {
         }
       } else if (outputCurrency !== "ETH") {
         if (inputCurrency !== "ETH") {
-          let tokenExchangeAddressA = exchangeAddresses[inputCurrency];
+          let tokenExchangeAddressA = this.getAvailableExchangeAddresses[
+            inputCurrency
+          ];
           let tokenContractA = tokenContracts[inputCurrency];
           let ethReserveA = await web3.eth.getBalance(tokenExchangeAddressA);
           let tokenRserveA = await tokenContractA.methods
@@ -1241,7 +1276,9 @@ export default {
           tokenRserveA = new BigNumber(tokenRserveA);
           let absPriceA = tokenRserveA.dividedBy(ethReserveA);
 
-          let tokenExchangeAddressB = exchangeAddresses[outputCurrency];
+          let tokenExchangeAddressB = this.getAvailableExchangeAddresses[
+            outputCurrency
+          ];
           let tokenContractB = tokenContracts[outputCurrency];
           let ethReserveB = await web3.eth.getBalance(tokenExchangeAddressB);
           let tokenReserveB = await tokenContractB.methods
@@ -1258,7 +1295,9 @@ export default {
           this.slippage =
             (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
         } else if (inputCurrency === "ETH") {
-          let tokenExchangeAddress = exchangeAddresses[outputCurrency];
+          let tokenExchangeAddress = this.getAvailableExchangeAddresses[
+            outputCurrency
+          ];
           let tokenContract = tokenContracts[outputCurrency];
           let ethReserve = await web3.eth.getBalance(tokenExchangeAddress);
           let tokenRserve = await tokenContract.methods
@@ -1385,7 +1424,7 @@ form label {
 }
 .buy-or-sell .selected,
 .buy-or-sell .selected:hover {
-  background: #2752e4;
+  background: #b342e6;
   color: #fff;
   font-weight: bold;
 }

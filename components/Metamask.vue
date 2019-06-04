@@ -16,7 +16,7 @@
             name="accept-checkbox"
           >I accept the terms and use to access my wallet</b-form-checkbox>-->
           <input type="checkbox" v-model="isAccepted">
-          <span for>I accept the terms and use to access my wallet</span>
+          <span for>To access my wallet, I accept the Terms</span>
         </b-form-group>
         <div class="submit-button-group">
           <b-button
