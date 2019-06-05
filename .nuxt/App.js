@@ -8,7 +8,7 @@ import _6f6c098b from '../layouts/default.vue'
 const layouts = { "_default": _6f6c098b }
 
 export default {
-  head: {"title":"UniswapDEX","meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Uniswapdex"},{"hid":"mobile-web-app-capable","name":"mobile-web-app-capable","content":"yes"},{"hid":"apple-mobile-web-app-title","name":"apple-mobile-web-app-title","content":"UniswapDEX"},{"hid":"author","name":"author","content":"thantsintoe"},{"hid":"theme-color","name":"theme-color","content":"#fff"},{"hid":"og:type","name":"og:type","property":"og:type","content":"website"},{"hid":"og:title","name":"og:title","property":"og:title","content":"UniswapDEX"},{"hid":"og:site_name","name":"og:site_name","property":"og:site_name","content":"UniswapDEX"},{"hid":"og:description","name":"og:description","property":"og:description","content":"Uniswapdex"}],"link":[{"rel":"icon","type":"image\u002Fx-icon"},{"rel":"manifest","href":"\u002F_nuxt\u002Fmanifest.6cffccaa.json"},{"rel":"shortcut icon","href":"\u002F_nuxt\u002Ficons\u002Ficon_64.ckY6Y9Iej77.png"},{"rel":"apple-touch-icon","href":"\u002F_nuxt\u002Ficons\u002Ficon_512.ckY6Y9Iej77.png","sizes":"512x512"}],"style":[],"script":[],"htmlAttrs":{"lang":"en"}},
+  head: {"title":"UniswapDEX","meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Uniswapdex"},{"hid":"mobile-web-app-capable","name":"mobile-web-app-capable","content":"yes"},{"hid":"apple-mobile-web-app-title","name":"apple-mobile-web-app-title","content":"UniswapDEX"},{"hid":"author","name":"author","content":"thantsintoe"},{"hid":"theme-color","name":"theme-color","content":"#fff"},{"hid":"og:type","name":"og:type","property":"og:type","content":"website"},{"hid":"og:title","name":"og:title","property":"og:title","content":"UniswapDEX"},{"hid":"og:site_name","name":"og:site_name","property":"og:site_name","content":"UniswapDEX"},{"hid":"og:description","name":"og:description","property":"og:description","content":"Uniswapdex"}],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"\u002Ffavicon.ico"},{"rel":"manifest","href":"\u002F_nuxt\u002Fmanifest.25b8e01b.json"},{"rel":"shortcut icon","href":"\u002F_nuxt\u002Ficons\u002Ficon_64.9k0eg1z0dU0.png"},{"rel":"apple-touch-icon","href":"\u002F_nuxt\u002Ficons\u002Ficon_512.9k0eg1z0dU0.png","sizes":"512x512"}],"style":[],"script":[],"htmlAttrs":{"lang":"en"}},
 
   render(h, props) {
     const loadingEl = h('NuxtLoading', { ref: 'loading' })
@@ -101,8 +101,6 @@ export default {
     },
 
     setLayout(layout) {
-      if(layout && typeof layout !== 'string') throw new Error('[nuxt] Avoid using non-string value as layout property.')
-
       if (!layout || !layouts['_' + layout]) {
         layout = 'default'
       }

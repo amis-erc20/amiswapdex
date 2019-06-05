@@ -323,6 +323,7 @@ export default {
     let shouldShould = this.show.shouldShow;
     let timestamp = this.show.timestamp;
     if (shouldShould) this.showModal("token_info_modal");
+    console.log("mounted");
   },
   beforeUpdate: function() {
     let shouldShould = this.show.shouldShow;

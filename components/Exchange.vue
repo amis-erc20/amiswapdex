@@ -21,7 +21,6 @@
         is not listed on Uniswap Exchange or liquidiy is less than 1 ETH for
         <strong>{{form.query}}</strong> exchange contract.
       </b-alert>
-      <!-- <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button> -->
     </div>
     <div v-if="tokenList" class="exchangelist-section">
       <div class="show-low-liquidity">
@@ -299,11 +298,7 @@ export default {
     };
   },
   events: {
-    "child-msg": function(msg) {
-      // `this` in event callbacks are automatically bound
-      // to the instance that registered it
-      alert(msg);
-    }
+    "child-msg": function(msg) {}
   },
   computed: {
     ...mapGetters({
@@ -602,16 +597,8 @@ export default {
       this.errorMessage = "";
     },
     onSelectToken(name) {
-      // this.updateAuthRedirectUrl({
-      //   url: "/tokendetail",
-      //   token: name,
-      //   tokenSubTab: this.getAuthRedirectUrl.tokenSubTab || "info"
-      // });
-      // this.updateActiveToken(name);
-      // this.redirect("/tokendetail");
-      // this.updateActiveTab("exchange");
-      this.updateActiveToken(name);
       this.showTokenInfoModal = true;
+      this.updateActiveToken(name);
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;

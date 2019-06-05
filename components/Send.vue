@@ -84,7 +84,7 @@
         </b-form-group>
         <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
           <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit"/>
+          <b-form-input type="text" required v-model="gasLimit" :state="validateGasLimit"/>
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
@@ -178,6 +178,11 @@ export default {
     }),
     validateTargetAddress() {
       return isValidAddress(this.form.targetAddress);
+    },
+    validateGasLimit() {
+      var reg = /^\d+$/;
+      if (!reg.test(this.gasLimit)) return false;
+      return !Number.isNaN(parseInt(this.gasLimit));
     },
     validateAmount() {
       var reg = /^[+-]?\d+(\.\d+)?$/;
@@ -356,7 +361,8 @@ export default {
 
           this.updateActiveToken(this.form.currency);
           this.onReset();
-          this.showModal("success_modal_ref");
+          // this.showModal("success_modal_ref");
+          this.showSuccessToast(this.txHash);
         } catch (e) {
           this.loading = false;
           alert(`Transaction is not submitted.`);

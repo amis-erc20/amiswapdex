@@ -3,7 +3,7 @@
     <div id="uniswap-liquidity-section">
       <div v-if="!shouldRender" class="no-exchange-yet">
         <p>
-          <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
+          <strong>{{ activeToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
         </p>
       </div>
       <div v-if="shouldRender">
@@ -58,10 +58,10 @@
 
         <b-form-group id="exampleInputGroup1" class="input-form-group">
           <div class="amount-label-container">
-            <label>Deposit {{getActiveToken}}</label>
+            <label>Deposit {{activeToken}}</label>
             <div>
-              <p class="current-balance">{{getBalance[getActiveToken]}} {{getActiveToken}}</p>
-              <label class="use-all-funds" @click="useAllFunds(getActiveToken)">Use All Funds</label>
+              <p class="current-balance">{{getBalance[activeToken]}} {{activeToken}}</p>
+              <label class="use-all-funds" @click="useAllFunds(activeToken)">Use All Funds</label>
             </div>
           </div>
           <div class="input-field-container">
@@ -109,7 +109,7 @@
         </b-form-group>
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit"/>
+          <b-form-input type="text" required v-model="gasLimit" :state="validateGasLimit"/>
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
@@ -162,7 +162,7 @@
           <p>
             <span id="withdrawn-eth">0.00</span> ETH +
             <span id="withdrawn-token">0.00</span>
-            {{getActiveToken}}
+            {{activeToken}}
           </p>
         </b-form-group>
 
@@ -240,7 +240,7 @@
         <b-form @submit="onUnlock" v-if="approvedStatus === false">
           <b-form-group id="exampleInputGroup1">
             <p>Please unlock your token before using it to add liquidity.</p>
-            <label>Amount to Unlock ({{getActiveToken}})</label>
+            <label>Amount to Unlock ({{activeToken}})</label>
             <b-form-input type="text" v-model="form.approvedAmount"/>
           </b-form-group>
           <b-button type="submit" variant="primary">Approve</b-button>
@@ -343,6 +343,7 @@ export default {
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
       getBalance: "account/getBalance",
+      getPrice: "account/getPrice",
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
       getAvailableTokenList: "account/getAvailableTokenList",
@@ -350,8 +351,8 @@ export default {
       getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses"
     }),
     shouldRender: function() {
-      if (this.getActiveToken === "ETH") return false;
-      if (hasTokenUniswap(this.getActiveToken)) return true;
+      if (this.activeToken === "ETH") return false;
+      if (hasTokenUniswap(this.activeToken)) return true;
       else return false;
     },
     swapType() {
@@ -366,6 +367,14 @@ export default {
       )
         return "ETH_TO_TOKEN";
       else return "TOKEN_TO_TOKEN";
+    },
+    validateGasLimit() {
+      var reg = /^\d+$/;
+      if (!reg.test(this.gasLimit)) return false;
+      return !Number.isNaN(parseInt(this.gasLimit));
+    },
+    activeToken() {
+      return this.getActiveToken;
     },
     validateinputValue() {
       let amount = parseFloat(this.form.inputValue * 1);
@@ -418,7 +427,7 @@ export default {
     validateTokenBalance() {
       if (!this.validateOutputAmount) return false;
       let tokenAmount = parseFloat(this.form.outputValue * 1);
-      let tokenBalance = parseFloat(this.getBalance[this.form.outputCurrency]);
+      let tokenBalance = parseFloat(this.getBalance[this.activeToken]);
       if (tokenAmount > tokenBalance) {
         this.outputErrorMessage = "Not enough balance";
         return false;
@@ -456,10 +465,10 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    let tokenSymbols = this.getAvailableTokenList.map(t => t.symbol);
+    let tokenSymbols = [this.activeToken];
     this.form.inputCurrency = "ETH";
     this.liquidity = "add";
-    this.form.outputCurrency = this.getActiveToken;
+    this.form.outputCurrency = this.activeToken;
     if (this.getAccount.type === "metamask") {
       this.web3 = await getWeb3Metamask();
     } else {
@@ -523,7 +532,8 @@ export default {
     },
     async useAllFunds(tokenName) {
       let estimatedGas = await this.getEstimatedGas(factoryAddress);
-      if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
+      if (estimatedGas * 2 > this.gasLimit)
+        this.gasLimit = parseInt(estimatedGas * 2);
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (tokenName === "ETH") {
@@ -571,12 +581,12 @@ export default {
       ];
       let estimatedGas = await this.getEstimatedGas(contractAddress);
       if (estimatedGas * 1.6 > this.gasLimit)
-        this.gasLimit = estimatedGas * 1.6;
+        this.gasLimit = parseInt(estimatedGas * 1.6);
       if (
         this.swapType === "TOKEN_TO_TOKEN" &&
         this.gasLimit < estimatedGas * 2.5
       )
-        this.gasLimit = estimatedGas * 2.5;
+        this.gasLimit = parseInt(estimatedGas * 2.5);
       console.log(estimatedGas, this.gasPrice, this.gasLimit);
     },
     async onAmountChange() {
@@ -586,11 +596,15 @@ export default {
           // this.form.outputValue = "";
           return;
         }
-        const absPrice = await getAbsPrice(
-          this.form.inputCurrency,
-          this.form.outputCurrency,
-          this.web3
-        );
+        let eth_usd = this.getPrice["ETH"];
+        let token_usd = this.getPrice[this.activeToken];
+        let absPrice = new BigNumber(eth_usd / token_usd);
+        // const absPrice = await getAbsPrice(
+        //   this.form.inputCurrency,
+        //   this.form.outputCurrency,
+        //   this.web3
+        // );
+        console.log(`Abs Price: ${absPrice.toFixed(6)}`);
         if (absPrice.toFixed(0) == "NaN") return;
         if (!Number.isNaN(absPrice.toNumber()))
           this.form.outputValue = absPrice
@@ -601,11 +615,15 @@ export default {
           // this.form.inputValue = "";
           return;
         }
-        const absPrice = await getAbsPrice(
-          this.form.inputCurrency,
-          this.form.outputCurrency,
-          this.web3
-        );
+        let eth_usd = this.getPrice["ETH"];
+        let token_usd = this.getPrice[this.activeToken];
+        let absPrice = new BigNumber(eth_usd / token_usd);
+        // const absPrice = await getAbsPrice(
+        //   this.form.inputCurrency,
+        //   this.form.outputCurrency,
+        //   this.web3
+        // );
+        console.log(`Abs Price: ${absPrice.toFixed(6)}`);
         if (absPrice.toFixed(0) == "NaN") return;
         if (!Number.isNaN(absPrice.toNumber()))
           this.form.inputValue = new BigNumber(this.form.outputValue)
@@ -824,7 +842,7 @@ export default {
       let inputValue = this.form.inputValue;
       let inputCurrency = this.form.inputCurrency;
       let outputValue = this.form.outputValue;
-      let outputCurrency = this.getActiveToken;
+      let outputCurrency = this.activeToken;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
 
@@ -934,7 +952,7 @@ export default {
       let inputValue = this.form.inputValue;
       let inputCurrency = this.form.inputCurrency;
       let outputValue = this.form.outputValue;
-      let outputCurrency = this.getActiveToken;
+      let outputCurrency = this.activeToken;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
 
@@ -1038,6 +1056,7 @@ export default {
       let web3 = this.web3;
       let outputCurrency = this.form.outputCurrency;
       let inputValue = this.form.inputValue;
+      console.log(outputCurrency);
       let exchangeContract = exchangeContracts[outputCurrency];
       let liquidityBalance = await exchangeContract.methods
         .balanceOf(this.getAccount.address)

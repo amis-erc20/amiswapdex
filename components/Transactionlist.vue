@@ -9,6 +9,12 @@
           <transaction :transaction="transaction"/>
         </b-list-group-item>
       </b-list-group>
+      <b-button
+        variant="outline-primary"
+        id="add-token-button"
+        @click="loadOlderTxs"
+        v-if="showShowLoadMoreBtn"
+      >Load Older Transactions</b-button>
     </b-card>
     <div
       class="no-transaction-container"
@@ -27,8 +33,14 @@
 <script>
 import Transaction from "~/components/Transaction.vue";
 import { mapGetters, mapActions } from "vuex";
+import * as R from "ramda";
 export default {
   components: { Transaction },
+  data: function() {
+    return {
+      showLimit: 10
+    };
+  },
   computed: {
     ...mapGetters({
       getAccount: "account/getAccount",
@@ -38,25 +50,43 @@ export default {
       getBalance: "account/getBalance"
     }),
     getTxList: function() {
-      if (this.getActiveToken === "ETH") return this.getTransactionList;
+      if (this.getActiveToken === "ETH")
+        return R.take(this.showLimit, this.getTransactionList);
       else
-        return this.getTokenTransactionList.filter(
+        return R.take(
+          this.showLimit,
+          this.getTokenTransactionList.filter(
+            tx => tx.tokenSymbol === this.getActiveToken
+          )
+        );
+    },
+    showShowLoadMoreBtn() {
+      if (this.getActiveToken === "ETH") {
+        let ethTxList = this.getTransactionList;
+        if (ethTxList.length > this.showLimit) return true;
+        else false;
+      } else {
+        let tokenTxList = this.getTokenTransactionList.filter(
           tx => tx.tokenSymbol === this.getActiveToken
         );
+        if (tokenTxList.length > this.showLimit) return true;
+        else false;
+      }
     }
   },
   methods: {
     ...mapActions({
       updateTransactionList: "transaction/updateTransactionList"
-    })
+    }),
+    loadOlderTxs() {
+      this.showLimit += 10;
+    }
   },
   mounted: async function() {
     console.log("component mounted");
   }
 };
 </script>
-
-
 <style>
 .transactionlist-section {
   box-shadow: 0px 4px 3px #eee;

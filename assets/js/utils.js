@@ -103,6 +103,7 @@ export const getWeb3Metamask = function () {
       }
       // web3.currentProvider.guardaWeb3
       let web3 = new Web3(Web3.givenProvider)
+      web3.currentProvider.setMaxListeners(300) // or more :)
       resolve(web3)
     } catch (e) {
       console.log(e)
@@ -243,7 +244,7 @@ export const getTokenBalance = async function (address, currency, web3, ownedTok
 export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) {
   if (!inputCurrency || !outputCurrency) return
   if (!tokenContracts[outputCurrency]) {
-    console.log(`Cannot find token contrat for ${currency}. Creating now...`)
+    console.log(`Cannot find token contract for ${currency}. Creating now...`)
     await initContracts(web3)
   }
   try {
@@ -258,7 +259,7 @@ export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) 
     let absPrice = tokenRserve.dividedBy(ethReserve)
     return absPrice
   } catch (e) {
-    // console.log(`ERROR - getAbsPrice`)
+    console.log(`ERROR - getAbsPrice`)
     // console.log(e)
     return 0
   }

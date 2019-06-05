@@ -16,7 +16,6 @@ const _029bae4a = () => interopDefault(import('../pages/sendtoken.vue' /* webpac
 const _12ba37ce = () => interopDefault(import('../pages/signin.vue' /* webpackChunkName: "pages/signin" */))
 const _0b393a8f = () => interopDefault(import('../pages/signup.vue' /* webpackChunkName: "pages/signup" */))
 const _70ed889f = () => interopDefault(import('../pages/swaptoken.vue' /* webpackChunkName: "pages/swaptoken" */))
-const _f10bbcba = () => interopDefault(import('../pages/tokendetail.vue' /* webpackChunkName: "pages/tokendetail" */))
 const _2577a971 = () => interopDefault(import('../pages/tos.vue' /* webpackChunkName: "pages/tos" */))
 const _0d66c5fb = () => interopDefault(import('../pages/welcome.vue' /* webpackChunkName: "pages/welcome" */))
 const _23ba67ab = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
@@ -151,10 +150,6 @@ export function createRouter() {
       path: "/swaptoken",
       component: _70ed889f,
       name: "swaptoken"
-    }, {
-      path: "/tokendetail",
-      component: _f10bbcba,
-      name: "tokendetail"
     }, {
       path: "/tos",
       component: _2577a971,

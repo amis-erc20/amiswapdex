@@ -209,7 +209,7 @@
         </b-form-group>
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit"/>
+          <b-form-input type="text" required v-model="gasLimit" :state="validateGasLimit"/>
         </b-form-group>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
@@ -469,6 +469,11 @@ export default {
         return "ETH_TO_TOKEN";
       else return "TOKEN_TO_TOKEN";
     },
+    validateGasLimit() {
+      var reg = /^\d+$/;
+      if (!reg.test(this.gasLimit)) return false;
+      return !Number.isNaN(parseInt(this.gasLimit));
+    },
     validateinputValue() {
       let amount = parseFloat(this.form.inputValue * 1);
       const isNaN = Number.isNaN(amount);
@@ -660,7 +665,8 @@ export default {
       } else {
         estimatedGas = await this.getEstimatedGas(contractAddress);
       }
-      if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
+      if (estimatedGas * 2 > this.gasLimit)
+        this.gasLimit = parseInt(estimatedGas * 2);
       this.txFee =
         (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (this.form.inputCurrency === "ETH") {
@@ -733,12 +739,12 @@ export default {
           ];
           let estimatedGas = await this.getEstimatedGas(contractAddress);
           if (estimatedGas * 1.6 > this.gasLimit)
-            this.gasLimit = estimatedGas * 1.6;
+            this.gasLimit = parseInt(estimatedGas * 1.6);
           if (
             this.swapType === "TOKEN_TO_TOKEN" &&
             this.gasLimit < estimatedGas * 2.5
           )
-            this.gasLimit = estimatedGas * 2.5;
+            this.gasLimit = parseInt(estimatedGas * 2.5);
           console.log(estimatedGas, this.gasPrice, this.gasLimit);
         } else {
           const contractAddress = this.getAvailableExchangeAddresses[
@@ -746,12 +752,12 @@ export default {
           ];
           let estimatedGas = await this.getEstimatedGas(contractAddress);
           if (estimatedGas * 1.6 > this.gasLimit)
-            this.gasLimit = estimatedGas * 1.6;
+            this.gasLimit = parseInt(estimatedGas * 1.6);
           if (
             this.swapType === "TOKEN_TO_TOKEN" &&
             this.gasLimit < estimatedGas * 2.5
           )
-            this.gasLimit = estimatedGas * 2.5;
+            this.gasLimit = parseInt(estimatedGas * 2.5);
           console.log(estimatedGas, this.gasPrice, this.gasLimit);
         }
       } catch (e) {
@@ -1427,7 +1433,7 @@ form label {
 }
 .buy-or-sell .selected,
 .buy-or-sell .selected:hover {
-  background: #b342e6;
+  background: #773794;
   color: #fff;
   font-weight: bold;
 }
