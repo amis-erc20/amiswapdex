@@ -267,7 +267,6 @@ export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) 
 
 export const estimateGas = async function (transaction, web3) {
   try {
-    console.log(transaction)
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
       // to: transaction.to,
@@ -300,6 +299,7 @@ export const estimateGasForSwap = async function (transaction, web3, exchangeAdd
           resolve(gasAmount)
         })
         .catch(function (error) {
+          console.log(error)
           resolve(0)
         })
     })

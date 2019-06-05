@@ -165,7 +165,12 @@
         </div>
 
         <b-form-group v-if="form.inputCurrency !== null" class="advanced-toggle-group">
-          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
+          <b-form-checkbox
+            switch
+            v-model="showAdvanced"
+            name="check-button"
+            class="show-advanced-label"
+          >Show Advanced Settings</b-form-checkbox>
         </b-form-group>
 
         <b-form-group
@@ -207,10 +212,19 @@
           />
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
-        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit" :state="validateGasLimit"/>
-        </b-form-group>
+        <label
+          for="range-1"
+          v-if="form.inputCurrency !== null && showAdvanced"
+          class="show-advanced-label"
+        >Gas Limit: {{ gasLimit }} gas</label>
+        <div id="address-qr-btn-container" v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="input-field-container address-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          </div>
+          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
+            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
+          </b-button>
+        </div>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
@@ -353,8 +367,9 @@ export default {
       },
       loading: false,
       showAdvanced: false,
-      gasPrice: 0,
-      gasLimit: 51000,
+      gasPrice: 6,
+      gasLimit: 80000,
+      defaultGasLimit: 80000,
       txFee: 0,
       txHash: "",
       approvedStatus: "",
@@ -656,19 +671,6 @@ export default {
       this.$router.push("/tokendetail");
     },
     async useAllFunds() {
-      const contractAddress = this.getAvailableExchangeAddresses[
-        this.form.inputCurrency
-      ];
-      let estimatedGas;
-      if (this.form.inputCurrency === "ETH") {
-        estimatedGas = await this.getEstimatedGas(this.form.outputCurrency);
-      } else {
-        estimatedGas = await this.getEstimatedGas(contractAddress);
-      }
-      if (estimatedGas * 2 > this.gasLimit)
-        this.gasLimit = parseInt(estimatedGas * 2);
-      this.txFee =
-        (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (this.form.inputCurrency === "ETH") {
         this.form.inputValue = parseFloat(this.getBalance["ETH"]) - this.txFee;
       } else {
@@ -679,18 +681,25 @@ export default {
       this.lastEditedField = "input";
       this.onAmountChange();
     },
+    async resetGasLimit() {
+      this.gasLimit = this.defaultGasLimit;
+    },
     async getEstimatedGas(toAddress) {
-      let value = this.form.inputValue || 1;
-      let estimatedGas = await estimateGasForSwap(
-        {
-          from: this.getAccount.address,
-          to: toAddress,
-          amount: new BigNumber(value * Math.pow(10, 18)).toNumber()
-        },
-        this.web3,
-        toAddress
-      );
-      return estimatedGas;
+      try {
+        let value = this.form.inputValue || 1;
+        let estimatedGas = await estimateGasForSwap(
+          {
+            from: this.getAccount.address,
+            to: toAddress,
+            amount: new BigNumber(value * Math.pow(10, 18)).toNumber()
+          },
+          this.web3,
+          toAddress
+        );
+        return estimatedGas;
+      } catch (e) {
+        console.warn("Unable to estimate gas");
+      }
     },
     async updateGasLimitAndTxFee() {
       this.txFee =
@@ -760,6 +769,7 @@ export default {
             this.gasLimit = parseInt(estimatedGas * 2.5);
           console.log(estimatedGas, this.gasPrice, this.gasLimit);
         }
+        this.defaultGasLimit = this.gasLimit;
       } catch (e) {
         console.log("some error");
         console.log(e);

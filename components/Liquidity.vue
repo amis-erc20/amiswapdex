@@ -93,7 +93,12 @@
         </div>
 
         <b-form-group v-if="form.inputCurrency !== null">
-          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
+          <b-form-checkbox
+            switch
+            v-model="showAdvanced"
+            name="check-button"
+            class="show-advanced-label"
+          >Show Advanced Settings</b-form-checkbox>
         </b-form-group>
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
@@ -107,10 +112,20 @@
           />
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
-        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit" :state="validateGasLimit"/>
-        </b-form-group>
+
+        <label
+          for="range-1"
+          v-if="form.inputCurrency !== null && showAdvanced"
+        >Gas Limit: {{ gasLimit }} gas</label>
+        <div id="address-qr-btn-container" v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="input-field-container address-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          </div>
+          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
+            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
+          </b-button>
+        </div>
+
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button type="submit" variant="primary" :disabled="shouldDisableAddButton">Add Liquidity</b-button>
@@ -191,10 +206,20 @@
           />
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
-        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit"/>
-        </b-form-group>
+
+        <label
+          for="range-1"
+          v-if="form.inputCurrency !== null && showAdvanced"
+        >Gas Limit: {{ gasLimit }} gas</label>
+        <div id="address-qr-btn-container" v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="input-field-container address-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          </div>
+          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
+            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
+          </b-button>
+        </div>
+
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
@@ -492,14 +517,19 @@ export default {
       );
     });
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
-    this.gasPrice =
-      parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+    if (estimatedGasPriceFromNetwork > 0) {
+      this.gasPrice =
+        parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+    }
     await this.updateGasLimitAndTxFee();
   },
   methods: {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    async resetGasLimit() {
+      this.gasLimit = defaultGasLimit;
+    },
     showScanner() {
       this.scanning = true;
       this.camera = defaultCamera;
@@ -1056,7 +1086,6 @@ export default {
       let web3 = this.web3;
       let outputCurrency = this.form.outputCurrency;
       let inputValue = this.form.inputValue;
-      console.log(outputCurrency);
       let exchangeContract = exchangeContracts[outputCurrency];
       let liquidityBalance = await exchangeContract.methods
         .balanceOf(this.getAccount.address)

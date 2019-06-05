@@ -53,7 +53,6 @@
               required
               :placeholder="`Enter amount in ${form.currency}`"
               :state="validateAmount"
-              v-on:change="updateGasLimitAndTxFee"
             />
             <button type="button" id="erase" @click="form.amount = ''"></button>
           </div>
@@ -68,7 +67,12 @@
           v-if="form.currency !== null && validateTargetAddress"
           class="advanced-toggle-group"
         >
-          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
+          <b-form-checkbox
+            switch
+            v-model="showAdvanced"
+            name="check-button"
+            class="show-advanced-label"
+          >Show Advanced Settings</b-form-checkbox>
         </b-form-group>
         <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
           <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
@@ -82,10 +86,23 @@
           />
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
-        <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
-          <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
-          <b-form-input type="text" required v-model="gasLimit" :state="validateGasLimit"/>
-        </b-form-group>
+
+        <label
+          for="range-1"
+          v-if="form.currency !== null && validateTargetAddress && showAdvanced"
+        >Gas Limit: {{ gasLimit }} gas</label>
+        <div
+          id="address-qr-btn-container"
+          v-if="form.currency !== null && validateTargetAddress && showAdvanced"
+        >
+          <div class="input-field-container address-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          </div>
+          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
+            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
+          </b-button>
+        </div>
+
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
@@ -156,8 +173,9 @@ export default {
       ],
       loading: false,
       showAdvanced: false,
-      gasPrice: 0,
-      gasLimit: 21000,
+      gasPrice: 6,
+      gasLimit: 42000,
+      defaultGasLimit: 42000,
       txFee: 0,
       txHash: "",
       web3: null,
@@ -213,8 +231,13 @@ export default {
     this.form.currency = this.getActiveToken;
     this.web3 = await getWeb3();
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
-    this.gasPrice =
-      parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+    if (estimatedGasPriceFromNetwork > 0) {
+      this.gasPrice =
+        parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+    } else {
+      this.gasPrice = 6;
+    }
+    this.updateGasLimitAndTxFee();
   },
   updated: async function() {
     this.form.currency = this.getActiveToken;
@@ -223,6 +246,9 @@ export default {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    async resetGasLimit() {
+      this.gasLimit = this.defaultGasLimit;
+    },
     showScanner() {
       this.scanning = true;
       this.camera = defaultCamera;
@@ -242,7 +268,7 @@ export default {
       let estimatedGas = await estimateGas(
         {
           from: this.getAccount.address,
-          to: this.form.targetAddress,
+          to: this.form.targetAddress || this.getAccount.address,
           amount: parseFloat(this.form.amount || 1) * Math.pow(10, 18)
         },
         this.web3
@@ -385,17 +411,6 @@ export default {
     },
     async useAllFunds() {
       try {
-        let estimatedGas = await estimateGas(
-          {
-            from: this.getAccount.address,
-            to: this.form.targetAddress,
-            amount: this.getBalance[this.getActiveToken]
-          },
-          this.web3
-        );
-        if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
-        this.txFee =
-          (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
         if (this.form.currency === "ETH") {
           this.form.amount = parseFloat(this.getBalance["ETH"]) - this.txFee;
         } else if (this.form.currency !== "ETH") {
@@ -566,6 +581,9 @@ export default {
 }
 .advanced-toggle-group {
   height: auto !important;
+  padding-top: 5px;
+}
+.show-advanced-label label {
   padding-top: 5px;
 }
 </style>

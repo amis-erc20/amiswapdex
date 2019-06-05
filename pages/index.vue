@@ -86,7 +86,8 @@ import {
   faQrcode,
   faPlus,
   faUpload,
-  faChartLine
+  faChartLine,
+  faUndo
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import "bootstrap/dist/css/bootstrap.css";
@@ -139,6 +140,7 @@ library.add(faQrcode);
 library.add(faPlus);
 library.add(faUpload);
 library.add(faChartLine);
+library.add(faUndo);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("v-select", vSelect);
 Vue.component("no-connection", NoConnection);
