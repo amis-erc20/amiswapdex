@@ -101,7 +101,12 @@
           >Show Advanced Settings</b-form-checkbox>
         </b-form-group>
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+          <div class="amount-label-container">
+            <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+            <div>
+              <label class="reset-gas-price" @click="resetGasPrice">Reset Gas Price</label>
+            </div>
+          </div>
           <b-form-input
             type="range"
             id="range-1"
@@ -113,18 +118,15 @@
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
 
-        <label
-          for="range-1"
-          v-if="form.inputCurrency !== null && showAdvanced"
-        >Gas Limit: {{ gasLimit }} gas</label>
-        <div id="address-qr-btn-container" v-if="form.inputCurrency !== null && showAdvanced">
-          <div class="input-field-container address-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="amount-label-container" v-if="form.inputCurrency !== null && showAdvanced">
+            <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
+            <div>
+              <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
+            </div>
           </div>
-          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
-            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
-          </b-button>
-        </div>
+          <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+        </b-form-group>
 
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
@@ -349,7 +351,8 @@ export default {
       },
       loading: false,
       showAdvanced: false,
-      gasPrice: 0,
+      gasPrice: 6,
+      defaultGasPrice: 6,
       gasLimit: defaultGasLimit,
       txFee: 0,
       txHash: "",
@@ -474,7 +477,8 @@ export default {
         !this.validateinputValue ||
         !this.validateOutputAmount ||
         !this.validateETHBalance ||
-        !this.validateSlippage
+        !this.validateSlippage ||
+        !this.validateGasLimit
       );
     },
     shouldDisableRemoveButton() {
@@ -521,6 +525,7 @@ export default {
       this.gasPrice =
         parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
     }
+    this.defaultGasPrice = this.gasPrice;
     await this.updateGasLimitAndTxFee();
   },
   methods: {
@@ -529,6 +534,11 @@ export default {
     }),
     async resetGasLimit() {
       this.gasLimit = defaultGasLimit;
+      this.updateGasLimitAndTxFee();
+    },
+    async resetGasPrice() {
+      this.gasPrice = this.defaultGasPrice;
+      this.updateGasLimitAndTxFee();
     },
     showScanner() {
       this.scanning = true;

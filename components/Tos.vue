@@ -32,9 +32,9 @@ export default {
 }
 #tos-description {
   position: relative;
-  top: 64px;
+  /* top: 64px; */
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 64px);
   flex-direction: column;
   justify-content: flex-start;
   width: 90%;

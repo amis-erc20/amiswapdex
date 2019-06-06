@@ -39,6 +39,37 @@ export default {
     })
   },
   methods: {
+    fallbackCopyTextToClipboard(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand("copy");
+        var msg = successful ? "successful" : "unsuccessful";
+        console.log("Fallback: Copying text command was " + msg);
+      } catch (err) {
+        console.error("Fallback: Oops, unable to copy", err);
+      }
+
+      document.body.removeChild(textArea);
+    },
+    copyTextToClipboard(text) {
+      if (!navigator.clipboard) {
+        this.fallbackCopyTextToClipboard(text);
+        return;
+      }
+      navigator.clipboard.writeText(text).then(
+        function() {
+          console.log("Async: Copying to clipboard was successful!");
+        },
+        function(err) {
+          console.error("Async: Could not copy text: ", err);
+        }
+      );
+    },
     copyToClipboard(str) {
       const el = document.createElement("textarea");
       el.value = str;
@@ -60,15 +91,13 @@ export default {
       }
     },
     onCopy() {
-      console.log("copying..now");
       // if (this.iOSSafari()) {
       //   this.iosCopyClipboard()
       //   this.$refs["copied-modal"].show();
       //   return
       // }
-      // this.copyToClipboard(this.getAccount.address.toLowerCase());
-      this.iosCopyClipboard(this.getAccount.address.toLowerCase());
-      // this.$refs["copied-modal"].show();
+      this.copyTextToClipboard(this.getAccount.address.toLowerCase());
+      // this.iosCopyClipboard(this.getAccount.address.toLowerCase());
       this.$toasted.show("Address is copied to clipboard.", {
         theme: "outline",
         position: "bottom-center",

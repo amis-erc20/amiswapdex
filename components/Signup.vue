@@ -54,11 +54,11 @@
             :disabled="!validatePassword() || loading"
           >Create Wallet</b-button>
         </div>
-        <p>
+        <!-- <p>
           Already have an account ? Please
           <nuxt-link to="/signin">sign in</nuxt-link>. If you forget your password,
           <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
-        </p>
+        </p>-->
       </b-form>
       <!-- Install Modal -->
       <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">

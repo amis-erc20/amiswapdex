@@ -83,7 +83,7 @@ export default {
     }
   },
   mounted: async function() {
-    console.log("component mounted");
+    // console.log("component mounted");
   }
 };
 </script>

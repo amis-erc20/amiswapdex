@@ -16,10 +16,43 @@
         <b-form-group>
           <b-form-input type="text" v-model="form.privateKey" placeholder="Private Key" required/>
         </b-form-group>
+
+        <b-form-group>
+          <input type="checkbox" v-model="isAccepted">
+          <span
+            id="metamask-agree-text"
+            @click="isAccepted = !isAccepted"
+          >To access my wallet, I accept the</span>
+          <span @click="showTos">
+            <em id="link-to-tos">Terms</em>
+          </span>
+        </b-form-group>
         <div class="submit-button-group">
-          <b-button type="submit" variant="primary" id="signin-btn">Access Wallet</b-button>
+          <b-button
+            type="submit"
+            variant="primary"
+            id="signin-btn"
+            :disabled="shouldDisableButton"
+          >Access Wallet</b-button>
         </div>
       </b-form>
+
+      <!-- TOS Modal -->
+      <b-modal ref="about_tos_modal" id="about_tos_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="lg"
+            color="#fff"
+            @click="closeTos"
+          />
+          <div id="main-title-no-connection-container">
+            <h4>Term of Services</h4>
+          </div>
+        </template>
+        <Tos/>
+      </b-modal>
     </div>
   </div>
 </template>
@@ -29,6 +62,7 @@ import { mapGetters, mapActions } from "vuex";
 import bcrypt from "bcryptjs";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import Nav from "~/components/Nav.vue";
+import Tos from "~/components/Tos.vue";
 import {
   getWeb3,
   isIos,
@@ -46,7 +80,8 @@ import { faExpand } from "@fortawesome/free-solid-svg-icons";
 export default {
   components: {
     ScaleLoader,
-    Nav
+    Nav,
+    Tos
   },
   data() {
     return {
@@ -59,14 +94,20 @@ export default {
       statusMessage: "",
       errorMessage: "",
       credentials: null,
-      Ns: null
+      Ns: null,
+      isAccepted: false
     };
   },
   computed: {
     ...mapGetters({
       getSignIn: "getSignIn",
       getAuthRedirectUrl: "getAuthRedirectUrl"
-    })
+    }),
+    shouldDisableButton() {
+      let isKeyValid = isValidPrivateKey(this.form.privateKey);
+      return !isKeyValid || !this.isAccepted;
+      // return !this.isAccepted;
+    }
   },
   created: async function() {
     this.web3 = await getWeb3();
@@ -84,6 +125,12 @@ export default {
     }),
     redirect(url) {
       this.$router.push(url);
+    },
+    showTos() {
+      this.showModal("about_tos_modal");
+    },
+    closeTos() {
+      this.hideModal("about_tos_modal");
     },
     async getAccountFromPrivateKey(key) {
       const {

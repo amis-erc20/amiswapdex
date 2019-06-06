@@ -36,8 +36,23 @@
           <label for>Password</label>
           <b-form-input type="password" v-model="form.password1" required/>
         </b-form-group>
+        <b-form-group>
+          <input type="checkbox" v-model="isAccepted">
+          <span
+            id="metamask-agree-text"
+            @click="isAccepted = !isAccepted"
+          >To access my wallet, I accept the</span>
+          <span @click="showTos">
+            <em id="link-to-tos">Terms</em>
+          </span>
+        </b-form-group>
         <div class="submit-button-group">
-          <b-button type="submit" variant="primary" id="signin-btn">Sign In</b-button>
+          <b-button
+            type="submit"
+            variant="primary"
+            id="signin-btn"
+            :disabled="shouldDisableButton"
+          >Sign In</b-button>
         </div>
       </b-form>
 
@@ -52,8 +67,24 @@
           <b-form-input type="password" v-model="form.password1" required/>
         </b-form-group>
 
+        <b-form-group>
+          <input type="checkbox" v-model="isAccepted">
+          <span
+            id="metamask-agree-text"
+            @click="isAccepted = !isAccepted"
+          >To access my wallet, I accept the</span>
+          <span @click="showTos">
+            <em id="link-to-tos">Terms</em>
+          </span>
+        </b-form-group>
+
         <div class="submit-button-group">
-          <b-button type="submit" variant="primary" id="signin-btn">Sign In with Google Drive</b-button>
+          <b-button
+            type="submit"
+            variant="primary"
+            id="signin-btn"
+            :disabled="shouldDisableButton"
+          >Sign In with Google Drive</b-button>
         </div>
       </b-form>
       <!-- FILE UPLOAD -->
@@ -80,12 +111,23 @@
           <div class="file-error" v-if="!isFileValid">Invalid File</div>
         </b-form-group>
 
+        <b-form-group>
+          <input type="checkbox" v-model="isAccepted">
+          <span
+            id="metamask-agree-text"
+            @click="isAccepted = !isAccepted"
+          >To access my wallet, I accept the</span>
+          <span @click="showTos">
+            <em id="link-to-tos">Terms</em>
+          </span>
+        </b-form-group>
+
         <div class="submit-button-group">
           <b-button
             type="submit"
             variant="primary"
             id="signin-btn"
-            :disabled="!isFileValid"
+            :disabled="!isFileValid && shouldDisableButton"
           >Import & Sign In</b-button>
         </div>
       </b-form>
@@ -99,16 +141,33 @@
         >Show more sign in options</b-form-checkbox>
       </b-form-group>
 
-      <p v-if="!loading">
+      <!-- <p v-if="!loading">
         Don't have an account ? Please
         <nuxt-link to="/signup">sign up</nuxt-link>. If you forget your password,
         <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
-      </p>
+      </p>-->
       <!-- Install Modal -->
       <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">
         Install this web app on your iPhone: tap
         <strong>share</strong> button and then
         <strong>Add to Homescreen</strong>
+      </b-modal>
+
+      <!-- TOS Modal -->
+      <b-modal ref="about_tos_modal" id="about_tos_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="lg"
+            color="#fff"
+            @click="closeTos"
+          />
+          <div id="main-title-no-connection-container">
+            <h4>Term of Services</h4>
+          </div>
+        </template>
+        <Tos/>
       </b-modal>
     </div>
   </div>
@@ -119,6 +178,7 @@ import { mapGetters, mapActions } from "vuex";
 import bcrypt from "bcryptjs";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import Nav from "~/components/Nav.vue";
+import Tos from "~/components/Tos.vue";
 import {
   getWeb3,
   isIos,
@@ -135,7 +195,8 @@ import { faExpand } from "@fortawesome/free-solid-svg-icons";
 export default {
   components: {
     ScaleLoader,
-    Nav
+    Nav,
+    Tos
   },
   data() {
     return {
@@ -153,14 +214,23 @@ export default {
       selected: "remote",
       isFileValid: false,
       showMoreOptions: false,
-      Ns: null
+      Ns: null,
+      isAccepted: false
     };
   },
   computed: {
     ...mapGetters({
       getSignIn: "getSignIn",
       getAuthRedirectUrl: "getAuthRedirectUrl"
-    })
+    }),
+    shouldDisableButton() {
+      let valid =
+        this.validateEmail(this.form.email) &&
+        this.validatePassword(this.form.password1) &&
+        this.isAccepted;
+      // console.log(valid);
+      return !valid;
+    }
   },
   created: async function() {
     this.web3 = await getWeb3();
@@ -176,16 +246,21 @@ export default {
       updateActiveToken: "updateActiveToken",
       updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
-    validatePassword() {
-      if (this.form.password1 !== this.form.password2) {
-        this.errorMessage = "Passwords do not match each other !";
-        return false;
-      }
-      if (this.form.password1.length < 4) {
-        this.errorMessage = "Password must be at least 4 characters long";
-        return false;
-      }
-      return true;
+    validateEmail(email) {
+      if (!email) return false;
+      if (email.length > 0) return true;
+      return false;
+    },
+    validatePassword(password) {
+      if (!password) return false;
+      if (password.length > 0) return true;
+      return false;
+    },
+    showTos() {
+      this.showModal("about_tos_modal");
+    },
+    closeTos() {
+      this.hideModal("about_tos_modal");
     },
     redirect(url) {
       this.$router.push(url);
@@ -457,7 +532,7 @@ export default {
   animation: rotateLogo 14s infinite linear;
 }
 #signin-section h4 {
-  margin: 30px auto;
+  margin: 0px auto;
 }
 #signin-section form label {
   font-weight: bolder;

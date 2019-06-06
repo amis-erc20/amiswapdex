@@ -75,7 +75,12 @@
           >Show Advanced Settings</b-form-checkbox>
         </b-form-group>
         <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
-          <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+          <div class="amount-label-container">
+            <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+            <div>
+              <label class="reset-gas-price" @click="resetGasPrice">Reset Gas Price</label>
+            </div>
+          </div>
           <b-form-input
             type="range"
             id="range-1"
@@ -87,28 +92,22 @@
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
 
-        <label
-          for="range-1"
-          v-if="form.currency !== null && validateTargetAddress && showAdvanced"
-        >Gas Limit: {{ gasLimit }} gas</label>
-        <div
-          id="address-qr-btn-container"
-          v-if="form.currency !== null && validateTargetAddress && showAdvanced"
-        >
-          <div class="input-field-container address-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="amount-label-container" v-if="form.inputCurrency !== null && showAdvanced">
+            <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
+            <div>
+              <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
+            </div>
           </div>
-          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
-            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
-          </b-button>
-        </div>
+          <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+        </b-form-group>
 
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
             type="submit"
             variant="primary"
-            :disabled="loading || !validateTargetAddress || !validateAmount"
+            :disabled="loading || !validateTargetAddress || !validateAmount || !validateGasLimit"
           >Send</b-button>
         </div>
       </b-form>
@@ -175,6 +174,7 @@ export default {
       showAdvanced: false,
       gasPrice: 6,
       gasLimit: 42000,
+      defaultGasPrice: 6,
       defaultGasLimit: 42000,
       txFee: 0,
       txHash: "",
@@ -237,6 +237,7 @@ export default {
     } else {
       this.gasPrice = 6;
     }
+    this.defaultGasPrice = this.gasPrice;
     this.updateGasLimitAndTxFee();
   },
   updated: async function() {
@@ -248,6 +249,11 @@ export default {
     }),
     async resetGasLimit() {
       this.gasLimit = this.defaultGasLimit;
+      this.updateGasLimitAndTxFee();
+    },
+    async resetGasPrice() {
+      this.gasPrice = this.defaultGasPrice;
+      this.updateGasLimitAndTxFee();
     },
     showScanner() {
       this.scanning = true;
@@ -277,9 +283,7 @@ export default {
     },
     async updateGasLimitAndTxFee() {
       let estimatedGas = await this.getEstimatedGas();
-      console.log(`Estimated Gas is: ${estimatedGas}`);
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
-      console.log(`Gas Limit is: ${this.gasLimit}`);
       this.txFee =
         (1.6 * this.gasLimit * parseInt(this.gasPrice) * 1000000000) /
         Math.pow(10, 18);

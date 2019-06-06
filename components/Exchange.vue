@@ -3,12 +3,16 @@
     <Loading v-if="redirecting"/>
     <b-form>
       <b-form-group>
-        <b-form-input
-          id="search-token-field"
-          v-model="form.query"
-          type="text"
-          placeholder="Search an ERC-20 Token"
-        ></b-form-input>
+        <div class="search-field-container">
+          <b-form-input
+            type="text"
+            id="search-token-field"
+            v-model="form.query"
+            required
+            placeholder="Search an ERC-20 Token"
+          />
+          <button type="button" id="erase" @click="form.query = ''">X</button>
+        </div>
       </b-form-group>
     </b-form>
     <div v-if="tokenList.length == 0 && form.query.length == 0">
@@ -737,6 +741,17 @@ export default {
 
 #search-token-field {
   margin: 15px auto;
+  width: 100%;
+}
+
+.search-field-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-field-container > #erase {
+  top: 0px;
+  color: #b3b3b3;
 }
 
 .exchangelist-section .token {

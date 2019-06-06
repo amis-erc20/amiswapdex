@@ -16,7 +16,13 @@
             name="accept-checkbox"
           >I accept the terms and use to access my wallet</b-form-checkbox>-->
           <input type="checkbox" v-model="isAccepted">
-          <span for>To access my wallet, I accept the Terms</span>
+          <span
+            id="metamask-agree-text"
+            @click="isAccepted = !isAccepted"
+          >To access my wallet, I accept the</span>
+          <span @click="showTos">
+            <em id="link-to-tos">Terms</em>
+          </span>
         </b-form-group>
         <div class="submit-button-group">
           <b-button
@@ -28,6 +34,23 @@
         </div>
         <!-- :disabled="!isAccepted" -->
       </b-form>
+
+      <!-- TOS Modal -->
+      <b-modal ref="about_tos_modal" id="about_tos_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="lg"
+            color="#fff"
+            @click="closeTos"
+          />
+          <div id="main-title-no-connection-container">
+            <h4>Term of Services</h4>
+          </div>
+        </template>
+        <Tos/>
+      </b-modal>
     </div>
   </div>
 </template>
@@ -38,6 +61,7 @@ import Web3 from "web3";
 import bcrypt from "bcryptjs";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import Nav from "~/components/Nav.vue";
+import Tos from "~/components/Tos.vue";
 import {
   getWeb3,
   getWeb3Metamask,
@@ -55,7 +79,8 @@ import { faExpand } from "@fortawesome/free-solid-svg-icons";
 export default {
   components: {
     ScaleLoader,
-    Nav
+    Nav,
+    Tos
   },
   data() {
     return {
@@ -100,6 +125,12 @@ export default {
     redirect(url) {
       this.$router.push(url);
     },
+    showTos() {
+      this.showModal("about_tos_modal");
+    },
+    closeTos() {
+      this.hideModal("about_tos_modal");
+    },
     async getAccountFromPrivateKey(key) {
       const {
         address,
@@ -112,7 +143,6 @@ export default {
       let accounts;
       try {
         accounts = await this.web3.eth.getAccounts();
-        console.log(accounts);
       } catch (e) {
         console.log(e);
         console.log("Cannot get wallet account. Please log into metamask");
@@ -217,7 +247,7 @@ export default {
   margin: 30px auto;
 }
 #metamask-section h4 {
-  margin: 30px auto;
+  /* margin: 30px auto; */
 }
 #metamask-section form label {
   font-weight: bolder;
@@ -249,4 +279,18 @@ export default {
   background-color: #773894;
   border-color: #773894;
 }
+#metamask-agree-text {
+  cursor: pointer;
+}
+#link-to-tos {
+  color: #773894;
+  cursor: pointer;
+}
+/* #metamask-section #tos-description {
+  position: relative;
+  top: 0px;
+}
+#metamask-section .tos-view {
+  overflow: hidden;
+} */
 </style>
