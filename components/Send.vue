@@ -92,14 +92,17 @@
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
 
-        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+        <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
           <div class="amount-label-container" v-if="form.inputCurrency !== null && showAdvanced">
             <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
             <div>
               <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
             </div>
           </div>
-          <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          <div class="input-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <button type="button" id="erase" @click="gasLimit = ''"></button>
+          </div>
         </b-form-group>
 
         <div class="submit-button-group">
@@ -190,6 +193,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
+      getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
       getServerStatus: "getServerStatus"
@@ -228,6 +232,7 @@ export default {
     }
   },
   mounted: async function() {
+    let self = this;
     this.form.currency = this.getActiveToken;
     this.web3 = await getWeb3();
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
@@ -239,6 +244,13 @@ export default {
     }
     this.defaultGasPrice = this.gasPrice;
     this.updateGasLimitAndTxFee();
+    setInterval(() => {
+      if (self.getCurrentView === "main") {
+        if (self.form.amount || self.form.targetAddress) {
+          self.onReset();
+        }
+      }
+    }, 1000);
   },
   updated: async function() {
     this.form.currency = this.getActiveToken;

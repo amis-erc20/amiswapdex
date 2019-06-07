@@ -227,6 +227,7 @@
     </b-modal>
     <Tokeninfo
       :show="{shouldShow: showTokenInfoModal, timestamp: Date.now()}"
+      :shouldClearTabs="shouldClearTabs"
       v-on:child-msg="closeTokenInfo"
     />
   </section>
@@ -298,7 +299,8 @@ export default {
       loading: false,
       showLowLiquidityToken: false,
       showTokenInfoModal: false,
-      redirecting: false
+      redirecting: false,
+      shouldClearTabs: "NO"
     };
   },
   events: {
@@ -452,6 +454,7 @@ export default {
       updateAuthRedirectUrl: "updateAuthRedirectUrl",
       updateSummary: "updateSummary",
       updateActiveTab: "updateActiveTab",
+      updateCurrentView: "updateCurrentView",
       updateActiveToken: "updateActiveToken",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
@@ -603,9 +606,12 @@ export default {
     onSelectToken(name) {
       this.showTokenInfoModal = true;
       this.updateActiveToken(name);
+      this.updateCurrentView("tokeninfo");
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;
+      this.shouldClearTabs = "YES";
+      this.updateCurrentView("main");
     },
     isExchangeTabActive() {
       if (this.$route.path === "/") return true;

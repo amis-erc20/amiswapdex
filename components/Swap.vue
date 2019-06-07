@@ -41,7 +41,6 @@
           >Sell {{ getActiveToken }}</b-button>
         </b-button-group>
       </div>
-      <!-- <h4>{{getActiveToken}}</h4> -->
       <div v-if="!shouldRender" class="no-exchange-yet">
         <p>
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
@@ -72,10 +71,6 @@
             </template>
           </v-select>
         </b-form-group>
-
-        <!-- <b-button variant="primary" @click="onCurrencySwap" id="currency-swap-button">
-          <font-awesome-icon icon="exchange-alt" size="lg" color="#fff"/>
-        </b-button>-->
 
         <b-form-group v-if="isSellSelected" id="exampleInputGroup1">
           <label>Receive In</label>
@@ -199,7 +194,6 @@
             :state="validateTargetAddress"
           >Invalid Receiver Address</b-form-invalid-feedback>
         </b-form-group>
-
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <div class="amount-label-container">
             <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
@@ -217,7 +211,6 @@
           />
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
-
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <div class="amount-label-container" v-if="form.inputCurrency !== null && showAdvanced">
             <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
@@ -225,9 +218,11 @@
               <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
             </div>
           </div>
-          <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          <div class="input-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <button type="button" id="erase" @click="gasLimit = ''"></button>
+          </div>
         </b-form-group>
-
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
@@ -269,7 +264,6 @@
       >
         <p>Error occour while trying to submit transaction</p>
       </b-modal>
-
       <!-- Unlock Request -->
       <b-modal
         ref="unlock_request_modal_ref"
@@ -284,7 +278,6 @@
           </b-form-group>
           <b-button type="submit" variant="outline-danger">Approve</b-button>
         </b-form>
-
         <p v-else-if="approvedStatus === `waiting`">Approving...pls wait a few moments</p>
         <p v-else-if="approvedStatus === `waiting` && unlockTxHash">
           See your approval tx on
@@ -334,11 +327,9 @@ const defaultCamera = {
   }
 };
 Vue.use(VueQrcodeReader);
-
 let exchangeContracts = {};
 let tokenAddressess = {};
 let tokenContracts = {};
-
 export default {
   data() {
     return {
@@ -398,6 +389,7 @@ export default {
       getAvailableTokenAddresses: "account/getAvailableTokenAddresses",
       getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses",
       getActiveToken: "getActiveToken",
+      getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
@@ -562,8 +554,6 @@ export default {
       if (!token) return false;
       let summary = this.getSummary.find(s => s.token_id === token.id);
       if (!summary) return false;
-
-      // console.log(`${this.form.inputCurrency} liquidity: ${summary.liquidity}`);
       if (summary.liquidity > 0) return true;
       else return false;
     },
@@ -576,9 +566,6 @@ export default {
       if (!token) return false;
       let summary = this.getSummary.find(s => s.token_id === token.id);
       if (!summary) return false;
-      // console.log(
-      //   `${this.form.outputCurrency} liquidity: ${summary.liquidity}`
-      // );
       if (summary.liquidity > 0) return true;
       else return false;
     }
@@ -600,6 +587,7 @@ export default {
     console.log("Unexpected Error.");
   },
   mounted: async function() {
+    let self = this;
     let tokenSymbols = this.getAvailableTokenList.map(t => t.symbol);
     this.form.outputCurrency = this.getActiveToken;
     this.form.inputCurrency = null;
@@ -608,24 +596,16 @@ export default {
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       try {
         if (exchangeContracts[tokenSymbols[i]] !== undefined) {
-          // console.log(`Contract already created for ${tokenSymbols[i]}`);
           continue;
         }
         exchangeContracts[tokenSymbols[i]] = new this.web3.eth.Contract(
           exchangeABI,
           this.getAvailableExchangeAddresses[tokenSymbols[i]]
         );
-        // console.log(`Created a exchange contract ${tokenSymbols[i]}`);
       } catch (e) {
         console.log(e);
       }
     }
-    // console.log(`Total available tokens: ${this.getAvailableTokenList.length}`);
-    // console.log(
-    //   `Exchange contracts created: ${
-    //     Object.keys(exchangeContracts).length
-    //   } contracts`
-    // );
     this.getAvailableTokenList.forEach(async token => {
       const contract = exchangeContracts[token.symbol];
       tokenContracts[token.symbol] = new this.web3.eth.Contract(
@@ -633,14 +613,18 @@ export default {
         token.tokenAddress
       );
     });
-    // console.log(
-    //   `Token contracts created: ${Object.keys(tokenContracts).length} contracts`
-    // );
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
     this.gasPrice =
       parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
     this.defaultGasPrice = this.gasPrice;
     await this.updateGasLimitAndTxFee();
+    setInterval(() => {
+      if (self.getCurrentView == "main") {
+        if (self.form.inputValue || self.form.outputValue) {
+          self.onReset();
+        }
+      }
+    }, 1000);
   },
   methods: {
     ...mapActions({
@@ -715,18 +699,17 @@ export default {
     },
     async getEstimatedGas(toAddress) {
       try {
-        return 42000;
-        // let value = this.form.inputValue || 1;
-        // let estimatedGas = await estimateGasForSwap(
-        //   {
-        //     from: this.getAccount.address,
-        //     to: toAddress,
-        //     amount: new BigNumber(value * Math.pow(10, 18)).toNumber()
-        //   },
-        //   this.web3,
-        //   toAddress
-        // );
-        // return estimatedGas;
+        let value = this.form.inputValue || 1;
+        let estimatedGas = await estimateGasForSwap(
+          {
+            from: this.getAccount.address,
+            to: toAddress,
+            amount: new BigNumber(value * Math.pow(10, 18)).toNumber()
+          },
+          this.web3,
+          toAddress
+        );
+        return estimatedGas;
       } catch (e) {
         console.warn("Unable to estimate gas");
       }

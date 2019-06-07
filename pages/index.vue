@@ -258,35 +258,26 @@ export default {
       ) {
         return;
       }
-
       let self = this;
       let account = this.getAccount;
       try {
         if (account) {
-          // console.log("Refreshing Wallet");
+          console.log("Refreshing Wallet");
           let txList = await getHistory(account.address);
           let tokenTxList = await getTokenHistory(account.address);
           if (!Array.isArray(txList) || !Array.isArray(tokenTxList)) return;
           let newTokenHolding = await getTokenHoldingByAnAccount(
             account.address
           );
-          let isTokenHoldingUpdated = self.checkTokenHoldingUpdate(
-            newTokenHolding
-          );
           if (
             txList.length !== this.getTransactionList.length ||
-            tokenTxList.length !== this.getTokenTransactionList.length ||
-            isTokenHoldingUpdated
+            tokenTxList.length !== this.getTokenTransactionList.length
           ) {
-            // console.log("UPDATING TXS and WALLET BALANCES");
+            console.log("UPDATING TXS and WALLET BALANCES");
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
               self.addToken(token);
-              // self.updateBalance({
-              //   symbol: token.symbol,
-              //   balance: token.balance
-              // });
             });
             self.setOwnedTokenList(newTokenHolding);
           }
@@ -294,23 +285,6 @@ export default {
       } catch (e) {
         console.log(e);
       }
-    },
-    checkTokenHoldingUpdate(tokenHolding) {
-      let self = this;
-      // for (let i = 0; i < tokenHolding.length; i++) {
-      //   let token = tokenHolding[i];
-      //   console.log(token.symbol);
-      //   console.log(token.balance, self.getBalance[token.symbol]);
-      //   if (
-      //     token.balance > self.getBalance[token.symbol] ||
-      //     token.balance < self.getBalance[token.symbol]
-      //   ) {
-      //     console.log(`Token balance is updated for ${token.symbol}`);
-      //     return true;
-      //   }
-      // }
-      // return false;
-      return true;
     },
     async checkRemoteBackup(web3) {
       if (!this.getSignIn) return;
@@ -420,6 +394,7 @@ export default {
     let web3 = await getWeb3();
     let metamaskWeb3 = await getWeb3Metamask();
     let availableTokens = await getAllListedToken();
+
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
     this.updateActiveTab("market");

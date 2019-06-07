@@ -125,7 +125,10 @@
               <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
             </div>
           </div>
-          <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+          <div class="input-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <button type="button" id="erase" @click="gasLimit = ''"></button>
+          </div>
         </b-form-group>
 
         <div class="submit-button-group">
@@ -194,10 +197,20 @@
         </div>
 
         <b-form-group v-if="form.inputCurrency !== null">
-          <b-form-checkbox switch v-model="showAdvanced" name="check-button">Show Advanced Settings</b-form-checkbox>
+          <b-form-checkbox
+            switch
+            v-model="showAdvanced"
+            name="check-button"
+            class="show-advanced-label"
+          >Show Advanced Settings</b-form-checkbox>
         </b-form-group>
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
-          <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+          <div class="amount-label-container">
+            <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
+            <div>
+              <label class="reset-gas-price" @click="resetGasPrice">Reset Gas Price</label>
+            </div>
+          </div>
           <b-form-input
             type="range"
             id="range-1"
@@ -209,18 +222,18 @@
           <p>Estimated Tx Fee: {{txFee}} ETH</p>
         </b-form-group>
 
-        <label
-          for="range-1"
-          v-if="form.inputCurrency !== null && showAdvanced"
-        >Gas Limit: {{ gasLimit }} gas</label>
-        <div id="address-qr-btn-container" v-if="form.inputCurrency !== null && showAdvanced">
-          <div class="input-field-container address-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+        <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="amount-label-container" v-if="form.inputCurrency !== null && showAdvanced">
+            <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
+            <div>
+              <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
+            </div>
           </div>
-          <b-button variant="primary" id="qr-toggle-btn" @click="resetGasLimit">
-            <font-awesome-icon icon="undo" size="lg" color="#fff"/>
-          </b-button>
-        </div>
+          <div class="input-field-container">
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <button type="button" id="erase" @click="gasLimit = ''"></button>
+          </div>
+        </b-form-group>
 
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
@@ -370,6 +383,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
+      getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
       getConnection: "getConnection",
@@ -527,6 +541,13 @@ export default {
     }
     this.defaultGasPrice = this.gasPrice;
     await this.updateGasLimitAndTxFee();
+    setInterval(() => {
+      if (self.getCurrentView === "main") {
+        if (self.form.inputValue || self.form.outputValue) {
+          self.onReset();
+        }
+      }
+    }, 1000);
   },
   methods: {
     ...mapActions({
@@ -639,11 +660,6 @@ export default {
         let eth_usd = this.getPrice["ETH"];
         let token_usd = this.getPrice[this.activeToken];
         let absPrice = new BigNumber(eth_usd / token_usd);
-        // const absPrice = await getAbsPrice(
-        //   this.form.inputCurrency,
-        //   this.form.outputCurrency,
-        //   this.web3
-        // );
         console.log(`Abs Price: ${absPrice.toFixed(6)}`);
         if (absPrice.toFixed(0) == "NaN") return;
         if (!Number.isNaN(absPrice.toNumber()))
@@ -658,11 +674,6 @@ export default {
         let eth_usd = this.getPrice["ETH"];
         let token_usd = this.getPrice[this.activeToken];
         let absPrice = new BigNumber(eth_usd / token_usd);
-        // const absPrice = await getAbsPrice(
-        //   this.form.inputCurrency,
-        //   this.form.outputCurrency,
-        //   this.web3
-        // );
         console.log(`Abs Price: ${absPrice.toFixed(6)}`);
         if (absPrice.toFixed(0) == "NaN") return;
         if (!Number.isNaN(absPrice.toNumber()))

@@ -94,14 +94,17 @@ export default {
   methods: {
     ...mapActions({
       updateTransactionList: "transaction/updateTransactionList",
-      updateActiveToken: "updateActiveToken"
+      updateActiveToken: "updateActiveToken",
+      updateCurrentView: "updateCurrentView"
     }),
     changeTokenTab: function(event, tokenName) {
       this.updateActiveToken(tokenName);
       this.showTokenInfoModal = true;
+      this.updateCurrentView("tokeninfo");
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;
+      this.updateCurrentView("main");
     },
     calculateBalance: function(balance) {
       if (!balance || balance === 0) return 0;

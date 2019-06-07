@@ -5,7 +5,7 @@
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="primary">{{errorMessage}}</b-alert>
 
-      <b-form-group v-if="downloadMethod !== `local` && !loading">
+      <b-form-group v-if="downloadMethod !== `local` && !loading" class="more-options-container">
         <b-form-radio
           value="remote"
           v-model="selected"
@@ -574,5 +574,12 @@ export default {
 #signin-section div {
   text-align: left;
   margin: 5px auto;
+}
+.more-options-container label,
+.show-more-option label {
+  padding-top: 5px;
+}
+#signin_modal {
+  padding-left: 0 !important;
 }
 </style>

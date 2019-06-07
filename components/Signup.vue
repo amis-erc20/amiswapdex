@@ -1,8 +1,6 @@
 <template>
   <div>
     <div id="signup-section">
-      <!-- <img src="../assets/logo.svg" alt> -->
-      <!-- <h4>Create New Wallet</h4> -->
       <scale-loader :loading="loading && !success" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <font-awesome-icon v-if="success" icon="check" size="2x" color="green" align="center"/>
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
@@ -13,7 +11,6 @@
           class="create-account-success-btn"
         >Backup to Google Drive</b-button>
       </nuxt-link>
-      <!-- <nuxt-link v-if="success" @click="onContinueToWallet"> -->
       <b-button
         v-if="success"
         @click="onContinueToWallet"
@@ -21,11 +18,10 @@
         variant="outline-primary"
         class="create-account-success-btn"
       >Continue to Wallet</b-button>
-      <!-- </nuxt-link> -->
       <b-form @submit="onCreate" v-if="!loading">
         <b-form-group>
           <label for>Email</label>
-          <b-form-input type="email" v-model="form.email" required :state="validateEmail()"/>
+          <b-form-input type="email" v-model="form.email" required :state="validateEmail"/>
         </b-form-group>
         <b-form-group>
           <label for>Password</label>
@@ -33,7 +29,7 @@
             type="password"
             v-model="form.password1"
             required
-            :state="validatePassword()"
+            :state="validatePassword"
           />
         </b-form-group>
         <b-form-group>
@@ -42,29 +38,50 @@
             type="password"
             v-model="form.password2"
             required
-            :state="validatePassword()"
+            :state="validatePassword"
           />
-          <b-form-invalid-feedback :state="validatePassword()">{{errorMessage}}</b-form-invalid-feedback>
+          <b-form-invalid-feedback :state="validatePassword">{{errorMessage}}</b-form-invalid-feedback>
+        </b-form-group>
+        <b-form-group>
+          <input type="checkbox" v-model="isAccepted">
+          <span
+            id="metamask-agree-text"
+            @click="isAccepted = !isAccepted"
+          >To create and use my wallet, I accept the</span>
+          <span @click="showTos">
+            <em id="link-to-tos">Terms</em>
+          </span>
         </b-form-group>
         <div class="submit-button-group">
           <b-button
             type="submit"
             variant="primary"
             id="create-account-btn"
-            :disabled="!validatePassword() || loading"
+            :disabled="!validateEmail || !validatePassword || !isAccepted || loading"
           >Create Wallet</b-button>
         </div>
-        <!-- <p>
-          Already have an account ? Please
-          <nuxt-link to="/signin">sign in</nuxt-link>. If you forget your password,
-          <nuxt-link to="/recovery">recover{{" "}}</nuxt-link>your account here
-        </p>-->
       </b-form>
       <!-- Install Modal -->
       <b-modal ref="install_modal" id="install_modal" title="Install Shardus" :hide-footer="true">
         Install this web app on your iPhone: tap
         <strong>share</strong> button and then
         <strong>Add to Homescreen</strong>
+      </b-modal>
+      <!-- TOS Modal -->
+      <b-modal ref="about_tos_modal" id="about_tos_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="lg"
+            color="#fff"
+            @click="closeTos"
+          />
+          <div id="main-title-no-connection-container">
+            <h4>Term of Services</h4>
+          </div>
+        </template>
+        <Tos/>
       </b-modal>
     </div>
   </div>
@@ -87,11 +104,13 @@ import cryptoUtils from "../assets/js/cryptoUtils.js";
 import GDrive from "../assets/js/googleDrive/GDrive.js";
 import CONFIG from "../config.js";
 import Nav from "~/components/Nav.vue";
+import Tos from "~/components/Tos.vue";
 
 export default {
   components: {
     ScaleLoader,
-    Nav
+    Nav,
+    Tos
   },
   data() {
     return {
@@ -104,14 +123,43 @@ export default {
       errorMessage: "",
       web3: null,
       statusMessage: "",
-      success: false
+      success: false,
+      isAccepted: false
     };
   },
   computed: {
     ...mapGetters({
       getSignIn: "getSignIn",
       getAuthRedirectUrl: "getAuthRedirectUrl"
-    })
+    }),
+    validatePassword() {
+      let password1 = normaliseText(this.form.password1);
+      let password2 = normaliseText(this.form.password2);
+      if (password1.length === 0 || password2.length === 0) {
+        return false;
+      }
+      if (password1 !== password2) {
+        this.errorMessage = "Passwords do not match each other !";
+        return false;
+      }
+      if (password1.length < 8) {
+        this.errorMessage = "Password must be at least 8 characters long";
+        return false;
+      }
+      return true;
+    },
+    validateEmail() {
+      let email = normaliseText(this.form.email);
+      if (email.length === 0) {
+        return false;
+      }
+      let regX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      let isValid = regX.test(email);
+      if (!isValid) {
+        this.errorMessage = "Invalid Email Address.";
+      }
+      return isValid;
+    }
   },
   created: async function() {
     this.web3 = await getWeb3();
@@ -127,29 +175,14 @@ export default {
       updateActiveToken: "updateActiveToken",
       updateAuthRedirectUrl: "updateAuthRedirectUrl"
     }),
-    validatePassword() {
-      let password1 = normaliseText(this.form.password1);
-      let password2 = normaliseText(this.form.password2);
-      if (password1 !== password2) {
-        this.errorMessage = "Passwords do not match each other !";
-        return false;
-      }
-      if (password1.length < 8) {
-        this.errorMessage = "Password must be at least 8 characters long";
-        return false;
-      }
-      return true;
-    },
-    validateEmail() {
-      let email = normaliseText(this.form.email);
-      if (email.length <= 0) {
-        this.errorMessage = "Enter a valid email address";
-        return false;
-      }
-      return true;
-    },
     redirect(url) {
       this.$router.push(url);
+    },
+    showTos() {
+      this.showModal("about_tos_modal");
+    },
+    closeTos() {
+      this.hideModal("about_tos_modal");
     },
     async createNewAccount() {
       const { address, privateKey } = await this.web3.eth.accounts.create();
@@ -330,15 +363,14 @@ export default {
   text-align: center;
   animation: rotateLogo 14s infinite linear;
 }
-#signup-section h4 {
-  margin: 30px auto;
-}
 #signup-section form label {
   font-weight: bolder;
   font-size: 13px;
 }
 #signup-section form {
   width: 90%;
+  max-width: 650px;
+  margin: 20px auto;
 }
 #signup-section p {
   font-size: 12px;

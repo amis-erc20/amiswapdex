@@ -4,19 +4,13 @@ import { interopDefault } from './utils'
 
 const _04028ce6 = () => interopDefault(import('../pages/about.vue' /* webpackChunkName: "pages/about" */))
 const _1c044b8e = () => interopDefault(import('../pages/backup.vue' /* webpackChunkName: "pages/backup" */))
-const _c65468b0 = () => interopDefault(import('../pages/metamask.vue' /* webpackChunkName: "pages/metamask" */))
 const _bfabd41a = () => interopDefault(import('../pages/privatekey.vue' /* webpackChunkName: "pages/privatekey" */))
-const _ad089756 = () => interopDefault(import('../pages/privatekeysignin.vue' /* webpackChunkName: "pages/privatekeysignin" */))
 const _7452642d = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
 const _1fbf86cc = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
 const _3b71da3e = () => interopDefault(import('../pages/recoverysetup.vue' /* webpackChunkName: "pages/recoverysetup" */))
 const _70d48a7a = () => interopDefault(import('../pages/resetpassword.vue' /* webpackChunkName: "pages/resetpassword" */))
 const _b1b11ad2 = () => interopDefault(import('../pages/scanner.vue' /* webpackChunkName: "pages/scanner" */))
 const _029bae4a = () => interopDefault(import('../pages/sendtoken.vue' /* webpackChunkName: "pages/sendtoken" */))
-const _12ba37ce = () => interopDefault(import('../pages/signin.vue' /* webpackChunkName: "pages/signin" */))
-const _0b393a8f = () => interopDefault(import('../pages/signup.vue' /* webpackChunkName: "pages/signup" */))
-const _70ed889f = () => interopDefault(import('../pages/swaptoken.vue' /* webpackChunkName: "pages/swaptoken" */))
-const _2577a971 = () => interopDefault(import('../pages/tos.vue' /* webpackChunkName: "pages/tos" */))
 const _0d66c5fb = () => interopDefault(import('../pages/welcome.vue' /* webpackChunkName: "pages/welcome" */))
 const _23ba67ab = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
 
@@ -103,17 +97,9 @@ export function createRouter() {
       component: _1c044b8e,
       name: "backup"
     }, {
-      path: "/metamask",
-      component: _c65468b0,
-      name: "metamask"
-    }, {
       path: "/privatekey",
       component: _bfabd41a,
       name: "privatekey"
-    }, {
-      path: "/privatekeysignin",
-      component: _ad089756,
-      name: "privatekeysignin"
     }, {
       path: "/receivetoken",
       component: _7452642d,
@@ -138,22 +124,6 @@ export function createRouter() {
       path: "/sendtoken",
       component: _029bae4a,
       name: "sendtoken"
-    }, {
-      path: "/signin",
-      component: _12ba37ce,
-      name: "signin"
-    }, {
-      path: "/signup",
-      component: _0b393a8f,
-      name: "signup"
-    }, {
-      path: "/swaptoken",
-      component: _70ed889f,
-      name: "swaptoken"
-    }, {
-      path: "/tos",
-      component: _2577a971,
-      name: "tos"
     }, {
       path: "/welcome",
       component: _0d66c5fb,

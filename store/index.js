@@ -13,7 +13,8 @@ export const state = () => {
       token: null,
       tokenSubTab: 'info'
     },
-    summary: []
+    summary: [],
+    currentView: 'main'
   }
 }
 
@@ -27,7 +28,8 @@ export const getters = {
   getBackupStatus: state => state.backupStatus,
   getCredentials: state => state.credentials,
   getAuthRedirectUrl: state => state.authRedirectUrl,
-  getSummary: state => state.summary
+  getSummary: state => state.summary,
+  getCurrentView: state => state.currentView
 }
 
 export const actions = {
@@ -36,6 +38,9 @@ export const actions = {
   },
   updateActiveToken(store, payload) {
     store.commit('updateActiveToken', payload)
+  },
+  updateCurrentView(store, payload) {
+    store.commit('updateCurrentView', payload)
   },
   updateAuthStatus(store, payload) {
     store.commit('updateAuthStatus', payload)
@@ -69,6 +74,9 @@ export const mutations = {
   },
   updateActiveToken(state, payload) {
     state.activeToken = payload
+  },
+  updateCurrentView(state, payload) {
+    state.currentView = payload
   },
   updateConnection(state, payload) {
     state.isOnline = payload

@@ -51,10 +51,6 @@ export const initContracts = async function (web3, availableTokens) {
       console.log(e)
     }
   }
-  // let ethSold = new BigNumber(1).toFixed(0)
-  // let dummdyULTBought = await exchangeContracts['ULT'].methods.getEthToTokenInputPrice(ethSold
-  // ).call()
-  // console.log(`ULT Bought: ${dummdyULTBought}`)
 }
 export const createNewCotract = async function (web3, token) {
   factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
@@ -70,18 +66,6 @@ export const hasTokenUniswap = function (symbol) {
   if (exchangeAddresses[symbol]) {
     return true
   } else return false
-}
-async function getCurrentReserve (exchangeAddress, tokenContract, web3) {
-  let ethReserve = await web3.eth.getBalance(exchangeAddress)
-
-  // https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress=0x862Da0A691bb0b74038377295f8fF523D0493eB4&apikey=YourApiKeyToken
-  let tokenSupply = await tokenContract.methods
-    .balanceOf(exchangeAddress)
-    .call()
-  return {
-    ethReserve: parseInt(ethReserve),
-    tokenReserve: parseInt(tokenSupply, 'hex')
-  }
 }
 export const getWeb3 = function () {
   return new Promise(function (resolve, reject) {
@@ -107,7 +91,7 @@ export const getWeb3Metamask = function () {
       }
       // web3.currentProvider.guardaWeb3
       let web3 = new Web3(Web3.givenProvider)
-      web3.currentProvider.setMaxListeners(300) // or more :)
+      web3.currentProvider.setMaxListeners(300)
       resolve(web3)
     } catch (e) {
       console.log(e)
@@ -122,13 +106,11 @@ export const getExchangeAddress = async function (tokenAddress) {
     let exchangeAddress = await factoryContract.methods
       .getExchange(tokenAddress)
       .call()
-    console.log(exchangeAddress)
-    // 0x0000000000000000000000000000000000000000
     if (exchangeAddress) return exchangeAddress
     else return false
   } catch (e) {
-    // console.log(`ERROR: cannot get exchange for token address: ${tokenAddress}`)
-    // console.log(e)
+    // console.log(`ERROR: unable to get exchange address for token address: ${tokenAddress}`)
+    // console.error(e)
     return false
   }
 }
@@ -245,30 +227,6 @@ export const getTokenBalance = async function (address, currency, web3, ownedTok
     return 0
   }
 }
-export const getAbsPrice = async function (inputCurrency, outputCurrency, web3) {
-  if (!inputCurrency || !outputCurrency) return
-  if (!tokenContracts[outputCurrency]) {
-    console.log(`Cannot find token contract for ${currency}. Creating now...`)
-    await initContracts(web3)
-  }
-  try {
-    let tokenExchangeAddress = exchangeAddresses[outputCurrency]
-    let tokenContract = tokenContracts[outputCurrency]
-    let ethReserve = await web3.eth.getBalance(tokenExchangeAddress)
-    let tokenRserve = await tokenContract.methods
-      .balanceOf(tokenExchangeAddress)
-      .call()
-    ethReserve = new BigNumber(ethReserve)
-    tokenRserve = new BigNumber(tokenRserve)
-    let absPrice = tokenRserve.dividedBy(ethReserve)
-    return absPrice
-  } catch (e) {
-    console.log(`ERROR - getAbsPrice`)
-    // console.log(e)
-    return 0
-  }
-}
-
 export const estimateGas = async function (transaction, web3) {
   try {
     let gas = await web3.eth.estimateGas({
@@ -336,7 +294,6 @@ export const signAndSendETH = async function (transaction, privateKey, web3) {
       })
   })
 }
-
 export const createNewExchange = async function (
   tx,
   tokenAddress,
@@ -357,16 +314,11 @@ export const createNewExchange = async function (
   }
 
   let estimatedGas = await estimateGas(transactionParameters)
-
   if (!estimatedGas || estimatedGas <= 0) {
     transactionParameters.gasLimit = web3.utils.toHex(500590)
   } else {
     transactionParameters.gasLimit = web3.utils.toHex(estimatedGas)
   }
-
-  console.log(`Estimate gas: ${estimatedGas}`)
-  console.log(`Estimate gas price: ${gasPrice}`)
-  console.log(transactionParameters)
 
   let transaction = await web3.eth.accounts.signTransaction(
     transactionParameters,
@@ -388,7 +340,6 @@ export const metamaskCreateNewExchange = async function (
   let web3 = await getWeb3Metamask()
   let myAddress = tx.from
   try {
-    let count = await web3.eth.getTransactionCount(myAddress)
     let factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
     let txId = await factoryContract.methods.createExchange(tokenAddress).send({
       from: myAddress
@@ -399,7 +350,6 @@ export const metamaskCreateNewExchange = async function (
     console.log(e)
   }
 }
-
 export const sendToken = async function (tx, currency, privateKey, web3) {
   console.log(tx)
   let myAddress = tx.from
@@ -430,7 +380,6 @@ export const sendToken = async function (tx, currency, privateKey, web3) {
       })
   })
 }
-
 export const unlockToken = async (tx, tokenSymbol, data) => {
   console.log(tx)
   console.log(data)
@@ -481,7 +430,6 @@ export const unlockTokenMetamask = async (tx, tokenSymbol, data) => {
     })
   })
 }
-
 export const swapTokenToEth = async function (
   tx,
   exchangeContract,
@@ -494,7 +442,6 @@ export const swapTokenToEth = async function (
   let count = await web3.eth.getTransactionCount(myAddress)
   let transaction
   if (tx.recipient && tx.recipient.length > 0) {
-    console.log(`Recipient: ${tx.recipient}`)
     transaction = await web3.eth.accounts.signTransaction({
       from: myAddress,
       gasPrice: web3.utils.toHex(tx.gasPrice),
@@ -523,7 +470,6 @@ export const swapTokenToEth = async function (
     privateKey
     )
   }
-
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
@@ -533,7 +479,6 @@ export const swapTokenToEth = async function (
       })
   })
 }
-
 export const swapEthToToken = async function (
   tx,
   exchangeContract,
@@ -549,7 +494,6 @@ export const swapEthToToken = async function (
     try {
       let transaction
       if (tx.recipient && tx.recipient.length > 0) {
-        console.log(`Recipient: ${tx.recipient}`)
         transaction = await web3.eth.accounts.signTransaction({
           from: myAddress,
           gasPrice: web3.utils.toHex(tx.gasPrice),
@@ -593,7 +537,6 @@ export const swapEthToToken = async function (
     }
   })
 }
-
 export const swapTokenToToken = async function (
   tx,
   exchangeContract,
@@ -605,7 +548,6 @@ export const swapTokenToToken = async function (
   let count = await web3.eth.getTransactionCount(myAddress)
   let transaction
   if (tx.recipient && tx.recipient.length > 0) {
-    console.log(`Recipient: ${tx.recipient}`)
     transaction = await web3.eth.accounts.signTransaction({
       from: myAddress,
       gasPrice: web3.utils.toHex(tx.gasPrice),
@@ -647,7 +589,6 @@ export const swapTokenToToken = async function (
     privateKey
     )
   }
-
   return new Promise(resolve => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
@@ -818,7 +759,6 @@ export const metamaskRemoveLiquidity = async function (
     })
   })
 }
-
 export const metamaskSwap = async function (data) {
   const ALLOWED_SLIPPAGE = 0.02
   let web3Metamask = await getWeb3Metamask()
@@ -845,7 +785,6 @@ export const metamaskSwap = async function (data) {
 
     return new Promise((resolve, reject) => {
       if (recipient) {
-        console.log(`Recipient is ${recipient}`)
         exchangeContract.methods.ethToTokenTransferInput(min_token, deadline, recipient)
           .send({
             from: accounts[0],
@@ -880,10 +819,8 @@ export const metamaskSwap = async function (data) {
     )
     const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
     const minEth = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
-    const exchangeRate = parseFloat(outputValue / inputValue)
     return new Promise((resolve, reject) => {
       if (recipient) {
-        console.log(`Recipient is ${recipient}`)
         exchangeContract.methods.tokenToEthTransferInput(tokenSold, minEth, deadline, recipient)
           .send({
             from: accounts[0]
@@ -918,13 +855,11 @@ export const metamaskSwap = async function (data) {
     )
     const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
     const minToken = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
-    let exchangeRate
     const minEth = new BigNumber(1).toFixed(0)
     const outputTokenAddress = tokenAddresses[outputCurrency]
     console.log(`Minimum required token is: ${minToken / Math.pow(10, 18)} ${outputCurrency}`)
     return new Promise((resolve, reject) => {
       if (recipient) {
-        console.log(`Recipient is ${recipient}`)
         exchangeContract.methods.tokenToTokenTransferInput(
           tokenSold,
           minToken,
@@ -995,7 +930,6 @@ export const metamaskSendEth = async function (data) {
     })
   })
 }
-
 export const normaliseText = text => {
   let normalised
   if (!text || text.length === 0) return ''
@@ -1003,7 +937,6 @@ export const normaliseText = text => {
   normalised = normalised.replace(/\s/g, '')
   return normalised
 }
-
 export const metamaskSendToken = async function (data) {
   const {
     from,
@@ -1041,7 +974,6 @@ export const metamaskSendToken = async function (data) {
       })
   })
 }
-
 // Detects if device is on iOS
 export const isIos = () => {
   const userAgent = window.navigator.userAgent.toLowerCase()
@@ -1148,10 +1080,4 @@ export const isValidPrivateKey = (key) => {
   if (keyToCheck.length !== 64) return false
   if (!isValidHex(keyToCheck)) return false
   return finalKey
-}
-
-function wait (ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms)
-  })
 }
