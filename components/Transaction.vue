@@ -82,7 +82,9 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getAccount: "account/getAccount"
+      getAccount: "account/getAccount",
+      getActiveToken: "getActiveToken",
+      getAvailableTokenList: "account/getAvailableTokenList"
     }),
     icon: function() {
       if (this.txType === "converted") return "exchange-alt";
@@ -108,7 +110,10 @@ export default {
       else return "unknown";
     },
     txAmount: function() {
-      return (this.transaction.value / Math.pow(10, 18)).toFixed(4);
+      return (
+        parseInt(this.transaction.value) /
+        Math.pow(10, this.getDecimal(this.getActiveToken))
+      ).toFixed(4);
     },
     txSign: function() {
       return this.txType === "received" ? "+" : "-";
@@ -131,6 +136,11 @@ export default {
     showTxDetail(ref) {
       console.log("clicked");
       this.$refs[this.transaction.hash].show();
+    },
+    getDecimal(symbol) {
+      let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
+      if (token) return token.decimal;
+      else return 18;
     }
   }
 };

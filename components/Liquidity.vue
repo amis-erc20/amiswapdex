@@ -591,6 +591,11 @@ export default {
         return false;
       }
     },
+    getDecimal(symbol) {
+      let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
+      if (token) return token.decimal;
+      else return 18;
+    },
     async useAllFunds(tokenName) {
       let estimatedGas = await this.getEstimatedGas(factoryAddress);
       if (estimatedGas * 2 > this.gasLimit)
@@ -727,7 +732,9 @@ export default {
       ).innerHTML = ethWithdrawn.dividedBy(10 ** 18).toFixed(6);
       document.querySelector(
         "#withdrawn-token"
-      ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
+      ).innerHTML = tokenWithdrawn
+        .dividedBy(10 ** this.getDecimal(this.getActiveToken))
+        .toFixed(6);
     },
     async onUnlock(evt) {
       evt.preventDefault();
@@ -749,7 +756,9 @@ export default {
           this.unlockTxHash = await unlockTokenMetamask(
             {
               from: this.getAccount.address,
-              approvedAmount: this.form.approvedAmount * Math.pow(10, 18),
+              approvedAmount:
+                this.form.approvedAmount *
+                Math.pow(10, this.getDecimal(this.getActiveToken)),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: parseInt(this.gasLimit)
             },
@@ -766,7 +775,9 @@ export default {
           this.unlockTxHash = await unlockToken(
             {
               from: this.getAccount.address,
-              approvedAmount: this.form.approvedAmount * Math.pow(10, 18),
+              approvedAmount:
+                this.form.approvedAmount *
+                Math.pow(10, this.getDecimal(this.getActiveToken)),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: parseInt(this.gasLimit)
             },
@@ -787,7 +798,11 @@ export default {
           console.log(`Checking allowance for ${currencyToCheck} token`);
           const allowance = await self.getAllowance(currencyToCheck);
           if (
-            allowance == parseInt(self.form.approvedAmount * Math.pow(10, 18))
+            allowance ==
+            parseInt(
+              self.form.approvedAmount *
+                Math.pow(10, this.getDecimal(this.getActiveToken))
+            )
           ) {
             clearInterval(check);
             self.approvedStatus = true;
@@ -918,7 +933,9 @@ export default {
         outputCurrency
       ];
       let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
-      let tokenAmount = new BigNumber(outputValue).multipliedBy(10 ** 18);
+      let tokenAmount = new BigNumber(outputValue).multipliedBy(
+        10 ** this.getDecimal(this.getActiveToken)
+      );
       let ethReserve = await web3.eth.getBalance(contractAddress);
 
       const totalLiquidity = await exchangeContract.methods
@@ -1036,23 +1053,14 @@ export default {
         ethBalance.dividedBy(ethReserve)
       );
 
-      // console.log(`eth balance: ${ethBalance.dividedBy(10 ** 18).toFixed(6)}`);
-      // console.log(
-      //   `liquidityBalance: ${liquidityBalance.dividedBy(10 ** 18).toFixed(6)}`
-      // );
-      // console.log(
-      //   `eth withdrawn: ${ethWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
-      // );
-      // console.log(
-      //   `token withdrawn: ${tokenWithdrawn.dividedBy(10 ** 18).toFixed(6)}`
-      // );
-
       document.querySelector(
         "#withdrawn-eth"
       ).innerHTML = ethWithdrawn.dividedBy(10 ** 18).toFixed(6);
       document.querySelector(
         "#withdrawn-token"
-      ).innerHTML = tokenWithdrawn.dividedBy(10 ** 18).toFixed(6);
+      ).innerHTML = tokenWithdrawn
+        .dividedBy(10 ** this.getDecimal(this.getActiveToken))
+        .toFixed(6);
 
       try {
         if (this.getAccount.type === "metamask") {

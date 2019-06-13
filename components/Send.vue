@@ -196,7 +196,8 @@ export default {
       getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
-      getServerStatus: "getServerStatus"
+      getServerStatus: "getServerStatus",
+      getAvailableTokenList: "account/getAvailableTokenList"
     }),
     validateTargetAddress() {
       return isValidAddress(this.form.targetAddress);
@@ -259,6 +260,11 @@ export default {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    getDecimal(symbol) {
+      let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
+      if (token) return token.decimal;
+      else return 18;
+    },
     async resetGasLimit() {
       this.gasLimit = this.defaultGasLimit;
       this.updateGasLimitAndTxFee();
@@ -287,7 +293,9 @@ export default {
         {
           from: this.getAccount.address,
           to: this.form.targetAddress || this.getAccount.address,
-          amount: parseFloat(this.form.amount || 1) * Math.pow(10, 18)
+          amount:
+            parseFloat(this.form.amount || 1) *
+            Math.pow(10, this.getDecimal(this.getActiveToken))
         },
         this.web3
       );
@@ -348,7 +356,10 @@ export default {
             this.txHash = await metamaskSendToken({
               from: this.getAccount.address,
               to: this.form.targetAddress,
-              value: parseInt(this.form.amount * Math.pow(10, 18)),
+              value: parseInt(
+                this.form.amount *
+                  Math.pow(10, this.getDecimal(this.getActiveToken))
+              ),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: this.gasLimit,
               currency: this.form.currency
@@ -390,7 +401,9 @@ export default {
               {
                 from: this.getAccount.address,
                 to: this.form.targetAddress,
-                amount: parseInt(this.form.amount) * Math.pow(10, 18),
+                amount:
+                  parseInt(this.form.amount) *
+                  Math.pow(10, this.getDecimal(this.getActiveToken)),
                 gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
                 gasLimit: this.gasLimit > 42000 ? this.gasLimit : 42000
               },

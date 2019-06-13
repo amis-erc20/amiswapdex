@@ -105,13 +105,6 @@ export default {
     closeTokenInfo() {
       this.showTokenInfoModal = false;
       this.updateCurrentView("main");
-    },
-    calculateBalance: function(balance) {
-      if (!balance || balance === 0) return 0;
-      else {
-        var parsedBalance = parseFloat(balance / Math.pow(10, 18));
-        return parsedBalance;
-      }
     }
   }
 };

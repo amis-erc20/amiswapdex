@@ -70,10 +70,13 @@ export const hasTokenUniswap = function (symbol) {
 export const getWeb3 = function () {
   return new Promise(function (resolve, reject) {
     try {
+      // let web3 = new Web3(
+      //   'wss://mainnet.infura.io/v3/398dbd17c02c4a37ba1a0e902742cf2b'
+      // )
       let web3 = new Web3(
-        'wss://mainnet.infura.io/ws/v3/6f70582e339948738835c25da4b9b8a5'
-        // 'wss://mainnet.infura.io/ws'
+        new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws/v3/398dbd17c02c4a37ba1a0e902742cf2b")
       )
+      console.log(web3)
       resolve(web3)
     } catch (e) {
       console.error(e)
@@ -261,7 +264,7 @@ export const estimateGasForSwap = async function (transaction, web3, exchangeAdd
           resolve(gasAmount)
         })
         .catch(function (error) {
-          console.log(error)
+          // console.log(error)
           resolve(0)
         })
     })
@@ -283,7 +286,7 @@ export const signAndSendETH = async function (transaction, privateKey, web3) {
     to: transaction.to,
     value: transaction.amount
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -369,7 +372,7 @@ export const sendToken = async function (tx, currency, privateKey, web3) {
     data: contract.methods.transfer(toAddress, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -398,7 +401,7 @@ export const unlockToken = async (tx, tokenSymbol, data) => {
     data: contract.methods.approve(data.exchangeAddress, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  data.privateKey
+    data.privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -453,7 +456,7 @@ export const swapTokenToEth = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   } else {
     transaction = await web3.eth.accounts.signTransaction({
@@ -467,7 +470,7 @@ export const swapTokenToEth = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   }
   return new Promise(resolve => {
@@ -505,7 +508,7 @@ export const swapEthToToken = async function (
             .encodeABI(),
           nonce: web3.utils.toHex(count)
         },
-        privateKey
+          privateKey
         )
       } else {
         transaction = await web3.eth.accounts.signTransaction({
@@ -519,7 +522,7 @@ export const swapEthToToken = async function (
             .encodeABI(),
           nonce: web3.utils.toHex(count)
         },
-        privateKey
+          privateKey
         )
       }
       web3.eth
@@ -566,7 +569,7 @@ export const swapTokenToToken = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   } else {
     transaction = await web3.eth.accounts.signTransaction({
@@ -586,7 +589,7 @@ export const swapTokenToToken = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   }
   return new Promise(resolve => {
@@ -631,7 +634,7 @@ export const addLiquidity = async function (
       .encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -712,7 +715,7 @@ export const removeLiquidity = async function (
       .encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -764,8 +767,10 @@ export const metamaskSwap = async function (data) {
   let web3Metamask = await getWeb3Metamask()
   let {
     inputValue,
+    inputDecimal,
     inputCurrency,
     outputValue,
+    outputDecimal,
     outputCurrency,
     type,
     recipient
@@ -780,8 +785,8 @@ export const metamaskSwap = async function (data) {
       exchangeABI,
       exchangeAddresses[outputCurrency]
     )
-    const min_token = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
-    const amount = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
+    const min_token = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    const amount = new BigNumber(inputValue).multipliedBy(10 ** inputDecimal).toFixed(0)
 
     return new Promise((resolve, reject) => {
       if (recipient) {
@@ -817,8 +822,8 @@ export const metamaskSwap = async function (data) {
       exchangeABI,
       exchangeAddresses[inputCurrency]
     )
-    const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
-    const minEth = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** inputDecimal).toFixed(0)
+    const minEth = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
     return new Promise((resolve, reject) => {
       if (recipient) {
         exchangeContract.methods.tokenToEthTransferInput(tokenSold, minEth, deadline, recipient)
@@ -853,11 +858,11 @@ export const metamaskSwap = async function (data) {
       exchangeABI,
       exchangeAddresses[inputCurrency]
     )
-    const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** 18).toFixed(0)
-    const minToken = new BigNumber(outputValue).multipliedBy(10 ** 18).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** inputDecimal).toFixed(0)
+    const minToken = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
     const minEth = new BigNumber(1).toFixed(0)
     const outputTokenAddress = tokenAddresses[outputCurrency]
-    console.log(`Minimum required token is: ${minToken / Math.pow(10, 18)} ${outputCurrency}`)
+    console.log(`Minimum required token is: ${minToken / Math.pow(10, outputDecimal)} ${outputCurrency}`)
     return new Promise((resolve, reject) => {
       if (recipient) {
         exchangeContract.methods.tokenToTokenTransferInput(
@@ -1007,7 +1012,7 @@ export const getAllListedToken = async () => {
     if (token.logo) {
       let protocol = token.logo.split(':')[0]
       if (protocol === 'http') {
-        checkedUrl = `https://uniswapdex.com:8889/static/${token.tokenAddress.toLowerCase()}.png`
+        checkedUrl = `${CONFIG.uniswapDexServer}static/${token.tokenAddress.toLowerCase()}.png`
       }
     } else {
       checkedUrl = token.logo

@@ -56,6 +56,8 @@
         </b-col>
       </b-row>
     </div>
+
+    <TVChartContainer v-if="showChart" :tokenAddress="selectedToken.tokenAddress"/>
   </div>
 </template>
 
@@ -63,6 +65,7 @@
 import { mapGetters } from "vuex";
 import axios from "axios";
 import config from "../config";
+import TVChartContainer from "~/components/TVChartContainer.vue";
 import {
   getWeb3,
   getWeb3Metamask,
@@ -79,8 +82,12 @@ export default {
   data: function() {
     return {
       summary: null,
-      ethToUsd: 0
+      ethToUsd: 0,
+      showChart: true
     };
+  },
+  components: {
+    TVChartContainer
   },
   computed: {
     ...mapGetters({
@@ -146,6 +153,11 @@ export default {
     }
     this.ethToUsd = ethPrice;
   },
+  // mounted: function() {
+  //   setTimeout(() => {
+  //     self.showChart = true;
+  //   }, 4000);
+  // },
   methods: {
     copyToClipboard(str) {
       const el = document.createElement("textarea");
@@ -180,7 +192,7 @@ export default {
 .token-info-section {
   text-align: center;
   width: 90%;
-  max-width: 650px;
+  /* max-width: 650px; */
   margin: 0 auto;
   margin-top: 30px;
   overflow: hidden;

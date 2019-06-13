@@ -39,6 +39,7 @@
     "npm": "^6.8.0",
     "nuxt": "^2.4.0",
     "ramda": "^0.26.1",
+    "request-promise": "^4.2.4",
     "shardus-crypto-web": "gitlab:shardus/shardus-crypto-web",
     "tls": "0.0.1",
     "v-offline": "^1.1.0",

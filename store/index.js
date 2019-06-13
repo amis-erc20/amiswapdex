@@ -29,7 +29,15 @@ export const getters = {
   getCredentials: state => state.credentials,
   getAuthRedirectUrl: state => state.authRedirectUrl,
   getSummary: state => state.summary,
-  getCurrentView: state => state.currentView
+  getCurrentView: state => state.currentView,
+  getAllTokenPrice: state => {
+    let priceList = {}
+    state.account.availableTokenList.forEach(token => {
+      let summary = state.summary.find(s => s.token_id === token.id)
+      if (summary) priceList[token.symbol] = summary.price_last_1H
+    })
+    return priceList
+  }
 }
 
 export const actions = {

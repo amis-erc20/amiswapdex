@@ -313,7 +313,9 @@ import {
   swapTokenToToken,
   metamaskSwap,
   hasTokenUniswap,
-  isValidAddress
+  isValidAddress,
+  unlockTokenMetamask,
+  getWeb3Metamask
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Vue from "vue";
@@ -348,6 +350,7 @@ export default {
         widgetTitle: ""
       },
       web3: null,
+      web3Metamask: null,
       ALLOWED_SLIPPAGE: 0.025,
       mainToken: "ULT",
       account: null,
@@ -393,7 +396,8 @@ export default {
       getBalance: "account/getBalance",
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
-      getSummary: "getSummary"
+      getSummary: "getSummary",
+      getAllTokenPrice: "getAllTokenPrice"
     }),
     shouldRender: function() {
       if (this.getActiveToken === "ETH") return true;
@@ -592,6 +596,7 @@ export default {
     this.form.outputCurrency = this.getActiveToken;
     this.form.inputCurrency = null;
     this.web3 = await getWeb3();
+    this.web3Metamask = await getWeb3Metamask();
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       try {
@@ -608,6 +613,7 @@ export default {
     }
     this.getAvailableTokenList.forEach(async token => {
       const contract = exchangeContracts[token.symbol];
+      // console.log(token);
       tokenContracts[token.symbol] = new this.web3.eth.Contract(
         tokenABI,
         token.tokenAddress
@@ -630,6 +636,11 @@ export default {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    getDecimal(symbol) {
+      let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
+      if (token) return token.decimal;
+      else return 18;
+    },
     onSelectInputCurrency(value) {
       if (!value) return;
       console.log(`${value.title} is selected as input`);
@@ -704,7 +715,9 @@ export default {
           {
             from: this.getAccount.address,
             to: toAddress,
-            amount: new BigNumber(value * Math.pow(10, 18)).toNumber()
+            amount: new BigNumber(
+              value * Math.pow(10, this.getDecimal(this.getActiveToken))
+            ).toNumber()
           },
           this.web3,
           toAddress
@@ -832,7 +845,8 @@ export default {
         if (this.swapType === "TOKEN_TO_ETH") {
           let exchangeContract = exchangeContracts[this.form.inputCurrency];
           let tokenSold = new BigNumber(
-            this.form.inputValue * Math.pow(10, 18)
+            this.form.inputValue *
+              Math.pow(10, this.getDecimal(this.form.inputCurrency))
           ).toFixed(0);
           let ethBought = await exchangeContract.methods
             .getTokenToEthInputPrice(tokenSold)
@@ -846,11 +860,15 @@ export default {
           let tokenBought = await exchangeContract.methods
             .getEthToTokenInputPrice(ethSold)
             .call();
-          this.form.outputValue = parseFloat(tokenBought / Math.pow(10, 18));
+          this.form.outputValue = parseFloat(
+            tokenBought /
+              Math.pow(10, this.getDecimal(this.form.outputCurrency))
+          );
         } else if (this.swapType === "TOKEN_TO_TOKEN") {
           let exchangeContractA = exchangeContracts[this.form.inputCurrency];
           let tokenSoldA = new BigNumber(
-            this.form.inputValue * Math.pow(10, 18)
+            this.form.inputValue *
+              Math.pow(10, this.getDecimal(this.form.inputCurrency))
           ).toFixed(0);
           let ethBought = await exchangeContractA.methods
             .getTokenToEthInputPrice(tokenSoldA)
@@ -860,7 +878,10 @@ export default {
           let tokenBoughtB = await exchangeContractB.methods
             .getEthToTokenInputPrice(ethSold)
             .call();
-          this.form.outputValue = parseFloat(tokenBoughtB / Math.pow(10, 18));
+          this.form.outputValue = parseFloat(
+            tokenBoughtB /
+              Math.pow(10, this.getDecimal(this.form.outputCurrency))
+          );
         }
       } else if (this.lastEditedField === "output") {
         if (!this.validateOutputAmount) {
@@ -875,11 +896,14 @@ export default {
           let tokenSold = await exchangeContract.methods
             .getTokenToEthOutputPrice(ethBought)
             .call();
-          this.form.inputValue = parseFloat(tokenSold / Math.pow(10, 18));
+          this.form.inputValue = parseFloat(
+            tokenSold / Math.pow(10, this.getDecimal(this.form.inputCurrency))
+          );
         } else if (this.swapType === "ETH_TO_TOKEN") {
           let exchangeContract = exchangeContracts[this.form.outputCurrency];
           let tokenBought = new BigNumber(
-            this.form.outputValue * Math.pow(10, 18)
+            this.form.outputValue *
+              Math.pow(10, this.getDecimal(this.form.outputCurrency))
           ).toFixed(0);
           let ethSold = await exchangeContract.methods
             .getEthToTokenOutputPrice(tokenBought)
@@ -888,7 +912,8 @@ export default {
         } else if (this.swapType === "TOKEN_TO_TOKEN") {
           let exchangeContractB = exchangeContracts[this.form.outputCurrency];
           let tokenSoldB = new BigNumber(
-            this.form.outputValue * Math.pow(10, 18)
+            this.form.outputValue *
+              Math.pow(10, this.getDecimal(this.form.outputCurrency))
           ).toFixed(0);
           let ethBought = await exchangeContractB.methods
             .getTokenToEthInputPrice(tokenSoldB)
@@ -899,7 +924,10 @@ export default {
           let tokenBoughtA = await exchangeContractA.methods
             .getEthToTokenInputPrice(ethSold)
             .call();
-          this.form.inputValue = parseFloat(tokenBoughtA / Math.pow(10, 18));
+          this.form.inputValue = parseFloat(
+            tokenBoughtA /
+              Math.pow(10, this.getDecimal(this.form.inputCurrency))
+          );
         }
       }
       this.updateExchangeRateAndSlippage();
@@ -914,23 +942,46 @@ export default {
         alert("Connection Issue to Server !");
         return;
       }
+      let approvedAmount =
+        parseFloat(this.form.approvedAmount) *
+        Math.pow(10, this.getDecimal(this.form.inputCurrency));
+      console.log(`approve amount: ${approvedAmount}`);
       this.approvedStatus = "waiting";
-      this.unlockTxHash = await unlockToken(
-        {
-          from: this.getAccount.address,
-          approvedAmount: this.form.approvedAmount * Math.pow(10, 18),
-          gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-          gasLimit: parseInt(this.gasLimit)
-        },
-        this.form.inputCurrency,
-        {
-          web3: this.web3,
-          exchangeAddress: this.getAvailableExchangeAddresses[
-            this.form.inputCurrency
-          ],
-          privateKey: this.getAccount.privateKey
-        }
-      );
+      if (this.getAccount.type === "metamask") {
+        this.unlockTxHash = await unlockTokenMetamask(
+          {
+            from: this.getAccount.address,
+            approvedAmount: parseInt(approvedAmount),
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: parseInt(this.gasLimit)
+          },
+          this.form.inputCurrency,
+          {
+            web3: this.web3Metamask,
+            exchangeAddress: this.getAvailableExchangeAddresses[
+              this.form.inputCurrency
+            ],
+            privateKey: this.getAccount.privateKey
+          }
+        );
+      } else {
+        this.unlockTxHash = await unlockToken(
+          {
+            from: this.getAccount.address,
+            approvedAmount: parseInt(approvedAmount),
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: parseInt(this.gasLimit)
+          },
+          this.form.inputCurrency,
+          {
+            web3: this.web3,
+            exchangeAddress: this.getAvailableExchangeAddresses[
+              this.form.inputCurrency
+            ],
+            privateKey: this.getAccount.privateKey
+          }
+        );
+      }
 
       // checking allowance
       let self = this;
@@ -938,7 +989,11 @@ export default {
         console.log("Checking allowance...");
         const allowance = await self.getAllowance(self.form.inputCurrency);
         if (
-          allowance == parseInt(self.form.approvedAmount * Math.pow(10, 18))
+          allowance ==
+          parseInt(
+            self.form.approvedAmount *
+              Math.pow(10, this.getDecimal(this.form.inputCurrency))
+          )
         ) {
           clearInterval(check);
           self.approvedStatus = true;
@@ -967,10 +1022,27 @@ export default {
       let exchangeContract = exchangeContracts[outputCurrency];
       if (this.getAccount.type === "metamask") {
         try {
+          if (inputCurrency !== "ETH") {
+            const allowance = await this.getAllowance(this.form.inputCurrency);
+            const input =
+              inputValue *
+              Math.pow(10, this.getDecimal(this.form.inputCurrency));
+            console.log(`Current token allowance is: ${allowance}`);
+            if (input > allowance) {
+              this.loading = false;
+              this.approvedStatus = false;
+              this.form.approvedAmount = this.form.inputValue * 1.5;
+              this.showModal("unlock_request_modal_ref");
+              return;
+            }
+          }
+
           this.txHash = await metamaskSwap({
             inputValue,
+            inputDecimal: this.getDecimal(inputCurrency),
             inputCurrency,
             outputValue,
+            outputDecimal: this.getDecimal(outputCurrency),
             outputCurrency,
             recipient,
             type,
@@ -1059,7 +1131,9 @@ export default {
             this.showSuccessToast(this.txHash);
           } else if (type === "TOKEN_TO_ETH") {
             exchangeContract = exchangeContracts[inputCurrency];
-            const tokenSold = new BigNumber(inputValue * Math.pow(10, 18));
+            const tokenSold = new BigNumber(
+              inputValue * Math.pow(10, this.getDecimal(inputCurrency))
+            );
             const exchangeRate = parseFloat(outputValue / inputValue);
             let minEth = new BigNumber(outputValue)
               .minus(exchangeRate)
@@ -1076,8 +1150,9 @@ export default {
             ];
             await this.updateGasLimitAndTxFee();
             const allowance = await this.getAllowance(this.form.inputCurrency);
-
-            const input = this.form.inputValue * Math.pow(10, 18);
+            const input =
+              this.form.inputValue *
+              Math.pow(10, this.getDecimal(this.form.inputCurrency));
             console.log(`Current token allowance is: ${allowance}`);
             if (input > allowance) {
               this.loading = false;
@@ -1088,7 +1163,9 @@ export default {
             }
             console.log({
               from: this.getAccount.address,
-              amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
+              amount:
+                parseFloat(this.form.inputValue) *
+                Math.pow(10, this.getDecimal(this.form.inputCurrency)),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: parseInt(this.gasLimit),
               tokenSold,
@@ -1098,7 +1175,9 @@ export default {
             this.txHash = await swapTokenToEth(
               {
                 from: this.getAccount.address,
-                amount: parseFloat(this.form.inputValue) * Math.pow(10, 18),
+                amount:
+                  parseFloat(this.form.inputValue) *
+                  Math.pow(10, this.getDecimal(this.form.inputCurrency)),
                 gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
                 gasLimit: parseInt(this.gasLimit),
                 tokenSold,
@@ -1122,29 +1201,10 @@ export default {
               inputCurrency
             ];
             const tokenASold = new BigNumber(
-              inputValue * Math.pow(10, 18)
+              inputValue *
+                Math.pow(10, this.getDecimal(this.form.inputCurrency))
             ).toNumber(0);
             const minTokenBBought = new BigNumber(1).toNumber(0);
-            // let exchangeRate;
-            // let minTokenBBought;
-            // if (inputCurrency === "ULT") {
-            //   exchangeRate = parseFloat(outputValue / inputValue);
-            //   minTokenBBought = new BigNumber(outputValue)
-            //     .minus(exchangeRate)
-            //     .multipliedBy(10 ** 18)
-            //     .toNumber(0);
-            // } else if (outputCurrency === "ULT") {
-            //   minTokenBBought = new BigNumber(outputValue)
-            //     .minus(1)
-            //     .multipliedBy(10 ** 18)
-            //     .toNumber(0);
-            // }
-            // if (minTokenBBought <= 0) {
-            //   minTokenBBought = new BigNumber(outputValue)
-            //     .multipliedBy(0.9)
-            //     .multipliedBy(10 ** 18)
-            //     .toNumber(0);
-            // }
             console.log(`Minimum token bought is ${minTokenBBought}`);
             const minEth = new BigNumber(1).toNumber(0);
             const outputTokenAddress = tokenAddressess[outputCurrency];
@@ -1152,7 +1212,9 @@ export default {
 
             // check allowance value for input token
             const allowance = await this.getAllowance(this.form.inputCurrency);
-            const input = this.form.inputValue * Math.pow(10, 18);
+            const input =
+              this.form.inputValue *
+              Math.pow(10, this.getDecimal(this.form.inputCurrency));
             console.log(`${inputCurrency} token allowance is: ${allowance}`);
             if (input > allowance) {
               this.loading = false;
@@ -1204,9 +1266,14 @@ export default {
     async getAllowance(inputCurrency) {
       try {
         let exchangeAddress = this.getAvailableExchangeAddresses[inputCurrency];
-        let tokenAddress = tokenAddressess[inputCurrency];
+        let token = this.getAvailableTokenList.find(
+          t => t.symbol === inputCurrency
+        );
         const accounts = await this.web3.eth.getAccounts();
-        const contract = new this.web3.eth.Contract(ERC20_ABI, tokenAddress);
+        const contract = new this.web3.eth.Contract(
+          ERC20_ABI,
+          token.tokenAddress
+        );
         let exchangeContract = exchangeContracts[inputCurrency];
         let address = this.getAccount.address;
         let allowance = await contract.methods
@@ -1256,8 +1323,12 @@ export default {
               .call();
             ethReserveA = new BigNumber(ethReserveA);
             tokenRserveA = new BigNumber(tokenRserveA);
-            let absPriceA = tokenRserveA.dividedBy(ethReserveA);
 
+            ethReserveA = ethReserveA.dividedBy(10 ** 18);
+            tokenRserveA = tokenRserveA.dividedBy(
+              10 ** this.getDecimal(inputCurrency)
+            );
+            let absPriceA = tokenRserveA.dividedBy(ethReserveA);
             let tokenExchangeAddressB = this.getAvailableExchangeAddresses[
               outputCurrency
             ];
@@ -1268,6 +1339,11 @@ export default {
               .call();
             ethReserveB = new BigNumber(ethReserveB);
             tokenReserveB = new BigNumber(tokenReserveB);
+
+            ethReserveB = ethReserveB.dividedBy(10 ** 18);
+            tokenReserveB = tokenReserveB.dividedBy(
+              10 ** this.getDecimal(outputCurrency)
+            );
             let absPriceB = tokenReserveB.dividedBy(ethReserveB);
 
             let absPrice = absPriceB.dividedBy(absPriceA);
@@ -1281,17 +1357,17 @@ export default {
           }
         } else if (outputCurrency === "ETH") {
           // token_to_eth
-          let absPrice = this.getPrice[inputCurrency] / this.getPrice["ETH"];
-          console.log(`Abs Price is : ${absPrice}`);
+          let absPrice = this.getAllTokenPrice[inputCurrency];
           absPrice = absPrice.toFixed(8);
+          console.log(`Abs Price is : ${absPrice}`);
           this.exchangeRate = outputValue / inputValue;
           this.slippage =
             (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
         }
       } else if (inputCurrency === "ETH" && outputCurrency !== "ETH") {
         // eth_to_token
-        let absPrice = this.getPrice["ETH"] / this.getPrice[outputCurrency];
-        absPrice = absPrice.toFixed(8);
+        let absPrice = this.getAllTokenPrice[outputCurrency];
+        absPrice = 1 / absPrice.toFixed(8);
         console.log(`Abs Price is : ${absPrice}`);
         this.exchangeRate = outputValue / inputValue;
         this.slippage =
