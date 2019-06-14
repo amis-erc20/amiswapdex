@@ -23,24 +23,36 @@ export default {
         return []
       }
       if (data.result.length > 0) {
-        // console.log(
-        //   `Actually returned: ${new Date(
-        //     from * 1000
-        //   ).toISOString()} - ${new Date(to * 1000).toISOString()}`
-        // )
-        // console.log(`Result result length: ${data.result.length}`)
         let arr = []
         arr.push(data.result[0])
         var bars = data.result.map(el => {
           return {
             time: parseInt(el.timestamp), // TradingView requires bar time in ms
-            low: el.low * el.price_eth_usd,
-            high: el.high * el.price_eth_usd,
-            open: el.open * el.price_eth_usd,
-            close: el.close * el.price_eth_usd,
-            volume: el.volume_eth * el.price_eth_usd
+            low: el.low,
+            high: el.high,
+            open: el.open,
+            close: el.close,
+            volume: el.volume_eth,
+            price_eth_usd: el.price_eth_usd
           }
         })
+        // console.log(bars)
+        for (let i = bars.length - 1; i >= 1; i--) {
+          bars[i].open = bars[i].open * bars[i - 1].price_eth_usd
+          bars[i].close = bars[i].close * bars[i].price_eth_usd
+          bars[i].high = bars[i].high * bars[i].price_eth_usd
+          bars[i].low = bars[i].low * bars[i].price_eth_usd
+          bars[i].volume = bars[i].volume * bars[i].price_eth_usd
+        }
+        bars[0].open = bars[0].open * bars[0].price_eth_usd
+        bars[0].close = bars[0].close * bars[0].price_eth_usd
+        bars[0].high = bars[0].high * bars[0].price_eth_usd
+        bars[0].low = bars[0].low * bars[0].price_eth_usd
+        bars[0].volume = bars[0].volume * bars[0].price_eth_usd
+
+        bars[bars.length - 1].close = bars[bars.length - 1].open
+
+        console.log(bars)
         if (first) {
           var lastBar = bars[bars.length - 1]
           history[symbolInfo.name] = { lastBar: lastBar }

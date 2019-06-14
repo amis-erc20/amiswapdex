@@ -4,12 +4,29 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/ramda/0.25.0/ramda.min.js"></script>
     <!-- <script src="http://localhost:8888/static/charting_library/charting_library.min.js"></script> -->
-    <script src="http://dev.uniswapdex.com:8888/static/charting_library/charting_library.min.js"></script>
+    <script :src="url"></script>
     <!-- <script src="../assets/js/_nuxt/addtohomescreen.js"></script> -->
     <!-- <link rel="stylesheet" type="text/css" href="../assets/css/addtohomescreen.css"> -->
     <nuxt/>
   </div>
 </template>
+
+<script>
+import config from "../config";
+console.log(
+  `${config.uniswapDexServer}static/charting_library/charting_library.min.js`
+);
+export default {
+  data: function() {
+    return {
+      url: `${
+        config.uniswapDexServer
+      }static/charting_library/charting_library.min.js`
+    };
+  }
+};
+</script>
+
 
 <style>
 html {

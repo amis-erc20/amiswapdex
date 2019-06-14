@@ -28,7 +28,7 @@ module.exports = {
       href: '/favicon.ico'
     }],
     script: [
-      // { src: '/charting_library/charting_library.min.js' }
+      // { src: 'http://localhost:8888/static/charting_library/charting_library.min.js' }
       // { src: '/charting_library/thant.js' }
     ]
   },

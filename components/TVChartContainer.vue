@@ -133,6 +133,7 @@ export default {
 
       setTimeout(() => {
         console.log("Trading view loaded");
+        console.log(window.TradingView);
         const tvWidget = (window.tvWidget = new window.TradingView.widget(
           widgetOptions
         ));
@@ -154,7 +155,7 @@ export default {
             );
           button[0].innerHTML = "Check API";
         });
-      }, 2000);
+      }, 3000);
 
       //   setTimeout(() => {
       //     self.showChart = true;
