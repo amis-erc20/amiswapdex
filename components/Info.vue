@@ -234,7 +234,7 @@ export default {
     let self = this;
     let previousTokenName = this.getActiveToken;
     this.setRows();
-    // setInterval(self.setRows, 10000);
+    setInterval(self.setRows, 15000);
   },
   beforeUpdate: function() {
     console.log("INFO updated");

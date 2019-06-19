@@ -60,14 +60,16 @@
               src="../assets/default-token.png"
               alt
             >
-            <h4>{{ getActiveToken }}</h4>
-            <!-- http://localhost:3000/?token=0x09617F6fD6cF8A71278ec86e23bBab29C04353a7 -->
+            <div class="token-symbol-name-group">
+              <h4>{{ getActiveToken }}</h4>
+              <span>{{activeTokenName}}</span>
+            </div>
             <font-awesome-icon
               class="copy-button-svg"
               icon="copy"
-              size="lg"
+              size="sm"
               color="#fff"
-              @click="closeTokenInfoModal"
+              @click="copyTokenUrl"
             />
           </div>
         </div>
@@ -261,6 +263,23 @@ export default {
       if (token) return token.logo;
       else if (this.getActiveToken === "ETH") return null;
       else return null;
+    },
+    activeTokenName() {
+      let self = this;
+      const token = this.getAvailableTokenList.find(
+        t => t.symbol === self.getActiveToken
+      );
+      if (token) return token.name;
+      else if (this.getActiveToken === "ETH") return "Ether";
+      else return null;
+    },
+    activeTokenAddress() {
+      let self = this;
+      const token = this.getAvailableTokenList.find(
+        t => t.symbol === self.getActiveToken
+      );
+      if (token) return token.tokenAddress;
+      else if (this.getActiveToken === "ETH") return "-";
     }
   },
   methods: {
@@ -313,6 +332,52 @@ export default {
       this.hideModal("token_info_modal");
       this.$emit("child-msg", this.msg);
       this.updateActiveToken(null);
+    },
+    fallbackCopyTextToClipboard(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        var successful = document.execCommand("copy");
+        var msg = successful ? "successful" : "unsuccessful";
+        console.log("Fallback: Copying text command was " + msg);
+      } catch (err) {
+        console.error("Fallback: Oops, unable to copy", err);
+      }
+
+      document.body.removeChild(textArea);
+    },
+    copyTextToClipboard(text) {
+      if (!navigator.clipboard) {
+        this.fallbackCopyTextToClipboard(text);
+        return;
+      }
+      navigator.clipboard.writeText(text).then(
+        function() {
+          console.log("Async: Copying to clipboard was successful!");
+        },
+        function(err) {
+          console.error("Async: Could not copy text: ", err);
+        }
+      );
+    },
+    copyTokenUrl() {
+      let tokenAddress = this.activeTokenAddress;
+      let url = `${window.location.href}?token=${tokenAddress}`;
+      this.copyTextToClipboard(url);
+      this.$toasted.show("Token URL is copied to clipboard.", {
+        theme: "outline",
+        position: "bottom-center",
+        duration: 5000,
+        action: {
+          text: "OK",
+          onClick: (e, toastObject) => {
+            toastObject.goAway(0);
+          }
+        }
+      });
     },
     onLogout() {
       this.updateAuthStatus(false);
@@ -529,6 +594,21 @@ export default {
 #token-info-modal .logo-title-container {
   position: relative;
   top: 5px;
+}
+#token-info-modal .logo-title-container div {
+  display: flex;
+  flex-direction: row;
+  background: red;
+}
+.token-symbol-name-group span {
+  color: #333;
+  font-size: 11px;
+  font-weight: normal;
+  text-align: left;
+}
+.token-symbol-name-group h4 {
+  text-align: left;
+  margin-bottom: 0px;
 }
 #menu-button {
   color: #a41de4;

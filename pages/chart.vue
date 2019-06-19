@@ -46,7 +46,7 @@ export default {
       type: String
     },
     datafeedUrl: {
-      default: "https://demo_feed.tradingview.com",
+      // default: "https://demo_feed.tradingview.com",
       type: String
     },
     libraryPath: {
@@ -63,7 +63,7 @@ export default {
       type: String
     },
     clientId: {
-      default: "tradingview.com",
+      default: "uniswapdex.com",
       type: String
     },
     userId: {
@@ -146,18 +146,17 @@ export default {
         interval: this.interval,
         container_id: this.containerId,
         library_path: this.libraryPath,
-        locale: getLanguageFromURL() || "en",
-        disabled_features: ["use_localstorage_for_settings"],
-        enabled_features: ["study_templates"],
         charts_storage_url: this.chartsStorageUrl,
-        charts_storage_api_version: this.chartsStorageApiVersion,
-        client_id: this.clientId,
-        user_id: this.userId,
-        fullscreen: this.fullscreen,
-        autosize: this.autosize,
-        studies_overrides: this.studiesOverrides
+        charts_storage_api_version: this.chartsStorageApiVersion
+        // locale: getLanguageFromURL() || "en",
+        // disabled_features: ["use_localstorage_for_settings"],
+        // enabled_features: ["study_templates"],
+        // client_id: this.clientId,
+        // user_id: this.userId,
+        // fullscreen: this.fullscreen,
+        // autosize: this.autosize,
+        // studies_overrides: this.studiesOverrides
       };
-
       setTimeout(() => {
         console.log("Trading view loaded");
         const tvWidget = (window.tvWidget = new window.TradingView.widget(
@@ -181,7 +180,7 @@ export default {
             );
           button[0].innerHTML = "Check API";
         });
-      }, 3000);
+      }, 2000);
     },
     destroyChart() {
       if (this.tvWidget !== null && this.tvWidget !== undefined) {

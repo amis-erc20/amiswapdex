@@ -8,7 +8,6 @@ const history = {}
 export default {
   history: history,
   getBars: function (symbolInfo, resolution, from, to, first, limit) {
-    // console.log(symbolInfo)
     const url =
       resolution === '1D'
         ? `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from}&&end=${to}`
@@ -16,7 +15,6 @@ export default {
           ? `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
           : `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
     return axios.get(url).then(response => {
-      console.log(url)
       let data = response.data
       if (!data.result || data.result.length === 0) {
         console.log('Backend API error:', data.Message)

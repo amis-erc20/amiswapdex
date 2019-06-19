@@ -45,7 +45,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency) => ({
     }
     setTimeout(function () {
       onSymbolResolvedCallback(symbol_stub)
-      console.log('Resolving that symbol....', symbol_stub)
+      // console.log('Resolving that symbol....', symbol_stub)
     }, 0)
   },
   getBars: function (
@@ -93,7 +93,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency) => ({
   },
   calculateHistoryDepth: (resolution, resolutionBack, intervalBack) => {
     //optional
-    console.log('=====calculateHistoryDepth running')
+    // console.log('=====calculateHistoryDepth running')
     // while optional, this makes sure we request 24 hours of minute data at a time
     // CryptoCompare's minute data endpoint will throw an error if we request data beyond 7 days in the past, and return no data
     return resolution < 60
@@ -102,7 +102,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency) => ({
   },
   getMarks: (symbolInfo, startDate, endDate, onDataCallback, resolution) => {
     //optional
-    console.log('=====getMarks running')
+    // console.log('=====getMarks running')
   },
   getTimeScaleMarks: (
     symbolInfo,

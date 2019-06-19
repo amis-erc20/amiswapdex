@@ -1089,7 +1089,6 @@ export const isValidPrivateKey = (key) => {
 export const getEvents = async (tokenAddress, limit = 50) => {
   try {
     let url = `${config.uniswapDexServer}api/event?tokenAddress=${tokenAddress}&limit=${limit}`
-    console.log(url)
     let response = await axios.get(url)
     return response.data.result
   } catch (e) {

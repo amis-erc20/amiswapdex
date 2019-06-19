@@ -707,12 +707,16 @@ export default {
 .exchangelist-title {
   display: flex;
   justify-content: space-between;
-  padding: 10px 15px;
+  padding: 15px 15px;
   font-size: 12px;
   font-weight: bolder;
   background: #d0d0d0;
   margin-bottom: 5px;
   cursor: pointer;
+  position: sticky;
+  height: 40px;
+  top: 126px;
+  z-index: 500;
 }
 .exchange-list-order {
   display: flex;

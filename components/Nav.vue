@@ -279,6 +279,10 @@ export default {
   flex-direction: row;
   justify-content: center;
 }
+#main-title-no-connection-container .logo-title-container h4 {
+  font-size: 18px;
+  font-weight: bold;
+}
 #uniswapdex-logo {
   width: 40px;
   height: 29px;
