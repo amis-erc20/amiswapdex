@@ -95,12 +95,21 @@ export default {
     ...mapActions({
       updateTransactionList: "transaction/updateTransactionList",
       updateActiveToken: "updateActiveToken",
-      updateCurrentView: "updateCurrentView"
+      updateCurrentView: "updateCurrentView",
+      updateChartInfo: "updateChartInfo"
     }),
     changeTokenTab: function(event, tokenName) {
       this.updateActiveToken(tokenName);
       this.showTokenInfoModal = true;
       this.updateCurrentView("tokeninfo");
+
+      let token = this.getAvailableTokenList.find(t => t.symbol === tokenName);
+      this.updateChartInfo({
+        currency: "ETH",
+        showChart: true,
+        tokenAddress: token.tokenAddress,
+        tokenName: tokenName
+      });
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;

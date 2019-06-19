@@ -12,6 +12,7 @@ import {
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
 import * as R from 'ramda'
+import config from '../../config.js';
 
 let exchangeAddresses = {}
 let tokenAddresses = {}
@@ -76,7 +77,6 @@ export const getWeb3 = function () {
       let web3 = new Web3(
         new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws/v3/398dbd17c02c4a37ba1a0e902742cf2b")
       )
-      console.log(web3)
       resolve(web3)
     } catch (e) {
       console.error(e)
@@ -1085,4 +1085,14 @@ export const isValidPrivateKey = (key) => {
   if (keyToCheck.length !== 64) return false
   if (!isValidHex(keyToCheck)) return false
   return finalKey
+}
+export const getEvents = async (tokenAddress, limit = 50) => {
+  try {
+    let url = `${config.uniswapDexServer}api/event?tokenAddress=${tokenAddress}&limit=${limit}`
+    console.log(url)
+    let response = await axios.get(url)
+    return response.data.result
+  } catch (e) {
+    return []
+  }
 }

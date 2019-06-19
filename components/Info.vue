@@ -57,13 +57,39 @@
       </b-row>
     </div>
 
-    <TVChartContainer v-if="showChart" :tokenAddress="selectedToken.tokenAddress"/>
+    <div>
+      <b-button-group class="buy-or-sell">
+        <b-button
+          v-bind:class="{ selected: chartCurrency === 'ETH' }"
+          class="switch-buy"
+          @click="changeSelectedCurrency('ETH')"
+        >{{ getActiveToken }} / ETH</b-button>
+        <b-button
+          v-bind:class="{ selected: chartCurrency === 'USD' }"
+          class="switch-sell"
+          @click="changeSelectedCurrency('USD')"
+        >{{ getActiveToken }} / USD</b-button>
+      </b-button-group>
+    </div>
+    <vue-friendly-iframe src="/chart"></vue-friendly-iframe>
+
+    <h5>Latest Transactions</h5>
+    <vue-good-table
+      :columns="columns"
+      :rows="rows"
+      :line-numbers="true"
+      max-height="500px"
+      :fixed-header="true"
+      v-if="getActiveToken !== 'ETH' && rows.length > 0"
+      :row-style-class="rowStyleClassFn"
+    />
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
+import moment from "moment";
 import config from "../config";
 import TVChartContainer from "~/components/TVChartContainer.vue";
 import {
@@ -76,14 +102,64 @@ import {
   getExchangeAddress,
   estimateGas,
   createNewExchange,
-  metamaskCreateNewExchange
+  metamaskCreateNewExchange,
+  getEvents
 } from "../assets/js/utils";
 export default {
   data: function() {
     return {
       summary: null,
       ethToUsd: 0,
-      showChart: true
+      chartCurrency: "ETH",
+      chartLoading: true,
+      columns: [
+        {
+          label: "Date",
+          field: "timestamp",
+          type: "string",
+          sortable: false,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-center",
+          width: "25%"
+        },
+        {
+          label: "Action",
+          field: "action",
+          sortable: false,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-center",
+          width: "10%"
+        },
+        {
+          label: `ETH Amount`,
+          field: "amount_eth",
+          type: "number",
+          sortable: false,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "20%"
+        },
+        {
+          label: `Token Amount`,
+          field: "amount_token",
+          type: "number",
+          sortable: false,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "20%"
+        },
+        {
+          label: "Tx Hash",
+          field: "tx_hash",
+          type: "string",
+          sortable: false,
+          html: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "25%"
+        }
+      ],
+      rows: []
     };
   },
   components: {
@@ -94,6 +170,7 @@ export default {
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
       getSummary: "getSummary",
+      getChartInfo: "getChartInfo",
       getAvailableTokenList: "account/getAvailableTokenList",
       getPrice: "account/getPrice",
       getEthPrice: "account/getEthPrice"
@@ -153,31 +230,55 @@ export default {
     }
     this.ethToUsd = ethPrice;
   },
-  // mounted: function() {
-  //   setTimeout(() => {
-  //     self.showChart = true;
-  //   }, 4000);
-  // },
+  mounted: function() {
+    let self = this;
+    let previousTokenName = this.getActiveToken;
+    this.setRows();
+    // setInterval(self.setRows, 10000);
+  },
+  beforeUpdate: function() {
+    console.log("INFO updated");
+    if (this.getActiveToken === null) this.chartCurrency = "ETH";
+
+    if (this.getActiveToken === null) {
+      this.rows = [];
+    } else if (this.getActiveToken !== null && this.rows.length === 0) {
+      this.setRows();
+    }
+  },
   methods: {
-    copyToClipboard(str) {
-      const el = document.createElement("textarea");
-      el.value = str;
-      el.setAttribute("readonly", "");
-      el.style.position = "absolute";
-      el.style.left = "-9999px";
-      document.body.appendChild(el);
-      const selected =
-        document.getSelection().rangeCount > 0
-          ? document.getSelection().getRangeAt(0)
-          : false;
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-      if (selected) {
-        // If a selection existed before copying
-        document.getSelection().removeAllRanges();
-        document.getSelection().addRange(selected);
+    ...mapActions({
+      updateChartInfo: "updateChartInfo"
+    }),
+    rowStyleClassFn(row) {
+      return "row-style";
+    },
+    async setRows() {
+      let token = this.selectedToken;
+      if (token.tokenAddress.length < 42) {
+        this.rows = [];
+        return;
       }
+      let events = await getEvents(token.tokenAddress, 100);
+      let result = events.map(e => ({
+        timestamp: moment(parseInt(e.timestamp)).calendar(),
+        action: e.action,
+        amount_eth: e.amount_eth.toFixed(4),
+        amount_token: e.amount_token.toFixed(4),
+        tx_hash: `<a href="https://etherscan.io/tx/${
+          e.tx_hash
+        }" target="_blanck">View on Etherscan</a>`
+      }));
+      this.rows = result;
+    },
+    changeSelectedCurrency(currency) {
+      this.chartCurrency = currency;
+      this.updateChartInfo({
+        tokenAddress: this.selectedToken.tokenAddress,
+        tokenName: this.getActiveToken,
+        currency: this.chartCurrency,
+        showChart: false
+      });
     },
     numberWithCommas(x) {
       var parts = x.toString().split(".");
@@ -195,7 +296,7 @@ export default {
   /* max-width: 650px; */
   margin: 0 auto;
   margin-top: 30px;
-  overflow: hidden;
+  overflow: scroll;
   padding-top: 55px;
   height: calc(100vh - 94px);
 }
@@ -220,5 +321,43 @@ export default {
 .token-info-table .row .col-8 a {
   font-size: 11px;
   text-align: right;
+}
+.vue-friendly-iframe > iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+}
+.vgt-wrap {
+  width: 90%;
+  margin: 20px auto;
+}
+.row-style {
+  font-size: 12px;
+  padding-top: 10px;
+}
+.custom-th-class {
+  color: #b14ae2 !important;
+  font-size: 13px;
+  text-align: center;
+}
+.custom-td-class-align-center {
+  /* width: 20% !important; */
+  padding: 10px !important;
+  text-align: center;
+}
+.custom-td-class-align-left {
+  /* width: 20% !important; */
+  padding: 10px !important;
+  text-align: left;
+}
+.custom-td-class-align-right {
+  /* width: 20% !important; */
+  padding: 10px !important;
+  text-align: right;
+}
+.vgt-table.bordered td,
+.vgt-table.bordered th {
+  border-left: 0px !important;
+  border-right: 0px !important;
 }
 </style>

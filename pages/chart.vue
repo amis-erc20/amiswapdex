@@ -1,8 +1,7 @@
 <template>
   <div>
-    <p style="display: block">{{ tokenAddress}} {{ currency }} {{tokenName}}</p>
-    <button @click="destroyChart">Remove</button>
-    <div class="TVChartContainer" :id="containerId">{{tokenAddress}}</div>
+    <p style="display: none">{{ tokenAddress}} {{ currency }} {{tokenName}}</p>
+    <div class="TVChartContainer" :id="containerId"></div>
   </div>
 </template>
 
@@ -22,14 +21,22 @@ export default {
   data: function() {
     return {
       tvWidget: null,
-      currentTokenAddress: ""
+      currentTokenAddress: "",
+      chartInfo: {
+        tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        tokenName: "USDC",
+        currency: "USD",
+        showChart: false
+      },
+      defaultChart: {
+        tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        tokenName: "USDC",
+        currency: "USD",
+        showChart: false
+      }
     };
   },
   props: {
-    symbol: {
-      default: "Shardus:ULT/ETH",
-      type: String
-    },
     interval: {
       default: "60",
       type: String
@@ -79,42 +86,58 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
-      getChartInfo: "getChartInfo",
+      getAvailableTokenList: "account/getAvailableTokenList",
       getSummary: "getSummary",
       getAvailableTokenList: "account/getAvailableTokenList",
       getPrice: "account/getPrice",
       getEthPrice: "account/getEthPrice"
     }),
     tokenAddress: function() {
-      return this.getChartInfo.tokenAddress;
+      return this.chartInfo.tokenAddress;
     },
     currency: function() {
-      return this.getChartInfo.currency;
+      return this.chartInfo.currency;
     },
     tokenName: function() {
-      return this.getChartInfo.tokenName;
+      return this.chartInfo.tokenName;
     }
   },
   mounted() {
     let self = this;
-    console.log("TV mounted...");
-    console.log(this.tokenAddress);
+    try {
+      self.chartInfo = JSON.parse(localStorage.getItem("chartInfo"));
+    } catch (e) {
+      self.chartInfo = self.defaultChart;
+    }
     this.initChart();
-    let previousTokenName = this.tokenName;
+    setInterval(() => {
+      try {
+        let newChartInfo = JSON.parse(localStorage.getItem("chartInfo"));
+        if (
+          newChartInfo.tokenName !== self.chartInfo.tokenName ||
+          newChartInfo.currency !== self.chartInfo.currency
+        ) {
+          self.chartInfo = newChartInfo;
+        }
+      } catch (e) {
+        // self.chartInfo = self.defaultChart;
+      }
+    }, 1000);
   },
-  // updated() {
-  //   console.log("updated");
-  //   console.log(this.tokenAddress);
-  //   this.initChart();
-  // },
+  updated() {
+    console.log("Chart Updated");
+    this.initChart();
+  },
   methods: {
     initChart() {
       let self = this;
       const widgetOptions = {
-        symbol: `Uniswap:${this.tokenName}/${this.currency}`,
+        symbol: `Uniswap:${self.chartInfo.tokenName}/${
+          self.chartInfo.currency
+        }`,
         datafeed: createDatafeed(
           this.tokenAddress,
-          this.getActiveToken,
+          this.tokenName,
           this.currency
         ),
         time_frames: [
@@ -135,11 +158,8 @@ export default {
         studies_overrides: this.studiesOverrides
       };
 
-      setInterval(() => {
-        // if (!this.getChartInfo.showChart) return;
-        if (self.tvWidget) return;
+      setTimeout(() => {
         console.log("Trading view loaded");
-        console.log(window.TradingView);
         const tvWidget = (window.tvWidget = new window.TradingView.widget(
           widgetOptions
         ));
@@ -180,7 +200,7 @@ export default {
 <style scoped>
 .TVChartContainer {
   height: 500px;
-  width: 70%;
+  width: 90%;
   margin: 30px auto;
 }
 </style>

@@ -61,6 +61,14 @@
               alt
             >
             <h4>{{ getActiveToken }}</h4>
+            <!-- http://localhost:3000/?token=0x09617F6fD6cF8A71278ec86e23bBab29C04353a7 -->
+            <font-awesome-icon
+              class="copy-button-svg"
+              icon="copy"
+              size="lg"
+              color="#fff"
+              @click="closeTokenInfoModal"
+            />
           </div>
         </div>
         <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
@@ -75,6 +83,7 @@
             @click="onTokenTabChange('info')"
           >
             <Info/>
+            <!-- <TVChartContainer/> -->
           </b-tab>
           <b-tab
             :active="activeTokenSubTab === 'balance'"
@@ -163,6 +172,7 @@ import Liquidity from "~/components/Liquidity.vue";
 import Tos from "~/components/Tos.vue";
 import About from "~/components/About.vue";
 import Noaccount from "~/components/Noaccount.vue";
+import TVChartContainer from "~/components/TVChartContainer.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
@@ -195,7 +205,8 @@ export default {
     Swap,
     Liquidity,
     Tos,
-    About
+    About,
+    TVChartContainer
   },
   props: ["show"],
   data: function() {
@@ -223,6 +234,7 @@ export default {
       getPrice: "account/getPrice",
       getRefresher: "account/getRefresher",
       getWeb3: "getWeb3",
+      getChartInfo: "getChartInfo",
       getSignIn: "getSignIn",
       getSummary: "getSummary",
       getConnection: "getConnection",
@@ -255,6 +267,7 @@ export default {
     ...mapActions({
       updateAuthRedirectUrl: "updateAuthRedirectUrl",
       updateSummary: "updateSummary",
+      updateChartInfo: "updateChartInfo",
       updateAuthStatus: "updateAuthStatus",
       updateActiveTab: "updateActiveTab",
       updateActiveToken: "updateActiveToken",
@@ -299,6 +312,7 @@ export default {
     closeTokenInfoModal() {
       this.hideModal("token_info_modal");
       this.$emit("child-msg", this.msg);
+      this.updateActiveToken(null);
     },
     onLogout() {
       this.updateAuthStatus(false);
@@ -383,6 +397,9 @@ export default {
   height: 44px;
   width: 100%;
   margin: 0 auto;
+  position: fixed;
+  top: 70px;
+  box-shadow: 0px 2px 3px 3px #e0e0e0;
 }
 #token-info-tabs-container .card-header-pills {
   width: 100%;
@@ -411,6 +428,7 @@ export default {
 #token-info-tabs-container .tab-content {
   position: relative;
   top: 0px;
+  padding-top: 40px;
 }
 #token-info-tabs-container .transactionlist-section {
   box-shadow: 0px 4px 3px #eee;
@@ -438,6 +456,9 @@ export default {
 #about_tos_modal .modal-header {
   border-radius: 0px !important;
   border: none;
+  position: fixed;
+  top: 0px;
+  z-index: 666;
 }
 
 #token_info_modal .token-info-section {
@@ -464,6 +485,9 @@ export default {
 #about_tos_modal .modal-body {
   padding: 0;
   background: #eceeef;
+  position: relative;
+  top: 70px;
+  z-index: 500;
 }
 
 #token_info_modal .modal-dialog,
@@ -563,6 +587,13 @@ export default {
   top: 5px;
   left: 10px;
   color: #a41de4;
+}
+.copy-button-svg {
+  position: relative;
+  cursor: pointer;
+  top: 5px;
+  left: 10px;
+  color: #bbc1c3;
 }
 @media screen and (max-width: 450px) {
   #token-info-tabs-container .nav-pills .nav-link {

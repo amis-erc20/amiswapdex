@@ -14,7 +14,13 @@ export const state = () => {
       tokenSubTab: 'info'
     },
     summary: [],
-    currentView: 'main'
+    currentView: 'main',
+    chartInfo: {
+      tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      tokenName: "USDC",
+      currency: "USD",
+      showChart: false
+    }
   }
 }
 
@@ -29,6 +35,7 @@ export const getters = {
   getCredentials: state => state.credentials,
   getAuthRedirectUrl: state => state.authRedirectUrl,
   getSummary: state => state.summary,
+  getChartInfo: state => state.chartInfo,
   getCurrentView: state => state.currentView,
   getAllTokenPrice: state => {
     let priceList = {}
@@ -71,6 +78,9 @@ export const actions = {
   updateAuthRedirectUrl(store, payload) {
     store.commit('updateAuthRedirectUrl', payload)
   },
+  updateChartInfo(store, payload) {
+    store.commit('updateChartInfo', payload)
+  },
   updateSummary(store, payload) {
     store.commit('updateSummary', payload)
   }
@@ -97,6 +107,11 @@ export const mutations = {
   },
   updateActiveTab(state, payload) {
     state.activeTab = payload
+  },
+  updateChartInfo(state, payload) {
+    state.chartInfo = payload
+    // console.log(payload)
+    localStorage.setItem('chartInfo', JSON.stringify(payload))
   },
   updateCredentials(state, payload) {
     state.credentials = payload

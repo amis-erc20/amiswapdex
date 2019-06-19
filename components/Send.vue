@@ -235,6 +235,7 @@ export default {
   mounted: async function() {
     let self = this;
     this.form.currency = this.getActiveToken;
+    console.log(this.getActiveToken);
     this.web3 = await getWeb3();
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
     if (estimatedGasPriceFromNetwork > 0) {

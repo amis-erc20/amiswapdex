@@ -4,6 +4,7 @@ import { interopDefault } from './utils'
 
 const _04028ce6 = () => interopDefault(import('../pages/about.vue' /* webpackChunkName: "pages/about" */))
 const _1c044b8e = () => interopDefault(import('../pages/backup.vue' /* webpackChunkName: "pages/backup" */))
+const _9bc69e92 = () => interopDefault(import('../pages/chart.vue' /* webpackChunkName: "pages/chart" */))
 const _bfabd41a = () => interopDefault(import('../pages/privatekey.vue' /* webpackChunkName: "pages/privatekey" */))
 const _7452642d = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
 const _1fbf86cc = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
@@ -96,6 +97,10 @@ export function createRouter() {
       path: "/backup",
       component: _1c044b8e,
       name: "backup"
+    }, {
+      path: "/chart",
+      component: _9bc69e92,
+      name: "chart"
     }, {
       path: "/privatekey",
       component: _bfabd41a,

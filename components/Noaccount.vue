@@ -129,7 +129,7 @@ export default {
 }
 .signin-method {
   text-align: center;
-  margin: 20px auto;
+  margin: 30px auto;
 }
 .no-account-container button {
   min-width: 110px;
@@ -159,6 +159,10 @@ export default {
 }
 #signin_modal .modal-content {
   height: 100vh;
+}
+#backup-btn {
+  text-transform: capitalize;
+  font-weight: normal;
 }
 </style>
 

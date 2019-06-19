@@ -453,6 +453,7 @@ export default {
     ...mapActions({
       updateAuthRedirectUrl: "updateAuthRedirectUrl",
       updateSummary: "updateSummary",
+      updateChartInfo: "updateChartInfo",
       updateActiveTab: "updateActiveTab",
       updateCurrentView: "updateCurrentView",
       updateActiveToken: "updateActiveToken",
@@ -607,6 +608,14 @@ export default {
       this.showTokenInfoModal = true;
       this.updateActiveToken(name);
       this.updateCurrentView("tokeninfo");
+
+      let token = this.getAvailableTokenList.find(t => t.symbol === name);
+      this.updateChartInfo({
+        currency: "ETH",
+        showChart: true,
+        tokenAddress: token.tokenAddress,
+        tokenName: name
+      });
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;

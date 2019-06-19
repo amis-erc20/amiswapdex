@@ -87,7 +87,8 @@ import {
   faPlus,
   faUpload,
   faChartLine,
-  faUndo
+  faUndo,
+  faCopy
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import "bootstrap/dist/css/bootstrap.css";
@@ -98,7 +99,12 @@ import vSelect from "vue-select";
 import Noaccount from "~/components/Noaccount.vue";
 import Toasted from "vue-toasted";
 import VueMq from "vue-mq";
+import VueGoodTablePlugin from "vue-good-table";
+import "vue-good-table/dist/vue-good-table.css";
+import VueFriendlyIframe from "vue-friendly-iframe";
 
+Vue.component("vue-friendly-iframe", VueFriendlyIframe);
+Vue.use(VueGoodTablePlugin);
 Vue.use(Toasted);
 Vue.use(VueMq, {
   breakpoints: {
@@ -141,6 +147,7 @@ library.add(faPlus);
 library.add(faUpload);
 library.add(faChartLine);
 library.add(faUndo);
+library.add(faCopy);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("v-select", vSelect);
 Vue.component("no-connection", NoConnection);
@@ -568,6 +575,18 @@ div {
   color: #fff;
   background-color: #773894;
   border-color: #773894;
+  height: 50px;
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: bolder;
+}
+.btn-outline-dark {
+  color: #343a40;
+  border-color: #343a40;
+  height: 50px;
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: bolder;
 }
 .btn-primary:hover,
 .btn-primary:active,

@@ -174,6 +174,15 @@ export default {
 }
 #copy-button {
   margin: 10px auto;
+  border: 1px solid #a823e4;
+  color: #a41ce3;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+#copy-button:hover,
+#copy-button:active {
+  background: #a823e4;
+  color: #fff;
 }
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {

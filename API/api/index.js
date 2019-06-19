@@ -8,13 +8,13 @@ const config = {
 }
 
 // export default {
-export const createDatafeed = (tokenAddress, tokenName) => ({
+export const createDatafeed = (tokenAddress, tokenName, currency) => ({
   onReady: cb => {
-    console.log('=====onReady running')
+    // console.log('=====onReady running')
     setTimeout(() => cb(config), 0)
   },
   searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {
-    console.log('====Search Symbols running')
+    // console.log('====Search Symbols running')
   },
   resolveSymbol: (
     symbolName,
@@ -24,8 +24,8 @@ export const createDatafeed = (tokenAddress, tokenName) => ({
     var split_data = symbolName.split(/[:/]/)
     var symbol_stub = {
       // name: symbolName,
-      name: `${tokenName}/USD`,
-      pro_name: `${tokenName}/USD`,
+      name: `${tokenName}/${currency}`,
+      pro_name: `${tokenName}/${currency}`,
       description: '',
       type: 'crypto',
       session: '24x7',
@@ -57,13 +57,14 @@ export const createDatafeed = (tokenAddress, tokenName) => ({
     onErrorCallback,
     firstDataRequest
   ) {
-    console.log('=====getBars running')
-    console.log(
-      `Requesting bars between ${new Date(from * 1000)} and ${new Date(
-        to * 1000
-      )}`
-    )
+    // console.log('=====getBars running')
+    // console.log(
+    //   `Requesting bars between ${new Date(from * 1000)} and ${new Date(
+    //     to * 1000
+    //   )}`
+    // )
     symbolInfo.tokenAddress = tokenAddress
+    symbolInfo.currency = currency
     historyProvider
       .getBars(symbolInfo, resolution, from, to, firstDataRequest)
       .then(bars => {
@@ -85,10 +86,10 @@ export const createDatafeed = (tokenAddress, tokenName) => ({
     subscribeUID,
     onResetCacheNeededCallback
   ) => {
-    console.log('=====subscribeBars runnning')
+    // console.log('=====subscribeBars runnning')
   },
   unsubscribeBars: subscriberUID => {
-    console.log('=====unsubscribeBars running')
+    // console.log('=====unsubscribeBars running')
   },
   calculateHistoryDepth: (resolution, resolutionBack, intervalBack) => {
     //optional
@@ -111,9 +112,9 @@ export const createDatafeed = (tokenAddress, tokenName) => ({
     resolution
   ) => {
     //optional
-    console.log('=====getTimeScaleMarks running')
+    // console.log('=====getTimeScaleMarks running')
   },
   getServerTime: cb => {
-    console.log('=====getServerTime running')
+    // console.log('=====getServerTime running')
   }
 })

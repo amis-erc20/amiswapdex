@@ -268,7 +268,7 @@ export default {
 }
 #metamask-access-btn {
   width: 100%;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   height: 50px;
   color: #fff;

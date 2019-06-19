@@ -36,23 +36,21 @@ export default {
             price_eth_usd: el.price_eth_usd
           }
         })
-        // console.log(bars)
-        for (let i = bars.length - 1; i >= 1; i--) {
-          bars[i].open = bars[i].open * bars[i - 1].price_eth_usd
-          bars[i].close = bars[i].close * bars[i].price_eth_usd
-          bars[i].high = bars[i].high * bars[i].price_eth_usd
-          bars[i].low = bars[i].low * bars[i].price_eth_usd
-          bars[i].volume = bars[i].volume * bars[i].price_eth_usd
+        if (symbolInfo.currency === 'USD') {
+          for (let i = bars.length - 1; i >= 1; i--) {
+            bars[i].open = bars[i].open * bars[i - 1].price_eth_usd
+            bars[i].close = bars[i].close * bars[i].price_eth_usd
+            bars[i].high = bars[i].high * bars[i].price_eth_usd
+            bars[i].low = bars[i].low * bars[i].price_eth_usd
+            bars[i].volume = bars[i].volume * bars[i].price_eth_usd
+          }
+          bars[0].open = bars[0].open * bars[0].price_eth_usd
+          bars[0].close = bars[0].close * bars[0].price_eth_usd
+          bars[0].high = bars[0].high * bars[0].price_eth_usd
+          bars[0].low = bars[0].low * bars[0].price_eth_usd
+          bars[0].volume = bars[0].volume * bars[0].price_eth_usd
         }
-        bars[0].open = bars[0].open * bars[0].price_eth_usd
-        bars[0].close = bars[0].close * bars[0].price_eth_usd
-        bars[0].high = bars[0].high * bars[0].price_eth_usd
-        bars[0].low = bars[0].low * bars[0].price_eth_usd
-        bars[0].volume = bars[0].volume * bars[0].price_eth_usd
-
         bars[bars.length - 1].close = bars[bars.length - 1].open
-
-        console.log(bars)
         if (first) {
           var lastBar = bars[bars.length - 1]
           history[symbolInfo.name] = { lastBar: lastBar }
