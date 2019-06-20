@@ -8,6 +8,7 @@
 <script>
 import { createDatafeed } from "../API/api/index";
 import { mapGetters } from "vuex";
+import { prepareChart } from "../assets/js/utils";
 function getLanguageFromURL() {
   const regex = new RegExp("[\\?&]lang=([^&#]*)");
   const results = regex.exec(window.location.search);
@@ -125,7 +126,6 @@ export default {
     }, 1000);
   },
   updated() {
-    console.log("Chart Updated");
     this.initChart();
   },
   methods: {
@@ -147,49 +147,30 @@ export default {
         container_id: this.containerId,
         library_path: this.libraryPath,
         charts_storage_url: this.chartsStorageUrl,
-        charts_storage_api_version: this.chartsStorageApiVersion
+        charts_storage_api_version: this.chartsStorageApiVersion,
+        autosize: this.autosize
         // locale: getLanguageFromURL() || "en",
         // disabled_features: ["use_localstorage_for_settings"],
         // enabled_features: ["study_templates"],
         // client_id: this.clientId,
         // user_id: this.userId,
         // fullscreen: this.fullscreen,
-        // autosize: this.autosize,
         // studies_overrides: this.studiesOverrides
       };
       setTimeout(() => {
-        console.log("Trading view loaded");
         const tvWidget = (window.tvWidget = new window.TradingView.widget(
           widgetOptions
         ));
         self.tvWidget = tvWidget;
         tvWidget.onChartReady(() => {
-          const button = tvWidget
-            .createButton()
-            .attr("title", "Click to show a notification popup")
-            .addClass("apply-common-tooltip")
-            .on("click", () =>
-              tvWidget.showNoticeDialog({
-                title: "Notification",
-                body: "TradingView Charting Library API works correctly",
-                callback: () => {
-                  // eslint-disable-next-line no-console
-                  console.log("Noticed!");
-                }
-              })
-            );
-          button[0].innerHTML = "Check API";
+          prepareChart(tvWidget);
         });
       }, 2000);
     },
     destroyChart() {
       if (this.tvWidget !== null && this.tvWidget !== undefined) {
-        console.log("Destroying widget");
         this.tvWidget.remove();
         this.tvWidget = null;
-      } else {
-        console.log("No need to destroy widget");
-        console.log(this.tvWidget);
       }
     }
   }

@@ -91,7 +91,6 @@ import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import moment from "moment";
 import config from "../config";
-import TVChartContainer from "~/components/TVChartContainer.vue";
 import {
   getWeb3,
   getWeb3Metamask,
@@ -161,9 +160,6 @@ export default {
       ],
       rows: []
     };
-  },
-  components: {
-    TVChartContainer
   },
   computed: {
     ...mapGetters({

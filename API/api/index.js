@@ -1,13 +1,11 @@
 import historyProvider from '../api/historyProvider'
 
-// const supportedResolutions = ["1", "3", "5", "15", "30", "60", "120", "240", "D"]
-const supportedResolutions = ['60']
-
+// https://github.com/tradingview/charting_library/wiki/Resolution
+const supportedResolutions = ['60', '240', '1D']
 const config = {
   supported_resolutions: supportedResolutions
 }
 
-// export default {
 export const createDatafeed = (tokenAddress, tokenName, currency) => ({
   onReady: cb => {
     // console.log('=====onReady running')

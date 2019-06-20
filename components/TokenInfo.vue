@@ -67,7 +67,7 @@
             <font-awesome-icon
               class="copy-button-svg"
               icon="copy"
-              size="sm"
+              size="md"
               color="#fff"
               @click="copyTokenUrl"
             />
@@ -174,7 +174,6 @@ import Liquidity from "~/components/Liquidity.vue";
 import Tos from "~/components/Tos.vue";
 import About from "~/components/About.vue";
 import Noaccount from "~/components/Noaccount.vue";
-import TVChartContainer from "~/components/TVChartContainer.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
@@ -207,8 +206,7 @@ export default {
     Swap,
     Liquidity,
     Tos,
-    About,
-    TVChartContainer
+    About
   },
   props: ["show"],
   data: function() {
@@ -673,7 +671,7 @@ export default {
   cursor: pointer;
   top: 5px;
   left: 10px;
-  color: #bbc1c3;
+  color: #7f7584;
 }
 @media screen and (max-width: 450px) {
   #token-info-tabs-container .nav-pills .nav-link {

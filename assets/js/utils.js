@@ -1095,3 +1095,29 @@ export const getEvents = async (tokenAddress, limit = 50) => {
     return []
   }
 }
+
+export const prepareChart = (widget) => {
+  console.log('Chart has loaded!')
+  let visibleRange
+  setTimeout(() => {
+    visibleRange = JSON.parse(localStorage.getItem('visibleRange'))
+    widget.chart().setVisibleRange(visibleRange.timeRange, function (err) {
+      if (err) console.log(`No visible range is stored`)
+    })
+    widget
+      .chart()
+      .onVisibleRangeChanged()
+      .subscribe(null, function () {
+        const { from, to } = widget.chart().getVisibleRange()
+        const priceRange = widget.chart().getVisiblePriceRange()
+        let visibleRange = {
+          timeRange: {
+            from: from,
+            to: to
+          },
+          priceRange: priceRange
+        }
+        localStorage.setItem('visibleRange', JSON.stringify(visibleRange))
+      })
+  }, 100)
+}

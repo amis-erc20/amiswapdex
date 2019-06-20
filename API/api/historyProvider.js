@@ -1,8 +1,6 @@
 import CONFIG from '../../config'
-import { state, getters } from '../../store/index'
+import axios from 'axios'
 const serverUrl = CONFIG.uniswapDexServer
-// var rp = require('request-promise').defaults({ json: true })
-var axios = require('axios')
 const history = {}
 
 export default {
@@ -10,10 +8,10 @@ export default {
   getBars: function (symbolInfo, resolution, from, to, first, limit) {
     const url =
       resolution === '1D'
-        ? `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from}&&end=${to}`
-        : resolution >= 60
+        ? `${serverUrl}api/histoday?tokenAddress=${symbolInfo.tokenAddress}&start=${from}&&end=${to}`
+        : resolution === 60
           ? `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
-          : `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
+          : `${serverUrl}api/histo4hour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
     return axios.get(url).then(response => {
       let data = response.data
       if (!data.result || data.result.length === 0) {
