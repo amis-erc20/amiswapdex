@@ -320,7 +320,7 @@ export default {
 }
 .vue-friendly-iframe > iframe {
   width: 100%;
-  height: 600px;
+  height: 540px;
   border: none;
 }
 .vgt-wrap {

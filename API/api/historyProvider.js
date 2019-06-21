@@ -6,12 +6,25 @@ const history = {}
 export default {
   history: history,
   getBars: function (symbolInfo, resolution, from, to, first, limit) {
-    const url =
-      resolution === '1D'
-        ? `${serverUrl}api/histoday?tokenAddress=${symbolInfo.tokenAddress}&start=${from}&&end=${to}`
-        : resolution === 60
-          ? `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
-          : `${serverUrl}api/histo4hour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
+    let url
+    if (symbolInfo.market) {
+      if (resolution === '60') {
+        url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
+      } else if (resolution === '240') {
+        url = `${serverUrl}api/histo4hourmarket?start=${from * 1000}&&end=${to * 1000}`
+      } else {
+        url = `${serverUrl}api/histodaymarket?start=${from * 1000}&&end=${to * 1000}`
+      }
+    } else {
+      if (resolution === '60') {
+        url = `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
+      } else if (resolution === '240') {
+        url = `${serverUrl}api/histo4hour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
+      } else {
+        url = `${serverUrl}api/histoday?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
+      }
+    }
+
     return axios.get(url).then(response => {
       let data = response.data
       if (!data.result || data.result.length === 0) {

@@ -329,7 +329,6 @@ export default {
     closeTokenInfoModal() {
       this.hideModal("token_info_modal");
       this.$emit("child-msg", this.msg);
-      this.updateActiveToken(null);
     },
     fallbackCopyTextToClipboard(text) {
       var textArea = document.createElement("textarea");
@@ -363,7 +362,7 @@ export default {
     },
     copyTokenUrl() {
       let tokenAddress = this.activeTokenAddress;
-      let url = `${window.location.href}?token=${tokenAddress}`;
+      let url = `${window.location.origin}/?token=${tokenAddress}`;
       this.copyTextToClipboard(url);
       this.$toasted.show("Token URL is copied to clipboard.", {
         theme: "outline",

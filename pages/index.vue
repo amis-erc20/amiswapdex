@@ -221,13 +221,32 @@ export default {
       setRefresher: "account/setRefresher",
       updateTransactionList: "transaction/updateTransactionList",
       updateTokenTransactionList: "transaction/updateTokenTransactionList",
-      updateAuthRedirectUrl: "updateAuthRedirectUrl"
+      updateAuthRedirectUrl: "updateAuthRedirectUrl",
+      updateChartInfo: "updateChartInfo"
     }),
     onTabChange(e) {
       let selectedTab = e.target.text.toLowerCase();
       this.updateActiveTab(selectedTab);
       if (selectedTab === "exchange") {
         this.updateAuthRedirectUrl({ url: "/", token: null });
+      }
+      if (selectedTab === "market") {
+        this.updateAuthRedirectUrl({ url: "/", token: null });
+        this.updateChartInfo({
+          tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          tokenName: "LIQUIDITY",
+          currency: "USD",
+          showChart: false,
+          market: true
+        });
+      } else {
+        this.updateChartInfo({
+          tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          tokenName: "USDC",
+          currency: "USD",
+          showChart: false,
+          market: false
+        });
       }
     },
     getBackupStatus() {

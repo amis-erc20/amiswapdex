@@ -6,7 +6,7 @@ const config = {
   supported_resolutions: supportedResolutions
 }
 
-export const createDatafeed = (tokenAddress, tokenName, currency) => ({
+export const createDatafeed = (tokenAddress, tokenName, currency, market) => ({
   onReady: cb => {
     // console.log('=====onReady running')
     setTimeout(() => cb(config), 0)
@@ -43,7 +43,6 @@ export const createDatafeed = (tokenAddress, tokenName, currency) => ({
     }
     setTimeout(function () {
       onSymbolResolvedCallback(symbol_stub)
-      // console.log('Resolving that symbol....', symbol_stub)
     }, 0)
   },
   getBars: function (
@@ -55,14 +54,9 @@ export const createDatafeed = (tokenAddress, tokenName, currency) => ({
     onErrorCallback,
     firstDataRequest
   ) {
-    // console.log('=====getBars running')
-    // console.log(
-    //   `Requesting bars between ${new Date(from * 1000)} and ${new Date(
-    //     to * 1000
-    //   )}`
-    // )
     symbolInfo.tokenAddress = tokenAddress
     symbolInfo.currency = currency
+    symbolInfo.market = market
     historyProvider
       .getBars(symbolInfo, resolution, from, to, firstDataRequest)
       .then(bars => {

@@ -1099,25 +1099,64 @@ export const getEvents = async (tokenAddress, limit = 50) => {
 export const prepareChart = (widget) => {
   console.log('Chart has loaded!')
   let visibleRange
+  let defaultTimeRange = {
+    to: parseInt(Date.now() / 1000),
+    from: parseInt(Date.now() / 1000) - 60 * 60 * 24 * 7
+  }
   setTimeout(() => {
-    visibleRange = JSON.parse(localStorage.getItem('visibleRange'))
-    widget.chart().setVisibleRange(visibleRange.timeRange, function (err) {
-      if (err) console.log(`No visible range is stored`)
-    })
+    try {
+      visibleRange = JSON.parse(localStorage.getItem('visibleRange'))
+      if (visibleRange) {
+        // widget.chart().setResolution(visibleRange.resolution, function (err) {
+        //   if (err) console.log(`Failed to set resolution for chart`)
+        // })
+        widget.chart().setVisibleRange(visibleRange.timeRange, function (err) {
+          if (err) console.log(`Failed to set visible range for chart`)
+        })
+      }
+    } catch (e) {
+      console.log(`No Visible Range value are detected.`)
+      widget.chart().setResolution('60', function (err) {
+        if (err) console.log(`Failed to set resolution for chart`)
+        else console.log(`Default resolution set to hourly.`)
+      })
+    }
     widget
       .chart()
       .onVisibleRangeChanged()
       .subscribe(null, function () {
         const { from, to } = widget.chart().getVisibleRange()
         const priceRange = widget.chart().getVisiblePriceRange()
-        let visibleRange = {
+        const currentResolution = widget.chart().resolution()
+        const range = (to - from) / (60 * 60 * 24) // range in days
+        if (range <= 0) return
+        // let newResolution
+        // if (range > 0 && range <= 10) newResolution = '60'
+        // else if (range > 10 && range <= 70) newResolution = '240'
+        // else if (range > 70) newResolution = '1D'
+        // console.log(`Visible Range has changed !`)
+        // console.log(range)
+        // console.log(`Current resolution is: ${currentResolution}`)
+        // console.log(`New resolution is: ${newResolution}`)
+        // console.log('-------------')
+        // if (currentResolution !== newResolution) {
+        //   let lastTimeRange = { from, to }
+        //   widget.chart().setResolution(newResolution, function (err) {
+        //     if (err) console.log(`Failed to set new resolution for chart`)
+        //     else {
+        //       console.log(`RESOLUTION SWITCHED FROM ${currentResolution} TO ${newResolution}.`)
+        //     }
+        //   })
+        // }
+        let visibleRangeToSave = {
           timeRange: {
             from: from,
             to: to
           },
-          priceRange: priceRange
+          priceRange,
+          resolution: currentResolution
         }
-        localStorage.setItem('visibleRange', JSON.stringify(visibleRange))
+        localStorage.setItem('visibleRange', JSON.stringify(visibleRangeToSave))
       })
   }, 100)
 }

@@ -1,27 +1,37 @@
 <template>
   <div class="market-section">
-    <div v-if="market" class="market-info-table">
-      <b-row class="count">
-        <b-col class="description">Number of Uniswap Contracts</b-col>
-        <b-col class="value">{{ market.count}}</b-col>
-      </b-row>
-      <b-row class="volume-eth">
-        <b-col class="description">24H Market Volume (ETH)</b-col>
-        <b-col class="value">{{ numberWithCommas(market.volume_eth.toFixed(0))}}</b-col>
-      </b-row>
-      <b-row class="volume-usd">
-        <b-col class="description">24H Market Volume (USD)</b-col>
-        <b-col class="value">$ {{ numberWithCommas(market.volume_usd.toFixed(0))}}</b-col>
-      </b-row>
-      <b-row class="total-eth">
-        <b-col class="description">Total amount of ETH in contracts</b-col>
-        <b-col class="value">{{ numberWithCommas(market.total_eth.toFixed(0))}}</b-col>
-      </b-row>
-      <b-row class="total-usd">
-        <b-col class="description">Total USD value of ETH in contracts</b-col>
-        <b-col class="value">$ {{ numberWithCommas(market.total_usd.toFixed(0))}}</b-col>
-      </b-row>
+    <div v-if="market">
+      <div class="market-info-table">
+        <b-row class="count">
+          <b-col class="description">Tokens with liquidity > 1 ETH</b-col>
+          <b-col class="value">{{ market.count}}</b-col>
+        </b-row>
+        <b-row class="count">
+          <b-col class="description"></b-col>
+          <b-col class="value"></b-col>
+        </b-row>
+
+        <b-row class="volume-usd">
+          <b-col class="description">24H Market Volume</b-col>
+          <b-col class="value">{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
+        </b-row>
+        <b-row class="volume-eth">
+          <b-col class="description"></b-col>
+          <b-col class="value">{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
+        </b-row>
+
+        <b-row class="total-usd">
+          <b-col class="description">Total Market Liquidity</b-col>
+          <b-col class="value">{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
+        </b-row>
+        <b-row class="total-eth">
+          <b-col class="description"></b-col>
+          <b-col class="value">{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
+        </b-row>
+      </div>
+      <vue-friendly-iframe src="/chart"></vue-friendly-iframe>
     </div>
+
     <div v-else class="loading-icon">
       <b-spinner label="Spinning"></b-spinner>
     </div>
@@ -111,6 +121,7 @@ export default {
   max-width: 650px;
   min-width: 300px;
   margin: 40px auto;
+  margin-bottom: 10px;
 }
 .market-info-table .row {
   height: 45px;
@@ -124,5 +135,10 @@ export default {
 }
 .loading-icon {
   margin-top: 50px;
+}
+.market-info-table .row.volume-eth .value,
+.market-info-table .row.total-eth .value {
+  font-size: 14px;
+  font-weight: normal;
 }
 </style>

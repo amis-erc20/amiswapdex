@@ -25,15 +25,17 @@ export default {
       currentTokenAddress: "",
       chartInfo: {
         tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        tokenName: "USDC",
+        tokenName: "LIQUIDITY",
         currency: "USD",
-        showChart: false
+        showChart: false,
+        market: true
       },
       defaultChart: {
         tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        tokenName: "USDC",
+        tokenName: "LIQUIDITY",
         currency: "USD",
-        showChart: false
+        showChart: false,
+        market: true
       }
     };
   },
@@ -101,15 +103,19 @@ export default {
     },
     tokenName: function() {
       return this.chartInfo.tokenName;
+    },
+    market: function() {
+      return this.chartInfo.market;
     }
   },
   mounted() {
     let self = this;
     try {
-      self.chartInfo = JSON.parse(localStorage.getItem("chartInfo"));
+      this.chartInfo = JSON.parse(localStorage.getItem("chartInfo"));
     } catch (e) {
-      self.chartInfo = self.defaultChart;
+      // self.chartInfo = self.defaultChart;
     }
+    if (this.chartInfo === null) this.chartInfo = this.defaultChart;
     this.initChart();
     setInterval(() => {
       try {
@@ -138,20 +144,32 @@ export default {
         datafeed: createDatafeed(
           this.tokenAddress,
           this.tokenName,
-          this.currency
+          this.currency,
+          this.market
         ),
         time_frames: [
-          { text: "3m", resolution: "60", description: "3 Months" }
+          { text: "3M", resolution: "1D", description: "3 Months" },
+          { text: "1m", resolution: "240", description: "1 Month" },
+          { text: "1W", resolution: "60", description: "1 Week" }
         ],
         interval: this.interval,
         container_id: this.containerId,
         library_path: this.libraryPath,
         charts_storage_url: this.chartsStorageUrl,
         charts_storage_api_version: this.chartsStorageApiVersion,
-        autosize: this.autosize
+        autosize: this.autosize,
+        disabled_features: [
+          "use_localstorage_for_settings",
+          "left_toolbar",
+          "header_compare",
+          "header_undo_redo",
+          "header_indicators"
+        ],
+        enabled_features: ["items_favoriting"],
+        favorites: {
+          intervals: ["60", "240", "1D"]
+        }
         // locale: getLanguageFromURL() || "en",
-        // disabled_features: ["use_localstorage_for_settings"],
-        // enabled_features: ["study_templates"],
         // client_id: this.clientId,
         // user_id: this.userId,
         // fullscreen: this.fullscreen,
@@ -181,6 +199,6 @@ export default {
 .TVChartContainer {
   height: 500px;
   width: 90%;
-  margin: 30px auto;
+  margin: 0px auto;
 }
 </style>
