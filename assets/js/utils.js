@@ -12,7 +12,7 @@ import {
 import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
 import * as R from 'ramda'
-import config from '../../config.js';
+import config from '../../config.js'
 
 let exchangeAddresses = {}
 let tokenAddresses = {}
@@ -75,7 +75,7 @@ export const getWeb3 = function () {
       //   'wss://mainnet.infura.io/v3/398dbd17c02c4a37ba1a0e902742cf2b'
       // )
       let web3 = new Web3(
-        new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws/v3/398dbd17c02c4a37ba1a0e902742cf2b")
+        new Web3.providers.WebsocketProvider('wss://mainnet.infura.io/ws/v3/398dbd17c02c4a37ba1a0e902742cf2b')
       )
       resolve(web3)
     } catch (e) {
@@ -286,7 +286,7 @@ export const signAndSendETH = async function (transaction, privateKey, web3) {
     to: transaction.to,
     value: transaction.amount
   },
-    privateKey
+  privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -372,7 +372,7 @@ export const sendToken = async function (tx, currency, privateKey, web3) {
     data: contract.methods.transfer(toAddress, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-    privateKey
+  privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -385,8 +385,6 @@ export const sendToken = async function (tx, currency, privateKey, web3) {
 }
 export const unlockToken = async (tx, tokenSymbol, data) => {
   console.log(tx)
-  console.log(data)
-  console.log(tokenSymbol)
   const web3 = data.web3
   const count = await web3.eth.getTransactionCount(tx.from)
   const amount = new BigNumber(tx.approvedAmount)
@@ -401,7 +399,7 @@ export const unlockToken = async (tx, tokenSymbol, data) => {
     data: contract.methods.approve(data.exchangeAddress, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-    data.privateKey
+  data.privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -456,7 +454,7 @@ export const swapTokenToEth = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-      privateKey
+    privateKey
     )
   } else {
     transaction = await web3.eth.accounts.signTransaction({
@@ -470,7 +468,7 @@ export const swapTokenToEth = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-      privateKey
+    privateKey
     )
   }
   return new Promise(resolve => {
@@ -508,7 +506,7 @@ export const swapEthToToken = async function (
             .encodeABI(),
           nonce: web3.utils.toHex(count)
         },
-          privateKey
+        privateKey
         )
       } else {
         transaction = await web3.eth.accounts.signTransaction({
@@ -522,7 +520,7 @@ export const swapEthToToken = async function (
             .encodeABI(),
           nonce: web3.utils.toHex(count)
         },
-          privateKey
+        privateKey
         )
       }
       web3.eth
@@ -569,7 +567,7 @@ export const swapTokenToToken = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-      privateKey
+    privateKey
     )
   } else {
     transaction = await web3.eth.accounts.signTransaction({
@@ -589,7 +587,7 @@ export const swapTokenToToken = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-      privateKey
+    privateKey
     )
   }
   return new Promise(resolve => {
@@ -634,7 +632,7 @@ export const addLiquidity = async function (
       .encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-    privateKey
+  privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -715,7 +713,7 @@ export const removeLiquidity = async function (
       .encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-    privateKey
+  privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -1125,7 +1123,10 @@ export const prepareChart = (widget) => {
       .chart()
       .onVisibleRangeChanged()
       .subscribe(null, function () {
-        const { from, to } = widget.chart().getVisibleRange()
+        const {
+          from,
+          to
+        } = widget.chart().getVisibleRange()
         const priceRange = widget.chart().getVisiblePriceRange()
         const currentResolution = widget.chart().resolution()
         const range = (to - from) / (60 * 60 * 24) // range in days

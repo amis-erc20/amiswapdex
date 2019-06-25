@@ -2,18 +2,18 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
-const _04028ce6 = () => interopDefault(import('../pages/about.vue' /* webpackChunkName: "pages/about" */))
-const _1c044b8e = () => interopDefault(import('../pages/backup.vue' /* webpackChunkName: "pages/backup" */))
-const _9bc69e92 = () => interopDefault(import('../pages/chart.vue' /* webpackChunkName: "pages/chart" */))
-const _bfabd41a = () => interopDefault(import('../pages/privatekey.vue' /* webpackChunkName: "pages/privatekey" */))
-const _7452642d = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
-const _1fbf86cc = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
-const _3b71da3e = () => interopDefault(import('../pages/recoverysetup.vue' /* webpackChunkName: "pages/recoverysetup" */))
-const _70d48a7a = () => interopDefault(import('../pages/resetpassword.vue' /* webpackChunkName: "pages/resetpassword" */))
-const _b1b11ad2 = () => interopDefault(import('../pages/scanner.vue' /* webpackChunkName: "pages/scanner" */))
-const _029bae4a = () => interopDefault(import('../pages/sendtoken.vue' /* webpackChunkName: "pages/sendtoken" */))
-const _0d66c5fb = () => interopDefault(import('../pages/welcome.vue' /* webpackChunkName: "pages/welcome" */))
-const _23ba67ab = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
+const _226b1ea1 = () => interopDefault(import('..\\pages\\about.vue' /* webpackChunkName: "pages_about" */))
+const _beb10044 = () => interopDefault(import('..\\pages\\backup.vue' /* webpackChunkName: "pages_backup" */))
+const _5ef57b1c = () => interopDefault(import('..\\pages\\chart.vue' /* webpackChunkName: "pages_chart" */))
+const _1ee33dd0 = () => interopDefault(import('..\\pages\\privatekey.vue' /* webpackChunkName: "pages_privatekey" */))
+const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* webpackChunkName: "pages_receivetoken" */))
+const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
+const _298bb99c = () => interopDefault(import('..\\pages\\recoverysetup.vue' /* webpackChunkName: "pages_recoverysetup" */))
+const _0eda617e = () => interopDefault(import('..\\pages\\resetpassword.vue' /* webpackChunkName: "pages_resetpassword" */))
+const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
+const _9ac22af6 = () => interopDefault(import('..\\pages\\sendtoken.vue' /* webpackChunkName: "pages_sendtoken" */))
+const _33f1d4f6 = () => interopDefault(import('..\\pages\\welcome.vue' /* webpackChunkName: "pages_welcome" */))
+const _4222f966 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
 Vue.use(Router)
 
@@ -91,51 +91,51 @@ export function createRouter() {
 
     routes: [{
       path: "/about",
-      component: _04028ce6,
+      component: _226b1ea1,
       name: "about"
     }, {
       path: "/backup",
-      component: _1c044b8e,
+      component: _beb10044,
       name: "backup"
     }, {
       path: "/chart",
-      component: _9bc69e92,
+      component: _5ef57b1c,
       name: "chart"
     }, {
       path: "/privatekey",
-      component: _bfabd41a,
+      component: _1ee33dd0,
       name: "privatekey"
     }, {
       path: "/receivetoken",
-      component: _7452642d,
+      component: _3cd07a12,
       name: "receivetoken"
     }, {
       path: "/recovery",
-      component: _1fbf86cc,
+      component: _6ad3519e,
       name: "recovery"
     }, {
       path: "/recoverysetup",
-      component: _3b71da3e,
+      component: _298bb99c,
       name: "recoverysetup"
     }, {
       path: "/resetpassword",
-      component: _70d48a7a,
+      component: _0eda617e,
       name: "resetpassword"
     }, {
       path: "/scanner",
-      component: _b1b11ad2,
+      component: _649afcdc,
       name: "scanner"
     }, {
       path: "/sendtoken",
-      component: _029bae4a,
+      component: _9ac22af6,
       name: "sendtoken"
     }, {
       path: "/welcome",
-      component: _0d66c5fb,
+      component: _33f1d4f6,
       name: "welcome"
     }, {
       path: "/",
-      component: _23ba67ab,
+      component: _4222f966,
       name: "index"
     }],
 

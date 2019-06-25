@@ -27,7 +27,8 @@
       <div v-if="token.balance !== `NaN`">
         <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
         <p class="token-amount-usd" v-else>-</p>
-        <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p>
+        <p class="token-amount">{{getBalance[token.name].toFixed(4)}} {{token.name}}</p>
+        <!-- <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p> -->
       </div>
       <p class="token-amount" v-else>loading...</p>
     </b-col>
@@ -45,7 +46,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getPrice: "account/getPrice"
+      getPrice: "account/getPrice",
+      getBalance: "account/getBalance"
     }),
     balanceInUsd: function() {
       if (this.token.balance && this.token.priceInUsd) {

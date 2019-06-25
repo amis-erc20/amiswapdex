@@ -7,7 +7,6 @@
         switch
       >Hide tokens with zero token amount</b-form-checkbox>
     </div>
-
     <div class="exchangelist-title">
       <div class="wallet-title-name">Token</div>
       <div class="wallet-title-price">Price</div>
@@ -50,6 +49,7 @@ export default {
       showTokenInfoModal: false
     };
   },
+  props: ["balance"],
   created: async function() {
     this.tokenAddresses = await getAllListedToken();
   },

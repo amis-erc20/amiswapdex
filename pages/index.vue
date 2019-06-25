@@ -18,14 +18,12 @@
           </b-tab>
           <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
             <b-card-text v-if="getSignIn">
-              <!-- <b-card-text> -->
-              <!-- <Header/> -->
               <div id="total-summary">
                 <h5>TOTAL VALUE</h5>
                 <h2 v-if="getTotalValue >= 1">$ {{ getTotalValue.toFixed(2) }}</h2>
                 <h2 v-else>$ {{ getTotalValue.toFixed(4) }}</h2>
               </div>
-              <Tokenlist/>
+              <Tokenlist :balance="tokenBalance"/>
               <periodic-backup :backupStatus="getBackupStatus()"/>
               <b-modal
                 ref="backup_advice_modal"
@@ -184,7 +182,8 @@ export default {
       currentTokenCount: 0,
       refreshInterval: null,
       redirecting: false,
-      web3: null
+      web3: null,
+      tokenBalance: {}
     };
   },
   computed: {
@@ -295,15 +294,27 @@ export default {
           let newTokenHolding = await getTokenHoldingByAnAccount(
             account.address
           );
+          let isBalanceChanged = false;
+          for (let i = 0; i < newTokenHolding.length; i++) {
+            let symbol = newTokenHolding[i].symbol;
+            if (symbol === "UNI-V1") continue;
+            if (self.getBalance[symbol] !== newTokenHolding[i].balance) {
+              isBalanceChanged = true;
+              break;
+            }
+          }
           if (
             txList.length !== this.getTransactionList.length ||
-            tokenTxList.length !== this.getTokenTransactionList.length
+            tokenTxList.length !== this.getTokenTransactionList.length ||
+            isBalanceChanged
           ) {
             console.log("UPDATING TXS and WALLET BALANCES");
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
               self.addToken(token);
+              self.updateBalance(token);
+              self.tokenBalance[token.symbol] = token.balance;
             });
             self.setOwnedTokenList(newTokenHolding);
           }
@@ -437,6 +448,7 @@ export default {
       }
     }
     const isRefresherExisted = self.getRefresher;
+    console.log(`is refresher existed: ${isRefresherExisted}`);
     if (!isRefresherExisted) {
       self.refreshInterval = setInterval(async () => {
         if (self.getSignIn) {
@@ -446,13 +458,15 @@ export default {
           } else {
             self.refreshWallet(web3);
           }
-        } else {
-          if (self.refreshInterval) {
-            clearInterval(self.refreshInterval);
-            self.refreshInterval = null;
-          }
         }
-      }, 15000);
+        // else {
+        //   if (self.refreshInterval) {
+        //     console.log("Clearing wallet refresher.");
+        //     clearInterval(self.refreshInterval);
+        //     self.refreshInterval = null;
+        //   }
+        // }
+      }, 3000);
     }
     let remoteBackupChecker = setTimeout(() => {
       self.checkRemoteBackup(web3);

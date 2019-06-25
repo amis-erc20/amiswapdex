@@ -7,7 +7,6 @@
           {{ calculateBalance(getBalance[getActiveToken]) }}
           <span>{{getActiveToken}}</span>
         </h2>
-        <!-- <p>{{ getBalance }}</p> -->
       </div>
     </div>
   </div>
@@ -40,9 +39,6 @@ export default {
     currentRoute() {
       return this.$route.path;
     }
-    // getBalance() {
-    //   return this.$store.state.account.balance;
-    // }
   },
   methods: {
     ...mapActions({
@@ -62,10 +58,9 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    // setInterval(() => {
-    //   self.balanceList = self.getBalance;
-    //   console.log(self.balanceList);
-    // }, 2000);
+    setInterval(() => {
+      self.balanceList = self.getBalance;
+    }, 2000);
   }
 };
 </script>
