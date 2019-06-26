@@ -1,7 +1,6 @@
 <template>
   <div>
-    <p style="display: none">{{ tokenAddress}} {{ currency }} {{tokenName}}</p>
-    <div class="TVChartContainer" :id="containerId"></div>
+    <div class="TVChartContainer" :id="containerIdTokenChart"></div>
   </div>
 </template>
 
@@ -9,33 +8,32 @@
 import { createDatafeed } from "../API/api/index";
 import { mapGetters } from "vuex";
 import { prepareChart } from "../assets/js/utils";
+function getLanguageFromURL() {
+  const regex = new RegExp("[\\?&]lang=([^&#]*)");
+  const results = regex.exec(window.location.search);
+  return results === null
+    ? null
+    : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
 export default {
-  name: "TVChartContainer",
+  name: "TVVolumeChartContainer",
   data: function() {
     return {
       tvWidget: null,
       currentTokenAddress: "",
       chartInfo: {
-        tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        tokenName: "USDC",
-        currency: "USD",
-        type: "txs"
-      },
-      defaultChart: {
-        tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        tokenName: "USDC",
-        currency: "USD",
-        type: "txs"
+        tokenName: "TOKEN",
+        type: 'token'
       }
     };
   },
   props: {
     interval: {
-      default: "60",
+      default: "1D",
       type: String
     },
-    containerId: {
+    containerIdTokenChart: {
       default: "tv_chart_container",
       type: String
     },
@@ -80,42 +78,11 @@ export default {
       getAvailableTokenList: "account/getAvailableTokenList",
       getPrice: "account/getPrice",
       getEthPrice: "account/getEthPrice"
-    }),
-    tokenAddress: function() {
-      return this.chartInfo.tokenAddress;
-    },
-    currency: function() {
-      return this.chartInfo.currency;
-    },
-    tokenName: function() {
-      return this.chartInfo.tokenName;
-    },
-    market: function() {
-      return this.chartInfo.market;
-    }
+    })
   },
   mounted() {
     let self = this;
-    try {
-      this.chartInfo = JSON.parse(localStorage.getItem("chartInfo"));
-    } catch (e) {
-      // self.chartInfo = self.defaultChart;
-    }
-    if (this.chartInfo === null) this.chartInfo = this.defaultChart;
     this.initChart();
-    setInterval(() => {
-      try {
-        let newChartInfo = JSON.parse(localStorage.getItem("chartInfo"));
-        if (
-          newChartInfo.tokenName !== self.chartInfo.tokenName ||
-          newChartInfo.currency !== self.chartInfo.currency
-        ) {
-          self.chartInfo = newChartInfo;
-        }
-      } catch (e) {
-        // self.chartInfo = self.defaultChart;
-      }
-    }, 1000);
   },
   updated() {
     this.initChart();
@@ -124,14 +91,13 @@ export default {
     initChart() {
       let self = this;
       const widgetOptions = {
-        symbol: `Uniswap:${self.chartInfo.tokenName}/${
-          self.chartInfo.currency
+        symbol: `Uniswap:${self.chartInfo.tokenName}/QTY
         }`,
         datafeed: createDatafeed(
-          this.tokenAddress,
-          this.tokenName,
-          this.currency,
-         "txs"
+          null,
+          this.chartInfo.tokenName,
+          'TOKEN',
+          this.chartInfo.type
         ),
         time_frames: [
           { text: "3M", resolution: "1D", description: "3 Months" },
@@ -139,7 +105,7 @@ export default {
           { text: "1W", resolution: "60", description: "1 Week" }
         ],
         interval: this.interval,
-        container_id: this.containerId,
+        container_id: this.containerIdTokenChart,
         library_path: this.libraryPath,
         charts_storage_url: this.chartsStorageUrl,
         charts_storage_api_version: this.chartsStorageApiVersion,
@@ -153,7 +119,7 @@ export default {
         ],
         enabled_features: ["items_favoriting"],
         favorites: {
-          intervals: ["60", "240", "1D"]
+          intervals: ["1D"]
         }
       };
       setTimeout(() => {

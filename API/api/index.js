@@ -6,7 +6,7 @@ const config = {
   supported_resolutions: supportedResolutions
 }
 
-export const createDatafeed = (tokenAddress, tokenName, currency, market) => ({
+export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
   onReady: cb => {
     // console.log('=====onReady running')
     setTimeout(() => cb(config), 0)
@@ -56,7 +56,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency, market) => ({
   ) {
     symbolInfo.tokenAddress = tokenAddress
     symbolInfo.currency = currency
-    symbolInfo.market = market
+    symbolInfo.type = type
     historyProvider
       .getBars(symbolInfo, resolution, from, to, firstDataRequest)
       .then(bars => {

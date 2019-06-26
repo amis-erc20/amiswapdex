@@ -1111,6 +1111,10 @@ export const prepareChart = (widget) => {
         widget.chart().setVisibleRange(visibleRange.timeRange, function (err) {
           if (err) console.log(`Failed to set visible range for chart`)
         })
+      } else {
+        widget.chart().setVisibleRange(defaultTimeRange, function (err) {
+          if (err) console.log(`Failed to set default visible range for chart`)
+        })
       }
     } catch (e) {
       console.log(`No Visible Range value are detected.`)

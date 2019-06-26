@@ -1,14 +1,11 @@
 <template>
   <div class="market-section">
     <div v-if="market">
+      <!-- <h4>SUMMARY</h4> -->
       <div class="market-info-table">
         <b-row class="count">
-          <b-col class="description">Tokens with liquidity > 1 ETH</b-col>
+          <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
           <b-col class="value">{{ market.count}}</b-col>
-        </b-row>
-        <b-row class="count">
-          <b-col class="description"></b-col>
-          <b-col class="value"></b-col>
         </b-row>
 
         <b-row class="volume-usd">
@@ -29,7 +26,9 @@
           <b-col class="value">{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
         </b-row>
       </div>
-      <vue-friendly-iframe src="/chart"></vue-friendly-iframe>
+      <vue-friendly-iframe src="/liquiditychart"></vue-friendly-iframe>
+      <vue-friendly-iframe src="/volumechart"></vue-friendly-iframe>
+      <vue-friendly-iframe src="/tokenchart"></vue-friendly-iframe>
     </div>
 
     <div v-else class="loading-icon">
@@ -41,6 +40,7 @@
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import config from "../config";
+import * as R from 'ramda'
 import {
   getULTToUSDPrice,
   getETHToUSDPrice,
@@ -97,8 +97,19 @@ export default {
     },
     async updateMarketInfo(force = false) {
       if (this.getActiveTab === "market" || force === true) {
+        let data = {}
         let res = await axios.get(`${config.uniswapDexServer}api/marketdata`);
-        this.market = res.data.market;
+        if (res.data.market) {
+        console.log(res.data.market)
+        data.count = res.data.market.count;
+        data.total_usd = res.data.market.total_usd;
+        data.total_eth = res.data.market.total_eth;
+        }
+        let volumeResponse = await axios.get(`${config.uniswapDexServer}api/histodayvolume`);
+        let todayVolume = R.last(volumeResponse.data.result)
+        data.volume_eth = todayVolume.amount_eth
+        data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd
+        this.market = data
       }
     }
   },
@@ -116,12 +127,17 @@ export default {
 
 <style>
 .market-info-table {
-  height: 300px;
+  height: 200px;
   width: 50%;
   max-width: 650px;
   min-width: 300px;
-  margin: 40px auto;
-  margin-bottom: 10px;
+  font-size: 15px;
+  margin: 60px auto;
+  margin-bottom: 70px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0px 2px 2px #ccc;
 }
 .market-info-table .row {
   height: 45px;
@@ -138,7 +154,19 @@ export default {
 }
 .market-info-table .row.volume-eth .value,
 .market-info-table .row.total-eth .value {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: normal;
+}
+
+.market-info-table .row.volume-usd,
+.market-info-table .row.total-usd {
+  height: 25px;
+}
+.market-info-table .row.volume-eth,
+.market-info-table .row.total-eth {
+  height: 35px;
+}
+.market-info-table .row.count {
+  height: 55px;
 }
 </style>

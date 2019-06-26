@@ -233,7 +233,6 @@ export default {
     setInterval(self.setRows, 15000);
   },
   beforeUpdate: function() {
-    console.log("INFO updated");
     if (this.getActiveToken === null) this.chartCurrency = "ETH";
 
     if (this.getActiveToken === null) {

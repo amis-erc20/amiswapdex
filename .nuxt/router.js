@@ -5,6 +5,7 @@ import { interopDefault } from './utils'
 const _226b1ea1 = () => interopDefault(import('..\\pages\\about.vue' /* webpackChunkName: "pages_about" */))
 const _beb10044 = () => interopDefault(import('..\\pages\\backup.vue' /* webpackChunkName: "pages_backup" */))
 const _5ef57b1c = () => interopDefault(import('..\\pages\\chart.vue' /* webpackChunkName: "pages_chart" */))
+const _23922a48 = () => interopDefault(import('..\\pages\\liquiditychart.vue' /* webpackChunkName: "pages_liquiditychart" */))
 const _1ee33dd0 = () => interopDefault(import('..\\pages\\privatekey.vue' /* webpackChunkName: "pages_privatekey" */))
 const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* webpackChunkName: "pages_receivetoken" */))
 const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
@@ -12,6 +13,8 @@ const _298bb99c = () => interopDefault(import('..\\pages\\recoverysetup.vue' /* 
 const _0eda617e = () => interopDefault(import('..\\pages\\resetpassword.vue' /* webpackChunkName: "pages_resetpassword" */))
 const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
 const _9ac22af6 = () => interopDefault(import('..\\pages\\sendtoken.vue' /* webpackChunkName: "pages_sendtoken" */))
+const _b725ffbe = () => interopDefault(import('..\\pages\\tokenchart.vue' /* webpackChunkName: "pages_tokenchart" */))
+const _6de4e8d0 = () => interopDefault(import('..\\pages\\volumechart.vue' /* webpackChunkName: "pages_volumechart" */))
 const _33f1d4f6 = () => interopDefault(import('..\\pages\\welcome.vue' /* webpackChunkName: "pages_welcome" */))
 const _4222f966 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
@@ -102,6 +105,10 @@ export function createRouter() {
       component: _5ef57b1c,
       name: "chart"
     }, {
+      path: "/liquiditychart",
+      component: _23922a48,
+      name: "liquiditychart"
+    }, {
       path: "/privatekey",
       component: _1ee33dd0,
       name: "privatekey"
@@ -129,6 +136,14 @@ export function createRouter() {
       path: "/sendtoken",
       component: _9ac22af6,
       name: "sendtoken"
+    }, {
+      path: "/tokenchart",
+      component: _b725ffbe,
+      name: "tokenchart"
+    }, {
+      path: "/volumechart",
+      component: _6de4e8d0,
+      name: "volumechart"
     }, {
       path: "/welcome",
       component: _33f1d4f6,
