@@ -153,7 +153,8 @@ export default {
         ],
         enabled_features: ["items_favoriting"],
         favorites: {
-          intervals: ["60", "240", "1D"]
+          intervals: ["60", "240", "1D"],
+          chartTypes: ["Area", "Candles"]
         }
       };
       setTimeout(() => {

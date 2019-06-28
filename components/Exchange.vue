@@ -29,10 +29,10 @@
     <div v-if="tokenList" class="exchangelist-section">
       <div class="show-low-liquidity">
         <b-form-checkbox
-          v-model="showLowLiquidityToken"
+          v-model="hideLowLiquidityToken"
           name="check-button"
           switch
-        >Show tokens with liquidity less than 1 ETH</b-form-checkbox>
+        >Hide tokens with liquidity less than 1 ETH</b-form-checkbox>
       </div>
       <div v-if="tokenList.length > 0" class="exchangelist-title">
         <div class="title-order">No</div>
@@ -297,7 +297,7 @@ export default {
       infoMessage: "",
       txHash: "",
       loading: false,
-      showLowLiquidityToken: false,
+      hideLowLiquidityToken: true,
       showTokenInfoModal: false,
       redirecting: false,
       shouldClearTabs: "NO"
@@ -366,7 +366,7 @@ export default {
           };
         })
         .filter(token => {
-          if (this.showLowLiquidityToken) {
+          if (!this.hideLowLiquidityToken) {
             return true;
           } else {
             return token.liquidity / ethToUsd > 1;

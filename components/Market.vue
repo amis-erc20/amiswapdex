@@ -4,12 +4,12 @@
       <!-- <h4>SUMMARY</h4> -->
       <div class="market-info-table">
         <b-row class="count">
-          <b-col class="description" cols="8">Total Listed Tokens</b-col>
-          <b-col class="value">{{ market.count}}</b-col>
-        </b-row>
-        <b-row class="count">
           <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
           <b-col class="value">{{ market.count1ETH}}</b-col>
+        </b-row>
+        <b-row class="count-all">
+          <b-col class="description" cols="8">(All Tokens)</b-col>
+          <b-col class="value">({{ market.count}})</b-col>
         </b-row>
 
         <b-row class="volume-usd">
@@ -140,7 +140,7 @@ export default {
 
 <style>
 .market-info-table {
-  height: 250px;
+  height: 230px;
   width: 50%;
   max-width: 650px;
   min-width: 300px;
@@ -180,6 +180,10 @@ export default {
   height: 35px;
 }
 .market-info-table .row.count {
+  height: 25px;
+}
+.market-info-table .row.count-all {
   height: 55px;
+  font-size:  13px;
 }
 </style>

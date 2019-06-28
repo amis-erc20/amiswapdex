@@ -116,11 +116,16 @@ export default {
           "left_toolbar",
           "header_compare",
           "header_undo_redo",
-          "header_indicators"
+          "header_indicators",
+          "header_resolutions"
         ],
         enabled_features: ["items_favoriting"],
         favorites: {
-          intervals: ["1D"]
+          intervals: ["1D"],
+          chartTypes: ["Area", "Candles"]
+        },
+        overrides: {
+          'mainSeriesProperties.style': 2,
         }
       };
       setTimeout(() => {

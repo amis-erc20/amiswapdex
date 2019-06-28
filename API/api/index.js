@@ -1,14 +1,16 @@
 import historyProvider from '../api/historyProvider'
 
 // https://github.com/tradingview/charting_library/wiki/Resolution
-const supportedResolutions = ['60', '240', '1D']
+let supportedResolutions = ['60', '240', '1D']
 const config = {
   supported_resolutions: supportedResolutions
+}
+const configMarketCharts = {
+  support_market_resolutions: ['1D']
 }
 
 export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
   onReady: cb => {
-    // console.log('=====onReady running')
     setTimeout(() => cb(config), 0)
   },
   searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {
