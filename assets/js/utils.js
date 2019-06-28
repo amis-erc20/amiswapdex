@@ -776,7 +776,7 @@ export const metamaskRemoveLiquidity = async function (
 }
 export const metamaskSwap = async function (data) {
   // const ALLOWED_SLIPPAGE = 0.00001
-  const ALLOWED_SLIPPAGE = 0.02
+  const ALLOWED_SLIPPAGE = 0
   let web3Metamask = await getWeb3Metamask()
   let {
     inputValue,
@@ -786,7 +786,9 @@ export const metamaskSwap = async function (data) {
     outputDecimal,
     outputCurrency,
     type,
-    recipient
+    recipient,
+    gasPrice,
+    gasLimit
   } = data
   const blockNumber = await web3Metamask.eth.getBlockNumber()
   const block = await web3Metamask.eth.getBlock(blockNumber)
@@ -808,7 +810,9 @@ export const metamaskSwap = async function (data) {
         exchangeContract.methods.ethToTokenTransferInput(min_token, deadline, recipient)
           .send({
             from: accounts[0],
-            value: amount
+            value: amount,
+            gasLimit: gasLimit,
+            gasPrice: gasPrice
           }, (err, data) => {
             if (err) {
               console.log(err)
@@ -818,10 +822,13 @@ export const metamaskSwap = async function (data) {
             }
           })
       } else {
+        console.log(gasPrice, gasLimit)
         exchangeContract.methods.ethToTokenSwapInput(min_token, deadline)
           .send({
             from: accounts[0],
-            value: amount
+            value: amount,
+            gasLimit: gasLimit,
+            gasPrice: gasPrice
           }, (err, data) => {
             if (err) {
               console.log(err)
@@ -845,7 +852,9 @@ export const metamaskSwap = async function (data) {
       if (recipient) {
         exchangeContract.methods.tokenToEthTransferInput(tokenSold, minEth, deadline, recipient)
           .send({
-            from: accounts[0]
+            from: accounts[0],
+            gasLimit: gasLimit,
+            gasPrice: gasPrice
           }, (err, data) => {
             if (err) {
               console.log(`Transaction is not submitted`)
@@ -858,7 +867,9 @@ export const metamaskSwap = async function (data) {
       } else {
         exchangeContract.methods.tokenToEthSwapInput(tokenSold, minEth, deadline)
           .send({
-            from: accounts[0]
+            from: accounts[0],
+            gasLimit: gasLimit,
+            gasPrice: gasPrice
           }, (err, data) => {
             if (err) {
               console.log(`Transaction is not submitted`)
@@ -890,7 +901,9 @@ export const metamaskSwap = async function (data) {
           recipient,
           outputTokenAddress
         ).send({
-          from: accounts[0]
+          from: accounts[0],
+          gasLimit: gasLimit,
+          gasPrice: gasPrice
         }, (err, data) => {
           if (err) {
             console.log(err)
@@ -907,7 +920,9 @@ export const metamaskSwap = async function (data) {
           deadline,
           outputTokenAddress
         ).send({
-          from: accounts[0]
+          from: accounts[0],
+          gasLimit: gasLimit,
+          gasPrice: gasPrice
         }, (err, data) => {
           if (err) {
             console.log(err)
@@ -964,7 +979,9 @@ export const metamaskSendToken = async function (data) {
     from,
     to,
     value,
-    currency
+    currency,
+    gasLimit,
+    gasPrice
   } = data
   const ethereum = window.ethereum
   let web3 = await getWeb3Metamask()
@@ -982,7 +999,9 @@ export const metamaskSendToken = async function (data) {
     to: contractAddress,
     value: '0x0',
     data: contract.methods.transfer(to, amount).encodeABI(),
-    nonce: web3.utils.toHex(count)
+    nonce: web3.utils.toHex(count),
+    gasPrice: web3.utils.toHex(gasPrice),
+    gasLimit: web3.utils.toHex(gasLimit)
   }
   return new Promise((resolve, reject) => {
     web3.eth.sendTransaction(transactionParameters).on('transactionHash', function (hash) {

@@ -104,12 +104,22 @@ export default {
       this.updateCurrentView("tokeninfo");
 
       let token = this.getAvailableTokenList.find(t => t.symbol === tokenName);
-      this.updateChartInfo({
-        currency: "ETH",
-        showChart: true,
-        tokenAddress: token.tokenAddress,
-        tokenName: tokenName
-      });
+      if (token) {
+        this.updateChartInfo({
+          currency: "ETH",
+          showChart: true,
+          tokenAddress: token.tokenAddress,
+          tokenName: tokenName
+        });
+      } 
+      // else {
+      //   this.updateChartInfo({
+      //     currency: "ETH",
+      //     showChart: true,
+      //     tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      //     tokenName: "USDC"
+      //   });
+      // }
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;

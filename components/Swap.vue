@@ -179,7 +179,6 @@
               <b-form-input
                 type="text"
                 v-model="form.targetAddress"
-                required
                 placeholder="Enter receiver address"
                 :state="validateTargetAddress"
               />
@@ -353,7 +352,7 @@ export default {
       },
       web3: null,
       web3Metamask: null,
-      ALLOWED_SLIPPAGE: 0.025,
+      ALLOWED_SLIPPAGE: 0,
       mainToken: "ULT",
       account: null,
       form: {
@@ -1047,6 +1046,8 @@ export default {
             outputValue,
             outputDecimal: this.getDecimal(outputCurrency),
             outputCurrency,
+            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+            gasLimit: parseInt(this.gasLimit),
             recipient,
             type,
             exchangeContract
@@ -1080,15 +1081,10 @@ export default {
             const contractAddress = this.getAvailableExchangeAddresses[
               outputCurrency
             ];
-            let minimumTokenBought = new BigNumber(outputValue - 1)
+            let minimumTokenBought = new BigNumber(outputValue)
+              .multipliedBy(1 - ALLOWED_SLIPPAGE)
               .multipliedBy(10 ** 18)
               .toNumber(0);
-            if (minimumTokenBought <= 0) {
-              minimumTokenBought = new BigNumber(outputValue)
-                .multipliedBy(0.9)
-                .multipliedBy(10 ** 18)
-                .toNumber(0);
-            }
             const ethSold = new BigNumber(
               inputValue * Math.pow(10, 18)
             ).toNumber(0);
@@ -1130,7 +1126,6 @@ export default {
             this.updateActiveToken(this.form.outputCurrency);
             this.onReset();
             this.loading = false;
-            // this.showModal("success_modal_ref");
             this.showSuccessToast(this.txHash);
           } else if (type === "TOKEN_TO_ETH") {
             exchangeContract = exchangeContracts[inputCurrency];
@@ -1139,7 +1134,7 @@ export default {
             );
             const exchangeRate = parseFloat(outputValue / inputValue);
             let minEth = new BigNumber(outputValue)
-              .minus(exchangeRate)
+              .multipliedBy(1 - ALLOWED_SLIPPAGE)
               .multipliedBy(10 ** 18)
               .toNumber(0);
             if (minEth <= 0) {
@@ -1212,7 +1207,6 @@ export default {
             const minEth = new BigNumber(1).toNumber(0);
             const outputTokenAddress = tokenAddressess[outputCurrency];
             await this.updateGasLimitAndTxFee();
-
             // check allowance value for input token
             const allowance = await this.getAllowance(this.form.inputCurrency);
             const input =
@@ -1368,7 +1362,7 @@ export default {
         let absPrice = await this.calculateAbsPrice(outputCurrency);
         this.exchangeRate = outputValue / inputValue;
         this.slippage =
-          (100 * Math.abs(absPrice - (1 / this.exchangeRate))) / absPrice;
+          (100 * Math.abs(absPrice - 1 / this.exchangeRate)) / absPrice;
       }
     }
   }
