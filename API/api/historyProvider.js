@@ -15,7 +15,6 @@ export default {
       } else {
         url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
       }
-      console.log(url)
     } else if (symbolInfo.type === 'volume') {
       if (resolution === '60') {
         url = `${serverUrl}api/histohourvolume?start=${from * 1000}&&end=${to * 1000}`
