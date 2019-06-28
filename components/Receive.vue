@@ -15,7 +15,7 @@
       type="reset"
       @click="onCopy"
       variant="outline-danger"
-      size="sm"
+      size="1x"
     >Copy address</b-button>
     <qriously v-if="getAccount !== null" :value="getAccount.address" :size="200" class="qr-code"/>
     <p>

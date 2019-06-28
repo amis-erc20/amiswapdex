@@ -1,7 +1,7 @@
 <template>
   <div class="nav-section">
     <nuxt-link to="/" v-if="currentRoute !== '/'">
-      <font-awesome-icon icon="chevron-left" size="lg" color="#fff" @click="onPressBack"/>
+      <font-awesome-icon icon="chevron-left" size="2x" color="#fff" @click="onPressBack"/>
     </nuxt-link>
     <div class="title">
       <div id="main-title-no-connection-container">
@@ -13,7 +13,7 @@
       </div>
     </div>
     <b-button v-b-modal.settingModal variant="outline-light">
-      <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+      <font-awesome-icon icon="bars" size="2x" color="#fff"/>
     </b-button>
     <b-modal ref="settingModal_ref" id="settingModal" title="Options" :hide-footer="true">
       <b-list-group v-if="getSignIn">
@@ -48,7 +48,7 @@
         <font-awesome-icon
           class="back-button-svg"
           icon="chevron-left"
-          size="lg"
+          size="2x"
           color="#fff"
           @click="closeSigninModal"
         />
@@ -57,7 +57,7 @@
           <h4 v-if="pageToRender === 'tos'">Term of Services</h4>
         </div>
         <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
-              <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+              <font-awesome-icon icon="bars" size="2x" color="#fff"/>
         </b-button>-->
       </template>
       <About v-if="pageToRender === 'about'"/>

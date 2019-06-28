@@ -186,7 +186,7 @@
               <button type="button" id="erase" @click="form.targetAddress = ''"></button>
             </div>
             <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
-              <font-awesome-icon icon="qrcode" size="lg" color="#fff"/>
+              <font-awesome-icon icon="qrcode" size="2x" color="#fff"/>
             </b-button>
           </div>
           <b-form-invalid-feedback
@@ -315,7 +315,9 @@ import {
   hasTokenUniswap,
   isValidAddress,
   unlockTokenMetamask,
-  getWeb3Metamask
+  getWeb3Metamask,
+  currency,
+  getCurrentReserve
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Vue from "vue";
@@ -613,7 +615,6 @@ export default {
     }
     this.getAvailableTokenList.forEach(async token => {
       const contract = exchangeContracts[token.symbol];
-      // console.log(token);
       tokenContracts[token.symbol] = new this.web3.eth.Contract(
         tokenABI,
         token.tokenAddress
@@ -641,15 +642,23 @@ export default {
       if (token) return token.decimal;
       else return 18;
     },
+    async calculateAbsPrice(symbol) {
+      let { ethReserve, tokenReserve } = await getCurrentReserve(
+        symbol,
+        this.web3
+      );
+      let decimal = this.getDecimal(symbol);
+      let absPrice =
+        ethReserve / Math.pow(10, 18) / (tokenReserve / Math.pow(10, decimal));
+      return absPrice;
+    },
     onSelectInputCurrency(value) {
       if (!value) return;
-      console.log(`${value.title} is selected as input`);
       this.form.inputCurrency = value.title;
       this.onCurrencyChange();
     },
     onSelectOutputCurrency(value) {
       if (!value) return;
-      console.log(`${value.title} is selected as output`);
       this.form.outputCurrency = value.title;
       this.onCurrencyChange();
     },
@@ -681,8 +690,6 @@ export default {
       this.camera = null;
     },
     toggleScanner() {
-      console.log("toggling...");
-      console.log(this.scanning);
       if (this.scanning) this.hideScanner();
       else this.showScanner();
     },
@@ -780,7 +787,6 @@ export default {
             this.gasLimit < estimatedGas * 2.5
           )
             this.gasLimit = parseInt(estimatedGas * 2.5);
-          console.log(estimatedGas, this.gasPrice, this.gasLimit);
         } else {
           const contractAddress = this.getAvailableExchangeAddresses[
             this.form.inputCurrency
@@ -793,7 +799,6 @@ export default {
             this.gasLimit < estimatedGas * 2.5
           )
             this.gasLimit = parseInt(estimatedGas * 2.5);
-          console.log(estimatedGas, this.gasPrice, this.gasLimit);
         }
         this.defaultGasLimit = this.gasLimit;
       } catch (e) {
@@ -841,7 +846,6 @@ export default {
           this.form.outputValue = "";
           return;
         }
-        console.log(this.swapType);
         if (this.swapType === "TOKEN_TO_ETH") {
           let exchangeContract = exchangeContracts[this.form.inputCurrency];
           let tokenSold = new BigNumber(
@@ -945,7 +949,6 @@ export default {
       let approvedAmount =
         parseFloat(this.form.approvedAmount) *
         Math.pow(10, this.getDecimal(this.form.inputCurrency));
-      console.log(`approve amount: ${approvedAmount}`);
       this.approvedStatus = "waiting";
       if (this.getAccount.type === "metamask") {
         this.unlockTxHash = await unlockTokenMetamask(
@@ -1345,10 +1348,8 @@ export default {
               10 ** this.getDecimal(outputCurrency)
             );
             let absPriceB = tokenReserveB.dividedBy(ethReserveB);
-
             let absPrice = absPriceB.dividedBy(absPriceA);
             absPrice = absPrice.toFixed(8);
-            console.log(`Abs Price is : ${absPrice}`);
             this.exchangeRate = outputValue / inputValue;
             this.slippage =
               (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
@@ -1357,21 +1358,17 @@ export default {
           }
         } else if (outputCurrency === "ETH") {
           // token_to_eth
-          let absPrice = this.getAllTokenPrice[inputCurrency];
-          absPrice = absPrice.toFixed(8);
-          console.log(`Abs Price is : ${absPrice}`);
+          let absPrice = await this.calculateAbsPrice(inputCurrency);
           this.exchangeRate = outputValue / inputValue;
           this.slippage =
             (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
         }
       } else if (inputCurrency === "ETH" && outputCurrency !== "ETH") {
         // eth_to_token
-        let absPrice = this.getAllTokenPrice[outputCurrency];
-        absPrice = 1 / absPrice.toFixed(8);
-        console.log(`Abs Price is : ${absPrice}`);
+        let absPrice = await this.calculateAbsPrice(outputCurrency);
         this.exchangeRate = outputValue / inputValue;
         this.slippage =
-          (100 * Math.abs(absPrice - this.exchangeRate)) / absPrice;
+          (100 * Math.abs(absPrice - (1 / this.exchangeRate))) / absPrice;
       }
     }
   }

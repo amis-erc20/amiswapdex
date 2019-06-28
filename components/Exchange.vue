@@ -41,12 +41,12 @@
           <font-awesome-icon
             v-if="orderBy[0] === 'name' && orderBy[1] === 'asc'"
             icon="long-arrow-alt-right"
-            size="xs"
+            size="1x"
           />
           <font-awesome-icon
             v-if="orderBy[0] === 'name' && orderBy[1] === 'desc'"
             icon="long-arrow-alt-left"
-            size="xs"
+            size="1x"
           />
         </div>
         <div class="title-price" @click="changeOrder(`price`)">
@@ -54,12 +54,12 @@
           <font-awesome-icon
             v-if="orderBy[0] === 'price' && orderBy[1] === 'desc'"
             icon="long-arrow-alt-right"
-            size="xs"
+            size="1x"
           />
           <font-awesome-icon
             v-if="orderBy[0] === 'price' && orderBy[1] === 'asc'"
             icon="long-arrow-alt-left"
-            size="xs"
+            size="1x"
           />
         </div>
         <div class="title-price" @click="changeOrder(`change`)" v-if="$mq !== 'mobile'">
@@ -67,12 +67,12 @@
           <font-awesome-icon
             v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
             icon="long-arrow-alt-right"
-            size="xs"
+            size="1x"
           />
           <font-awesome-icon
             v-if="orderBy[0] === 'change' && orderBy[1] === 'asc'"
             icon="long-arrow-alt-left"
-            size="xs"
+            size="1x"
           />
         </div>
 
@@ -81,12 +81,12 @@
           <font-awesome-icon
             v-if="orderBy[0] === 'volume' && orderBy[1] === 'desc'"
             icon="long-arrow-alt-right"
-            size="xs"
+            size="1x"
           />
           <font-awesome-icon
             v-if="orderBy[0] === 'volume' && orderBy[1] === 'asc'"
             icon="long-arrow-alt-left"
-            size="xs"
+            size="1x"
           />
         </div>
         <div class="title-liquidity" @click="changeOrder(`liquidity`)">
@@ -94,12 +94,12 @@
           <font-awesome-icon
             v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
             icon="long-arrow-alt-right"
-            size="xs"
+            size="1x"
           />
           <font-awesome-icon
             v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'asc'"
             icon="long-arrow-alt-left"
-            size="xs"
+            size="1x"
           />
         </div>
       </div>

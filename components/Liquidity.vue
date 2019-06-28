@@ -53,7 +53,7 @@
         </b-form-group>
 
         <!-- <b-button variant="primary" id="pool-swap-button">
-          <font-awesome-icon icon="plus" size="lg" color="#fff"/>
+          <font-awesome-icon icon="plus" size="2x" color="#fff"/>
         </b-button>-->
 
         <b-form-group id="exampleInputGroup1" class="input-form-group">
@@ -174,7 +174,7 @@
         </b-form-group>
 
         <!-- <b-button variant="primary" id="pool-swap-button">
-          <font-awesome-icon icon="arrow-down" size="lg" color="#fff"/>
+          <font-awesome-icon icon="arrow-down" size="2x" color="#fff"/>
         </b-button>-->
 
         <b-form-group id="exampleInputGroup1">

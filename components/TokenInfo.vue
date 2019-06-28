@@ -41,7 +41,7 @@
         <font-awesome-icon
           class="back-button-svg"
           icon="chevron-left"
-          size="lg"
+          size="2x"
           color="#fff"
           @click="closeTokenInfoModal"
         />
@@ -67,14 +67,14 @@
             <font-awesome-icon
               class="copy-button-svg"
               icon="copy"
-              size="md"
+              size="1x"
               color="#fff"
               @click="copyTokenUrl"
             />
           </div>
         </div>
         <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
-          <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+          <font-awesome-icon icon="bars" size="2x" color="#fff"/>
         </b-button>
       </template>
       <b-card no-body>
@@ -143,7 +143,7 @@
           <font-awesome-icon
             class="back-button-svg"
             icon="chevron-left"
-            size="lg"
+            size="2x"
             color="#fff"
             @click="closeAboutTosModal"
           />

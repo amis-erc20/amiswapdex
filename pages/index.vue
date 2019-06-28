@@ -367,7 +367,7 @@ export default {
         !this.getConnection
       )
         return;
-      console.log(`Refreshing EXCHANGE TOKEN PRICES`);
+      // console.log(`Refreshing EXCHANGE TOKEN PRICES`);
       try {
         let self = this;
         let ethPrice = await getETHToUSDPrice();
@@ -403,7 +403,7 @@ export default {
       )
         return;
       try {
-        console.log("Refreshing EXCHANGE TOKEN LIST");
+        // console.log("Refreshing EXCHANGE TOKEN LIST");
         let allTokens = await getAllListedToken();
         this.setAvailableTokenList(allTokens);
         await initContracts(web3, allTokens);
@@ -448,7 +448,6 @@ export default {
       }
     }
     const isRefresherExisted = self.getRefresher;
-    console.log(`is refresher existed: ${isRefresherExisted}`);
     if (!isRefresherExisted) {
       self.refreshInterval = setInterval(async () => {
         if (self.getSignIn) {
@@ -459,14 +458,7 @@ export default {
             self.refreshWallet(web3);
           }
         }
-        // else {
-        //   if (self.refreshInterval) {
-        //     console.log("Clearing wallet refresher.");
-        //     clearInterval(self.refreshInterval);
-        //     self.refreshInterval = null;
-        //   }
-        // }
-      }, 3000);
+      }, 10000);
     }
     let remoteBackupChecker = setTimeout(() => {
       self.checkRemoteBackup(web3);

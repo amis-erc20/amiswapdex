@@ -159,7 +159,7 @@
           <font-awesome-icon
             class="back-button-svg"
             icon="chevron-left"
-            size="lg"
+            size="2x"
             color="#fff"
             @click="closeTos"
           />

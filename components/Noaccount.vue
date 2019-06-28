@@ -54,7 +54,7 @@
             <font-awesome-icon
               class="back-button-svg"
               icon="chevron-left"
-              size="lg"
+              size="2x"
               color="#fff"
               @click="closeSignInModal"
             />
@@ -63,7 +63,7 @@
               <h4 v-else>Sign In</h4>
             </div>
             <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
-              <font-awesome-icon icon="bars" size="lg" color="#fff"/>
+              <font-awesome-icon icon="bars" size="2x" color="#fff"/>
             </b-button>-->
           </template>
           <Metamask v-if="signInMethod === 'metamask'"/>

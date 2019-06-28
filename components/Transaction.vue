@@ -2,7 +2,7 @@
   <b-container class="transaction" style="border-width: 0px 0px 1px 0px;">
     <b-row>
       <b-col cols="1" class="arrow-column">
-        <font-awesome-icon :icon="icon" :color="iconColor" size="lg"/>
+        <font-awesome-icon :icon="icon" :color="iconColor" size="2x"/>
       </b-col>
       <b-col cols="11" class="from-to-column">
         <b-row class="date-and-label-container">

@@ -29,7 +29,7 @@
               <button type="button" id="erase" @click="form.targetAddress = ''"></button>
             </div>
             <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
-              <font-awesome-icon icon="qrcode" size="lg" color="#fff"/>
+              <font-awesome-icon icon="qrcode" size="2x" color="#fff"/>
             </b-button>
           </div>
           <b-form-invalid-feedback

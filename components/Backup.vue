@@ -16,7 +16,7 @@
     <b-form @submit="onBackup" v-if="loading !== true">
       <div class="submit-button-group">
         <b-button type="submit" variant="primary" id="backup-btn" :disabled="loading">
-          <font-awesome-icon icon="upload" size="lg" color="#fff" id="upload-icon"/>Activate Automatic Backup
+          <font-awesome-icon icon="upload" size="2x" color="#fff" id="upload-icon"/>Activate Automatic Backup
         </b-button>
       </div>
     </b-form>
