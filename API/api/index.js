@@ -21,15 +21,14 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
   ) => {
     var split_data = symbolName.split(/[:/]/)
     var symbol_stub = {
-      // name: symbolName,
-      name: `${tokenName}/${currency}`,
-      pro_name: `${tokenName}/${currency}`,
+      name: (currency !== null) ? `${tokenName}/${currency}` : `${tokenName}`,
+      pro_name: (currency !== null) ? `${tokenName}/${currency}` : `${tokenName}`,
       description: '',
       type: 'crypto',
       session: '24x7',
       timezone: 'Etc/UTC',
       ticker: symbolName,
-      exchange: split_data[0],
+      exchange: 'UniswapDEX',
       minmov: 1,
       pricescale: 100000000,
       has_intraday: true,
@@ -38,9 +37,8 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
       volume_precision: 5,
       data_status: 'streaming'
     }
-    if (split_data[1].match(/USD|EUR|JPY|AUD|GBP|KRW|CNY|ETH/)) {
-      symbol_stub.pricescale = 10000
-    }
+    symbol_stub.pricescale = 10000
+
     setTimeout(function () {
       onSymbolResolvedCallback(symbol_stub)
     }, 0)
@@ -84,7 +82,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
     // console.log('=====unsubscribeBars running')
   },
   calculateHistoryDepth: (resolution, resolutionBack, intervalBack) => {
-    //optional
+    // optional
     // console.log('=====calculateHistoryDepth running')
     // while optional, this makes sure we request 24 hours of minute data at a time
     // CryptoCompare's minute data endpoint will throw an error if we request data beyond 7 days in the past, and return no data
@@ -93,7 +91,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
       : undefined
   },
   getMarks: (symbolInfo, startDate, endDate, onDataCallback, resolution) => {
-    //optional
+    // optional
     // console.log('=====getMarks running')
   },
   getTimeScaleMarks: (
@@ -103,7 +101,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
     onDataCallback,
     resolution
   ) => {
-    //optional
+    // optional
     // console.log('=====getTimeScaleMarks running')
   },
   getServerTime: cb => {

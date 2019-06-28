@@ -4,26 +4,32 @@
       <!-- <h4>SUMMARY</h4> -->
       <div class="market-info-table">
         <b-row class="count">
-          <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
+          <b-col class="description" cols="8">Total Listed Tokens</b-col>
           <b-col class="value">{{ market.count}}</b-col>
+        </b-row>
+        <b-row class="count">
+          <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
+          <b-col class="value">{{ market.count1ETH}}</b-col>
         </b-row>
 
         <b-row class="volume-usd">
           <b-col class="description">24H Market Volume</b-col>
-          <b-col class="value">{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
+
+          <b-col class="value">{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
         </b-row>
         <b-row class="volume-eth">
           <b-col class="description"></b-col>
-          <b-col class="value">{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
+          <b-col class="value">{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
         </b-row>
 
         <b-row class="total-usd">
           <b-col class="description">Total Market Liquidity</b-col>
-          <b-col class="value">{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
+          <b-col class="value">{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
         </b-row>
         <b-row class="total-eth">
           <b-col class="description"></b-col>
-          <b-col class="value">{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
+
+          <b-col class="value">{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
         </b-row>
       </div>
       <vue-friendly-iframe src="/liquiditychart"></vue-friendly-iframe>
@@ -40,7 +46,7 @@
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import config from "../config";
-import * as R from 'ramda'
+import * as R from "ramda";
 import {
   getULTToUSDPrice,
   getETHToUSDPrice,
@@ -97,19 +103,26 @@ export default {
     },
     async updateMarketInfo(force = false) {
       if (this.getActiveTab === "market" || force === true) {
-        let data = {}
+        let data = {};
         let res = await axios.get(`${config.uniswapDexServer}api/marketdata`);
         if (res.data.market) {
-        console.log(res.data.market)
-        data.count = res.data.market.count;
-        data.total_usd = res.data.market.total_usd;
-        data.total_eth = res.data.market.total_eth;
+          let ethToUsd = await getETHToUSDPrice();
+          data.count = res.data.market.count;
+          data.count1ETH = res.data.market.count1;
+          let liquidityResponse = await axios.get(
+            `${config.uniswapDexServer}api/histohourmarket`
+          );
+          let todayLiquidity = R.last(liquidityResponse.data.result);
+          data.total_usd = todayLiquidity.open * ethToUsd;
+          data.total_eth = todayLiquidity.open;
         }
-        let volumeResponse = await axios.get(`${config.uniswapDexServer}api/histodayvolume`);
-        let todayVolume = R.last(volumeResponse.data.result)
-        data.volume_eth = todayVolume.amount_eth
-        data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd
-        this.market = data
+        let volumeResponse = await axios.get(
+          `${config.uniswapDexServer}api/histodayvolume`
+        );
+        let todayVolume = R.last(volumeResponse.data.result);
+        data.volume_eth = todayVolume.amount_eth;
+        data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd;
+        this.market = data;
       }
     }
   },
@@ -127,7 +140,7 @@ export default {
 
 <style>
 .market-info-table {
-  height: 200px;
+  height: 250px;
   width: 50%;
   max-width: 650px;
   min-width: 300px;

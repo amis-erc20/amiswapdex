@@ -23,7 +23,7 @@ export default {
       tvWidget: null,
       currentTokenAddress: "",
       chartInfo: {
-        tokenName: "TOKEN",
+        tokenName: "TOKENS",
         type: 'token'
       }
     };
@@ -91,18 +91,17 @@ export default {
     initChart() {
       let self = this;
       const widgetOptions = {
-        symbol: `Uniswap:${self.chartInfo.tokenName}/QTY
-        }`,
+        symbol: `Uniswap:${self.chartInfo.tokenName}`,
         datafeed: createDatafeed(
           null,
           this.chartInfo.tokenName,
-          'TOKEN',
+          null,
           this.chartInfo.type
         ),
         time_frames: [
           { text: "3M", resolution: "1D", description: "3 Months" },
-          { text: "1m", resolution: "240", description: "1 Month" },
-          { text: "1W", resolution: "60", description: "1 Week" }
+          { text: "1m", resolution: "1D", description: "1 Month" },
+          { text: "1W", resolution: "1D", description: "1 Week" }
         ],
         interval: this.interval,
         container_id: this.containerIdTokenChart,

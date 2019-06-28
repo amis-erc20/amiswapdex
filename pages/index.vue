@@ -308,7 +308,7 @@ export default {
             tokenTxList.length !== this.getTokenTransactionList.length ||
             isBalanceChanged
           ) {
-            console.log("UPDATING TXS and WALLET BALANCES");
+            // console.log("UPDATING TXS and WALLET BALANCES");
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {

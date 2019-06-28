@@ -11,10 +11,11 @@ export default {
       if (resolution === '60') {
         url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
       } else if (resolution === '240') {
-        url = `${serverUrl}api/histo4hourmarket?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
       } else {
-        url = `${serverUrl}api/histodaymarket?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
       }
+      console.log(url)
     } else if (symbolInfo.type === 'volume') {
       if (resolution === '60') {
         url = `${serverUrl}api/histohourvolume?start=${from * 1000}&&end=${to * 1000}`
@@ -51,7 +52,7 @@ export default {
             high: el.high,
             open: el.open,
             close: el.close,
-            volume: el.volume_eth || el.amount_eth || el.token_count,
+            volume: (symbolInfo.type === 'txs') ? el.volume_eth : null,
             price_eth_usd: el.price_eth_usd
           }
         })
@@ -69,7 +70,7 @@ export default {
           bars[0].low = bars[0].low * bars[0].price_eth_usd
           bars[0].volume = bars[0].volume * bars[0].price_eth_usd
         }
-        bars[bars.length - 1].close = bars[bars.length - 1].open
+        if (symbolInfo.type !== 'volume') bars[bars.length - 1].close = bars[bars.length - 1].open
         if (first) {
           var lastBar = bars[bars.length - 1]
           history[symbolInfo.name] = {

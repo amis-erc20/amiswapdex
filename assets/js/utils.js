@@ -136,12 +136,13 @@ export const getETHToUSDPrice = async () => {
     if (response.data.transactions && response.data.transactions.length > 0) {
       let ethUsdPrice = response.data.transactions[0].price_eth_usd
       return ethUsdPrice
+    } else {
+      let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
+      return response.data.result.ethusd
     }
-    // let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
-    // return response.data.result.ethusd
   } catch (e) {
-    // console.log(`ERROR - getETHToUSDPrice`)
-    // console.log(e)
+    console.log(`ERROR - getETHToUSDPrice`)
+    console.log(e)
     return 0
   }
 }
@@ -783,9 +784,9 @@ export const metamaskSwap = async function (data) {
       exchangeABI,
       exchangeAddresses[outputCurrency]
     )
-    const min_token = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    const min_token = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).toFixed(0)
     const amount = new BigNumber(inputValue).multipliedBy(10 ** inputDecimal).toFixed(0)
-
+    console.log(`Minimum token bought: ${min_token}`)
     return new Promise((resolve, reject) => {
       if (recipient) {
         exchangeContract.methods.ethToTokenTransferInput(min_token, deadline, recipient)
@@ -821,7 +822,8 @@ export const metamaskSwap = async function (data) {
       exchangeAddresses[inputCurrency]
     )
     const tokenSold = new BigNumber(inputValue).multipliedBy(10 ** inputDecimal).toFixed(0)
-    const minEth = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0)
+    const minEth = new BigNumber(outputValue).multipliedBy(10 ** outputDecimal).toFixed(0)
+    console.log(`Minimum ETH bought: ${minEth}`)
     return new Promise((resolve, reject) => {
       if (recipient) {
         exchangeContract.methods.tokenToEthTransferInput(tokenSold, minEth, deadline, recipient)
@@ -1095,7 +1097,7 @@ export const getEvents = async (tokenAddress, limit = 50) => {
 }
 
 export const prepareChart = (widget) => {
-  console.log('Chart has loaded!')
+  // console.log('Chart has loaded!')
   let visibleRange
   let defaultTimeRange = {
     to: parseInt(Date.now() / 1000),

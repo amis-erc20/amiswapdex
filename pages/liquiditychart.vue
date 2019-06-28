@@ -24,7 +24,7 @@ export default {
       currentTokenAddress: "",
       chartInfo: {
         tokenName: "LIQUIDITY",
-        currency: "USD",
+        currency: "ETH",
         type: 'liquidity'
       }
     };
@@ -103,8 +103,7 @@ export default {
         ),
         time_frames: [
           { text: "3M", resolution: "1D", description: "3 Months" },
-          { text: "1m", resolution: "240", description: "1 Month" },
-          { text: "1W", resolution: "60", description: "1 Week" }
+          { text: "1m", resolution: "1D", description: "1 Month" }
         ],
         interval: this.interval,
         container_id: this.containerIdVolumeChart,
@@ -121,7 +120,7 @@ export default {
         ],
         enabled_features: ["items_favoriting"],
         favorites: {
-          intervals: ["60", "240", "1D"]
+          intervals: ["1D"]
         }
       };
       setTimeout(() => {
