@@ -7,7 +7,7 @@
     </div>
     <div id="reset-section" v-if="getConnection">
       <scale-loader :loading="loading && !success" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
-      <font-awesome-icon v-if="success" icon="check" size="2x" color="green"/>
+      <font-awesome-icon v-if="success" icon="check" size="2x" color="green" />
       <p v-if="loading || success" class="status-message">{{statusMessage}}</p>
       <nuxt-link to="/" v-if="success">
         <b-button type="button" variant="primary" id="create-account-btn">Go Back</b-button>
@@ -27,7 +27,7 @@
         </b-form-group>-->
         <b-form-group>
           <label for>Current Password</label>
-          <b-form-input type="password" v-model="form.currentPassword" required/>
+          <b-form-input type="password" v-model="form.currentPassword" required />
         </b-form-group>
         <b-form-group>
           <label for>New Password</label>
@@ -371,13 +371,13 @@ export default {
 #reset-section {
   width: 100%;
   max-width: 650px;
-  min-height: 100vh;
+  max-height: 500px;
   overflow: hidden;
   width: 90vw;
-  margin: 0 auto;
+  margin: 20px auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 #reset-section img {

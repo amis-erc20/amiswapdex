@@ -525,10 +525,8 @@ export default {
   width: 100%;
   max-width: 650px;
   min-height: 100vh;
-  overflow: hidden;
   width: 90vw;
   margin: 20px auto;
-  margin-top: 64px;
   display: flex;
   flex-direction: column;
   justify-content: center;

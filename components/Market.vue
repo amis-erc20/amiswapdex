@@ -181,6 +181,7 @@ export default {
 }
 .market-info-table .row.count {
   height: 25px;
+  margin-bottom: 5px;
 }
 .market-info-table .row.count-all {
   height: 55px;

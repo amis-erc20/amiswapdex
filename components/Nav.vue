@@ -19,19 +19,19 @@
       <b-list-group v-if="getSignIn">
         <b-list-group-item
           v-if="getAccount.type === 'credentials'"
-          @click="redirect('/backup')"
+          @click="showPage('backup')"
         >Remote Backup to Google Drive</b-list-group-item>
         <b-list-group-item
           v-if="getAccount.type === 'credentials'"
-          @click="redirect('/recoverysetup')"
+          @click="showPage('recoverysetup')"
         >Setup Recovery Q & A</b-list-group-item>
         <b-list-group-item
           v-if="getAccount.type === 'credentials'"
-          @click="redirect('/resetpassword')"
+          @click="showPage('reset_password')"
         >Change Password</b-list-group-item>
         <b-list-group-item
           v-if="getAccount.type === 'credentials' || getAccount.type === 'private_key'"
-          @click="redirect('/privatekey')"
+          @click="showPage('private')"
         >Show Private Key</b-list-group-item>
         <b-list-group-item @click="showPage('about')">About</b-list-group-item>
         <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
@@ -53,13 +53,18 @@
           @click="closeSigninModal"
         />
         <div id="main-title-no-connection-container">
+          <h4 v-if="pageToRender === 'backup'">Remote Backup</h4>
+          <h4 v-if="pageToRender === 'recoverysetup'">Recovery</h4>
+          <h4 v-if="pageToRender === 'reset_password'">Reset Password</h4>
+          <h4 v-if="pageToRender === 'private'">Private Key</h4>
           <h4 v-if="pageToRender === 'about'">About UniswapDex</h4>
           <h4 v-if="pageToRender === 'tos'">Term of Services</h4>
         </div>
-        <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
-              <font-awesome-icon icon="bars" size="2x" color="#fff"/>
-        </b-button>-->
       </template>
+      <Backup v-if="pageToRender === 'backup'"/>
+      <Recoverysetup v-if="pageToRender === 'recoverysetup'"/>
+      <Resetpassword v-if="pageToRender === 'reset_password'"/>
+      <Private v-if="pageToRender === 'private'"/>
       <About v-if="pageToRender === 'about'"/>
       <Tos v-if="pageToRender === 'tos'"/>
     </b-modal>
@@ -71,10 +76,18 @@ import { mapGetters, mapActions } from "vuex";
 import cryptoUtils from "../assets/js/cryptoUtils.js";
 import Tos from "~/components/Tos.vue";
 import About from "~/components/About.vue";
+import Private from "~/components/Private.vue";
+import Backup from "~/components/Backup.vue";
+import Resetpassword from "~/components/Resetpassword.vue";
+import Recoverysetup from "~/components/Recoverysetup.vue";
 export default {
   components: {
     Tos,
-    About
+    About,
+    Private,
+    Backup,
+    Resetpassword,
+    Recoverysetup
   },
   props: {
     refreshInterval: {

@@ -566,7 +566,9 @@ export default {
 }
 #about_tos_modal .modal-dialog,
 #about_tos_modal .modal-content {
-  overflow: hidden;
+  /* overflow: hidden; */
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 #token_info_modal___BV_modal_content_ {
   border: none;

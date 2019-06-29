@@ -84,12 +84,13 @@ export default {
 
 <style>
 .private-key-section {
-  text-align: center;
-  width: 90%;
-  max-width: 650px;
-  margin: 0 auto;
-  padding-top: 85px;
-  height: calc(100vh - 64px);
+    text-align: center;
+    width: 90%;
+    max-width: 650px;
+    margin: 0 auto;
+    padding-top: 20px;
+    height: calc(100vh - 164px);
+    overflow: hidden;
 }
 .private-key {
   margin-bottom: 0px;

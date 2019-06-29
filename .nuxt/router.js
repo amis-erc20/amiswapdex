@@ -2,17 +2,11 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
-const _04028ce6 = () => interopDefault(import('../pages/about.vue' /* webpackChunkName: "pages/about" */))
-const _1c044b8e = () => interopDefault(import('../pages/backup.vue' /* webpackChunkName: "pages/backup" */))
 const _9bc69e92 = () => interopDefault(import('../pages/chart.vue' /* webpackChunkName: "pages/chart" */))
 const _fb7c0cba = () => interopDefault(import('../pages/liquiditychart.vue' /* webpackChunkName: "pages/liquiditychart" */))
-const _bfabd41a = () => interopDefault(import('../pages/privatekey.vue' /* webpackChunkName: "pages/privatekey" */))
 const _7452642d = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
 const _1fbf86cc = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
-const _3b71da3e = () => interopDefault(import('../pages/recoverysetup.vue' /* webpackChunkName: "pages/recoverysetup" */))
-const _70d48a7a = () => interopDefault(import('../pages/resetpassword.vue' /* webpackChunkName: "pages/resetpassword" */))
 const _b1b11ad2 = () => interopDefault(import('../pages/scanner.vue' /* webpackChunkName: "pages/scanner" */))
-const _029bae4a = () => interopDefault(import('../pages/sendtoken.vue' /* webpackChunkName: "pages/sendtoken" */))
 const _5408b4fc = () => interopDefault(import('../pages/tokenchart.vue' /* webpackChunkName: "pages/tokenchart" */))
 const _0ce8721d = () => interopDefault(import('../pages/volumechart.vue' /* webpackChunkName: "pages/volumechart" */))
 const _0d66c5fb = () => interopDefault(import('../pages/welcome.vue' /* webpackChunkName: "pages/welcome" */))
@@ -93,14 +87,6 @@ export function createRouter() {
     scrollBehavior,
 
     routes: [{
-      path: "/about",
-      component: _04028ce6,
-      name: "about"
-    }, {
-      path: "/backup",
-      component: _1c044b8e,
-      name: "backup"
-    }, {
       path: "/chart",
       component: _9bc69e92,
       name: "chart"
@@ -108,10 +94,6 @@ export function createRouter() {
       path: "/liquiditychart",
       component: _fb7c0cba,
       name: "liquiditychart"
-    }, {
-      path: "/privatekey",
-      component: _bfabd41a,
-      name: "privatekey"
     }, {
       path: "/receivetoken",
       component: _7452642d,
@@ -121,21 +103,9 @@ export function createRouter() {
       component: _1fbf86cc,
       name: "recovery"
     }, {
-      path: "/recoverysetup",
-      component: _3b71da3e,
-      name: "recoverysetup"
-    }, {
-      path: "/resetpassword",
-      component: _70d48a7a,
-      name: "resetpassword"
-    }, {
       path: "/scanner",
       component: _b1b11ad2,
       name: "scanner"
-    }, {
-      path: "/sendtoken",
-      component: _029bae4a,
-      name: "sendtoken"
     }, {
       path: "/tokenchart",
       component: _5408b4fc,

@@ -10,9 +10,9 @@
       class="backup-description"
       v-if="!success && !loading"
     >Please activate automatic account backup to store your account credentials periodically to google drive</p>
-    <nuxt-link to="/" v-if="success">
+    <!-- <nuxt-link to="/" v-if="success">
       <b-button type="button" variant="primary" id="backup-btn">Contiue</b-button>
-    </nuxt-link>
+    </nuxt-link> -->
     <b-form @submit="onBackup" v-if="loading !== true">
       <div class="submit-button-group">
         <b-button type="submit" variant="primary" id="backup-btn" :disabled="loading">
@@ -278,8 +278,9 @@ export default {
   position: fixed;
   top: 64px;
   height: calc(100vh - 64px);
-  width: 90%;
-  max-width: 650px;
+  width: 100%;
+  padding: 20px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   text-align: center;
