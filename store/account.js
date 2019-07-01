@@ -49,6 +49,11 @@ export const mutations = {
     }
     if (!state.price[newToken.symbol]) state.price[newToken.symbol] = newToken.priceInUsd
     state.balance[newToken.symbol] = newToken.balance
+
+    state.totalValue = 0
+    for (let key in state.balance) {
+      state.totalValue += (state.balance[key]) * state.price[key] || 0.0
+    }
   },
   resetTokenList (state) {
     state.tokenList = []
