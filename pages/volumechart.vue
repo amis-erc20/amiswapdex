@@ -103,7 +103,8 @@ export default {
         ),
         time_frames: [
           { text: "3M", resolution: "1D", description: "3 Months" },
-          { text: "1m", resolution: "1D", description: "1 Month" }
+          { text: "1m", resolution: "1D", description: "1 Month" },
+          { text: "7D", resolution: "1D", description: "1 Week", title: "1w" }
         ],
         interval: this.interval,
         container_id: this.containerIdVolumeChart,
@@ -117,14 +118,18 @@ export default {
           "header_compare",
           "header_undo_redo",
           "header_indicators",
-          "header_resolutions"
+          "header_resolutions",
+          "dont_show_boolean_study_arguments",
+          "go_to_date",
+          "create_volume_indicator_by_default"
         ],
         enabled_features: ["items_favoriting"],
         favorites: {
           intervals: ["1D"]
         },
         overrides: {
-          'mainSeriesProperties.style': 2,
+          "mainSeriesProperties.style": 2,
+          "paneProperties.legendProperties.showSeriesOHLC": true
         }
       };
       setTimeout(() => {
@@ -133,7 +138,7 @@ export default {
         ));
         self.tvWidget = tvWidget;
         tvWidget.onChartReady(() => {
-          prepareChart(tvWidget);
+          prepareChart(tvWidget, true);
         });
       }, 2000);
     },

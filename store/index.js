@@ -16,9 +16,9 @@ export const state = () => {
     summary: [],
     currentView: 'main',
     chartInfo: {
-      tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      tokenName: "USDC",
-      currency: "USD",
+      tokenAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      tokenName: 'WETH',
+      currency: 'USD',
       showChart: false
     }
   }
@@ -48,80 +48,80 @@ export const getters = {
 }
 
 export const actions = {
-  async initialiseWeb3(store, action) {
+  async initialiseWeb3 (store, action) {
     web3 = action.payload
   },
-  updateActiveToken(store, payload) {
+  updateActiveToken (store, payload) {
     store.commit('updateActiveToken', payload)
   },
-  updateCurrentView(store, payload) {
+  updateCurrentView (store, payload) {
     store.commit('updateCurrentView', payload)
   },
-  updateAuthStatus(store, payload) {
+  updateAuthStatus (store, payload) {
     store.commit('updateAuthStatus', payload)
   },
-  updateConnection(store, payload) {
+  updateConnection (store, payload) {
     store.commit('updateConnection', payload)
   },
-  updateServerStatus(store, payload) {
+  updateServerStatus (store, payload) {
     store.commit('updateServerStatus', payload)
   },
-  updateBackupStatus(store, payload) {
+  updateBackupStatus (store, payload) {
     store.commit('updateBackupStatus', payload)
   },
-  updateActiveTab(store, payload) {
+  updateActiveTab (store, payload) {
     store.commit('updateActiveTab', payload)
   },
-  updateCredentials(store, payload) {
+  updateCredentials (store, payload) {
     store.commit('updateCredentials', payload)
   },
-  updateAuthRedirectUrl(store, payload) {
+  updateAuthRedirectUrl (store, payload) {
     store.commit('updateAuthRedirectUrl', payload)
   },
-  updateChartInfo(store, payload) {
+  updateChartInfo (store, payload) {
     store.commit('updateChartInfo', payload)
   },
-  updateSummary(store, payload) {
+  updateSummary (store, payload) {
     store.commit('updateSummary', payload)
   }
 }
 
 export const mutations = {
-  updateAuthStatus(state, payload) {
+  updateAuthStatus (state, payload) {
     state.signIn = payload
   },
-  updateActiveToken(state, payload) {
+  updateActiveToken (state, payload) {
     state.activeToken = payload
   },
-  updateCurrentView(state, payload) {
+  updateCurrentView (state, payload) {
     state.currentView = payload
   },
-  updateConnection(state, payload) {
+  updateConnection (state, payload) {
     state.isOnline = payload
   },
-  updateServerStatus(state, payload) {
+  updateServerStatus (state, payload) {
     state.serverStatus = payload
   },
-  updateBackupStatus(state, payload) {
+  updateBackupStatus (state, payload) {
     state.backupStatus = payload
   },
-  updateActiveTab(state, payload) {
+  updateActiveTab (state, payload) {
     state.activeTab = payload
   },
-  updateChartInfo(state, payload) {
+  updateChartInfo (state, payload) {
     state.chartInfo = payload
     // console.log(payload)
     localStorage.setItem('chartInfo', JSON.stringify(payload))
   },
-  updateCredentials(state, payload) {
+  updateCredentials (state, payload) {
     state.credentials = payload
   },
-  updateAuthRedirectUrl(state, payload) {
+  updateAuthRedirectUrl (state, payload) {
     if (payload.url) state.authRedirectUrl.url = payload.url
     if (payload.token) state.authRedirectUrl.token = payload.token || null
     if (payload.tokenSubTab) state.authRedirectUrl.tokenSubTab = payload.tokenSubTab || 'info'
   },
-  updateSummary(state, payload) {
+  updateSummary (state, payload) {
     state.summary = payload
   }
 }

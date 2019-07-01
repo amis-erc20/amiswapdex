@@ -122,17 +122,19 @@ export default {
   },
   methods: {
     initChart() {
+      let datafeed = createDatafeed(
+          this.tokenAddress,
+          this.tokenName,
+          this.currency,
+         "txs"
+        )
+      console.log(datafeed)
       let self = this;
       const widgetOptions = {
         symbol: `Uniswap:${self.chartInfo.tokenName}/${
           self.chartInfo.currency
         }`,
-        datafeed: createDatafeed(
-          this.tokenAddress,
-          this.tokenName,
-          this.currency,
-         "txs"
-        ),
+        datafeed: datafeed,
         time_frames: [
           { text: "3M", resolution: "1D", description: "3 Months" },
           { text: "1m", resolution: "240", description: "1 Month" },

@@ -57,23 +57,23 @@
       </b-row>
     </div>
 
-    <div>
+    <div v-if="rows.length > 0">
       <b-button-group class="buy-or-sell">
-        <b-button
-          v-bind:class="{ selected: chartCurrency === 'ETH' }"
-          class="switch-buy"
-          @click="changeSelectedCurrency('ETH')"
-        >{{ getActiveToken }} / ETH</b-button>
         <b-button
           v-bind:class="{ selected: chartCurrency === 'USD' }"
           class="switch-sell"
           @click="changeSelectedCurrency('USD')"
         >{{ getActiveToken }} / USD</b-button>
+           <b-button
+          v-bind:class="{ selected: chartCurrency === 'ETH' }"
+          class="switch-buy"
+          @click="changeSelectedCurrency('ETH')"
+        >{{ getActiveToken }} / ETH</b-button>
       </b-button-group>
     </div>
-    <vue-friendly-iframe src="/chart"></vue-friendly-iframe>
+    <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe>
 
-    <h5>Latest Transactions</h5>
+    <h5 v-if="rows.length > 0">Latest Transactions</h5>
     <vue-good-table
       :columns="columns"
       :rows="rows"
@@ -109,7 +109,7 @@ export default {
     return {
       summary: null,
       ethToUsd: 0,
-      chartCurrency: "ETH",
+      chartCurrency: "USD",
       chartLoading: true,
       columns: [
         {

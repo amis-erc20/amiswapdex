@@ -8,8 +8,8 @@
           <b-col class="value">{{ market.count1ETH}}</b-col>
         </b-row>
         <b-row class="count-all">
-          <b-col class="description" cols="8">(All Tokens)</b-col>
-          <b-col class="value">({{ market.count}})</b-col>
+          <b-col class="description" cols="8"></b-col>
+          <b-col class="value">{{ market.count}} Total</b-col>
         </b-row>
 
         <b-row class="volume-usd">
@@ -140,7 +140,7 @@ export default {
 
 <style>
 .market-info-table {
-  height: 230px;
+  height: 220px;
   width: 50%;
   max-width: 650px;
   min-width: 300px;
@@ -181,10 +181,14 @@ export default {
 }
 .market-info-table .row.count {
   height: 25px;
-  margin-bottom: 5px;
+  margin-bottom: 0px;
+}
+.market-info-table .row.count-all .value {
+  height: 10px;
+  font-size:  13px;
+  font-weight: normal;
 }
 .market-info-table .row.count-all {
-  height: 55px;
-  font-size:  13px;
+  height: 33px;
 }
 </style>

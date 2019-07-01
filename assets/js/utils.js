@@ -1132,17 +1132,17 @@ export const getEvents = async (tokenAddress, limit = 50) => {
   }
 }
 
-export const prepareChart = (widget) => {
+export const prepareChart = (widget, resetZoom = true) => {
   // console.log('Chart has loaded!')
   let visibleRange
   let defaultTimeRange = {
     to: parseInt(Date.now() / 1000),
-    from: parseInt(Date.now() / 1000) - 60 * 60 * 24 * 7
+    from: parseInt(Date.now() / 1000) - 60 * 60 * 24 * 90
   }
   setTimeout(() => {
     try {
       visibleRange = JSON.parse(localStorage.getItem('visibleRange'))
-      if (visibleRange) {
+      if (visibleRange && !resetZoom) {
         // widget.chart().setResolution(visibleRange.resolution, function (err) {
         //   if (err) console.log(`Failed to set resolution for chart`)
         // })
@@ -1151,7 +1151,7 @@ export const prepareChart = (widget) => {
         })
       } else {
         widget.chart().setVisibleRange(defaultTimeRange, function (err) {
-          if (err) console.log(`Failed to set default visible range for chart`)
+          if (err) console.log(`Visible range is set for 1W range`)
         })
       }
     } catch (e) {

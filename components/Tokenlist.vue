@@ -106,7 +106,7 @@ export default {
       let token = this.getAvailableTokenList.find(t => t.symbol === tokenName);
       if (token) {
         this.updateChartInfo({
-          currency: "ETH",
+          currency: "USD",
           showChart: true,
           tokenAddress: token.tokenAddress,
           tokenName: tokenName
