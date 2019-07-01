@@ -786,17 +786,6 @@ export default {
   box-shadow: 0px 2px 5px #bcc0c1;
   transform: scale(1.03);
 }
-/* .exchangelist-section .list-group-item {
-  transition: 0.5s;
-  padding: 0;
-  max-height: 65px;
-  overflow: hidden;
-}
-.exchangelist-section .list-group-item:hover {
-  cursor: pointer;
-  box-shadow: 0px 2px 5px #bcc0c1;
-  transform: scale(1.03);
-} */
 .exchangelist-section .token .token-name {
   font-size: 14px;
   font-weight: bold;

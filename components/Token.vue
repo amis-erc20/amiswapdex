@@ -150,6 +150,14 @@ export default {
   justify-content: center;
   flex-direction: column;
 }
+.tokenlist-section .card-body .list-group-item.list-group-item-action {
+  transition: 0.5s;
+}
+.tokenlist-section .card-body .list-group-item.list-group-item-action:hover {
+  cursor: pointer;
+  box-shadow: 0px 2px 5px #bcc0c1;
+  transform: scale(1.03);
+}
 @media screen and (max-width: 450px) {
   .tokenlist-section .token .token-price-container {
     width: 100px;

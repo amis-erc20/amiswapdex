@@ -1133,7 +1133,6 @@ export const getEvents = async (tokenAddress, limit = 50) => {
 }
 
 export const prepareChart = (widget, resetZoom = true) => {
-  // console.log('Chart has loaded!')
   let visibleRange
   let defaultTimeRange = {
     to: parseInt(Date.now() / 1000),
@@ -1143,9 +1142,6 @@ export const prepareChart = (widget, resetZoom = true) => {
     try {
       visibleRange = JSON.parse(localStorage.getItem('visibleRange'))
       if (visibleRange && !resetZoom) {
-        // widget.chart().setResolution(visibleRange.resolution, function (err) {
-        //   if (err) console.log(`Failed to set resolution for chart`)
-        // })
         widget.chart().setVisibleRange(visibleRange.timeRange, function (err) {
           if (err) console.log(`Failed to set visible range for chart`)
         })
@@ -1173,24 +1169,6 @@ export const prepareChart = (widget, resetZoom = true) => {
         const currentResolution = widget.chart().resolution()
         const range = (to - from) / (60 * 60 * 24) // range in days
         if (range <= 0) return
-        // let newResolution
-        // if (range > 0 && range <= 10) newResolution = '60'
-        // else if (range > 10 && range <= 70) newResolution = '240'
-        // else if (range > 70) newResolution = '1D'
-        // console.log(`Visible Range has changed !`)
-        // console.log(range)
-        // console.log(`Current resolution is: ${currentResolution}`)
-        // console.log(`New resolution is: ${newResolution}`)
-        // console.log('-------------')
-        // if (currentResolution !== newResolution) {
-        //   let lastTimeRange = { from, to }
-        //   widget.chart().setResolution(newResolution, function (err) {
-        //     if (err) console.log(`Failed to set new resolution for chart`)
-        //     else {
-        //       console.log(`RESOLUTION SWITCHED FROM ${currentResolution} TO ${newResolution}.`)
-        //     }
-        //   })
-        // }
         let visibleRangeToSave = {
           timeRange: {
             from: from,

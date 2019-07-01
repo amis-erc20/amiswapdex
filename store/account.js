@@ -72,7 +72,7 @@ export const mutations = {
     state.balance[symbol] = balance
     state.totalValue = 0
     for (let key in state.balance) {
-      state.totalValue += (state.balance[key]) * state.price[key] || 0.0
+      state.totalValue += (state.balance[key]) * (state.price[key] || 0.0)
     }
   },
   resetAllBalances (state) {
@@ -86,7 +86,7 @@ export const mutations = {
       symbol,
       price
     } = payload
-    state.price = price
+    state.price[symbol] = price
   },
   updateEthPrice (state, payload) {
     state.ethPrice = payload

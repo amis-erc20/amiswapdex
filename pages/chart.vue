@@ -128,7 +128,6 @@ export default {
           this.currency,
          "txs"
         )
-      console.log(datafeed)
       let self = this;
       const widgetOptions = {
         symbol: `Uniswap:${self.chartInfo.tokenName}/${

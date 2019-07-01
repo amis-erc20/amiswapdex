@@ -432,6 +432,7 @@ export default {
     let metamaskWeb3 = await getWeb3Metamask();
     let availableTokens = await getAllListedToken();
 
+    localStorage.removeItem('chartInfo')
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
     this.updateActiveTab("market");
@@ -629,5 +630,8 @@ div {
   color: #fff;
   background: #773894;
   border-color: #773894;
+}
+.spinner-border {
+  margin: 20px!important;
 }
 </style>
