@@ -20,13 +20,15 @@ export const state = () => {
       tokenName: 'WETH',
       currency: 'USD',
       showChart: false
-    }
+    },
+    adminLogIn: false
   }
 }
 
 export const getters = {
   getWeb3: () => web3,
   getActiveToken: state => state.activeToken,
+  getAdminLogin: state => state.adminLogIn,
   getActiveTab: state => state.activeTab,
   getSignIn: state => state.signIn,
   getConnection: state => state.isOnline,
@@ -81,6 +83,9 @@ export const actions = {
   updateChartInfo (store, payload) {
     store.commit('updateChartInfo', payload)
   },
+  adminLogIn (store) {
+    store.commit('adminLogIn')
+  },
   updateSummary (store, payload) {
     store.commit('updateSummary', payload)
   }
@@ -115,6 +120,9 @@ export const mutations = {
   },
   updateCredentials (state, payload) {
     state.credentials = payload
+  },
+  adminLogIn (state) {
+    state.adminLogIn = true
   },
   updateAuthRedirectUrl (state, payload) {
     if (payload.url) state.authRedirectUrl.url = payload.url

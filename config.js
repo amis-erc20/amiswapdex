@@ -11,10 +11,14 @@ export default {
   },
   chartServerUrl: 'https://bounty.shardus.com:8889',
   chartUrl: 'http://bounty.shardus.com:3333/',
-  uniswapDexServer: 'https://dev.uniswapdex.com:8889/',
+  // uniswapDexServer: 'https://dev.uniswapdex.com:8889/',
+  uniswapDexServer: 'https://uniswapdex.com:8889/',
   // uniswapDexServer: 'http://localhost:8888/',
   backupInterval: 10 * 60 * 1000,
   version: '1.0.0',
   etherscanApiKey: 'Y1C96ES3CDKANT866DQMTJTMF2G52FBBN9',
-  refreshInterval: 60000
+  refreshInterval: 60000,
+  authRequired: true,
+  adminUsername: 'osyed',
+  adminPassword: 'ULC!root1'
 }

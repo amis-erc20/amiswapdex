@@ -129,7 +129,9 @@ export default {
         },
         overrides: {
           "mainSeriesProperties.style": 2,
-          "paneProperties.legendProperties.showSeriesOHLC": true
+          "paneProperties.legendProperties.showSeriesOHLC": true,
+          "mainSeriesProperties.lineStyle.color": "#a41ce3",
+          "mainSeriesProperties.lineStyle.linewidth": 1.5
         }
       };
       setTimeout(() => {

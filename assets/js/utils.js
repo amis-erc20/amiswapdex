@@ -775,8 +775,8 @@ export const metamaskRemoveLiquidity = async function (
   })
 }
 export const metamaskSwap = async function (data) {
-  // const ALLOWED_SLIPPAGE = 0.00001
-  const ALLOWED_SLIPPAGE = 0
+  const ALLOWED_SLIPPAGE = 0.00001
+  // const ALLOWED_SLIPPAGE = 0
   let web3Metamask = await getWeb3Metamask()
   let {
     inputValue,

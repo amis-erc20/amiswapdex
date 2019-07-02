@@ -9,22 +9,28 @@ export default {
     let url
     if (symbolInfo.type === 'liquidity') {
       if (resolution === '60') {
-        url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histodaymarket?start=${from * 1000}&end=${to * 1000}`
       } else if (resolution === '240') {
-        url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histodaymarket?start=${from * 1000}&end=${to * 1000}`
       } else {
-        url = `${serverUrl}api/histohourmarket?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histodaymarket?start=${from * 1000}&end=${to * 1000}`
       }
     } else if (symbolInfo.type === 'volume') {
       if (resolution === '60') {
-        url = `${serverUrl}api/histohourvolume?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histodayvolume?start=${from * 1000}&end=${to * 1000}`
       } else if (resolution === '240') {
-        url = `${serverUrl}api/histo4hourvolume?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histodayvolume?start=${from * 1000}&end=${to * 1000}`
       } else {
-        url = `${serverUrl}api/histodayvolume?start=${from * 1000}&&end=${to * 1000}`
+        url = `${serverUrl}api/histodayvolume?start=${from * 1000}&end=${to * 1000}`
       }
     } else if (symbolInfo.type === 'token') {
-      url = `${serverUrl}api/histodaytoken?start=${from * 1000}&&end=${to * 1000}`
+      if (resolution === '60') {
+        url = `${serverUrl}api/histodaytoken?start=${from * 1000}&end=${to * 1000}`
+      } else if (resolution === '240') {
+        url = `${serverUrl}api/histodaytoken?start=${from * 1000}&end=${to * 1000}`
+      } else {
+        url = `${serverUrl}api/histodaytoken?start=${from * 1000}&end=${to * 1000}`
+      }
     } else if (symbolInfo.type === 'txs') {
       if (resolution === '60') {
         url = `${serverUrl}api/histohour?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
@@ -34,7 +40,6 @@ export default {
         url = `${serverUrl}api/histoday?tokenAddress=${symbolInfo.tokenAddress}&start=${from * 1000}&&end=${to * 1000}`
       }
     }
-
     return axios.get(url).then(response => {
       let data = response.data
       if (!data.result || data.result.length === 0) {

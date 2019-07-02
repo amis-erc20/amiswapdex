@@ -24,7 +24,7 @@ export default {
       currentTokenAddress: "",
       chartInfo: {
         tokenName: "TOKENS",
-        type: 'token'
+        type: "token"
       }
     };
   },
@@ -100,7 +100,8 @@ export default {
         ),
         time_frames: [
           { text: "3M", resolution: "1D", description: "3 Months" },
-          { text: "1m", resolution: "1D", description: "1 Month" }
+          { text: "1m", resolution: "1D", description: "1 Month" },
+          { text: "7D", resolution: "1D", description: "1 Week", title: "1w" }
         ],
         interval: this.interval,
         container_id: this.containerIdTokenChart,
@@ -125,7 +126,9 @@ export default {
         },
         overrides: {
           "mainSeriesProperties.style": 2,
-          "paneProperties.legendProperties.showSeriesOHLC": true
+          "paneProperties.legendProperties.showSeriesOHLC": true,
+          "mainSeriesProperties.lineStyle.color": "#a41ce3",
+          "mainSeriesProperties.lineStyle.linewidth": 1.5
         }
       };
       setTimeout(() => {

@@ -4,6 +4,7 @@ import { interopDefault } from './utils'
 
 const _5ef57b1c = () => interopDefault(import('..\\pages\\chart.vue' /* webpackChunkName: "pages_chart" */))
 const _23922a48 = () => interopDefault(import('..\\pages\\liquiditychart.vue' /* webpackChunkName: "pages_liquiditychart" */))
+const _0bca9c7d = () => interopDefault(import('..\\pages\\login.vue' /* webpackChunkName: "pages_login" */))
 const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* webpackChunkName: "pages_receivetoken" */))
 const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
 const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
@@ -94,6 +95,10 @@ export function createRouter() {
       path: "/liquiditychart",
       component: _23922a48,
       name: "liquiditychart"
+    }, {
+      path: "/login",
+      component: _0bca9c7d,
+      name: "login"
     }, {
       path: "/receivetoken",
       component: _3cd07a12,

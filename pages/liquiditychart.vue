@@ -25,7 +25,7 @@ export default {
       chartInfo: {
         tokenName: "LIQUIDITY",
         currency: "ETH",
-        type: 'liquidity'
+        type: "liquidity"
       }
     };
   },
@@ -129,8 +129,10 @@ export default {
           chartTypes: ["Area", "Candles"]
         },
         overrides: {
-          'mainSeriesProperties.style': 2,
-          'paneProperties.legendProperties.showSeriesOHLC': true
+          "mainSeriesProperties.style": 2,
+          "paneProperties.legendProperties.showSeriesOHLC": true,
+          "mainSeriesProperties.lineStyle.color": "#a41ce3",
+          "mainSeriesProperties.lineStyle.linewidth": 1.5
         }
       };
       setTimeout(() => {

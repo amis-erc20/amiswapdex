@@ -110,7 +110,7 @@ export default {
           data.count = res.data.market.count;
           data.count1ETH = res.data.market.count1;
           let liquidityResponse = await axios.get(
-            `${config.uniswapDexServer}api/histohourmarket`
+            `${config.uniswapDexServer}api/histodaymarket`
           );
           let todayLiquidity = R.last(liquidityResponse.data.result);
           data.total_usd = todayLiquidity.open * ethToUsd;

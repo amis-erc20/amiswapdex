@@ -64,7 +64,7 @@
           class="switch-sell"
           @click="changeSelectedCurrency('USD')"
         >{{ getActiveToken }} / USD</b-button>
-           <b-button
+        <b-button
           v-bind:class="{ selected: chartCurrency === 'ETH' }"
           class="switch-buy"
           @click="changeSelectedCurrency('ETH')"
@@ -168,6 +168,7 @@ export default {
       getSummary: "getSummary",
       getChartInfo: "getChartInfo",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getOwnedTokenList: "account/getOwnedTokenList",
       getPrice: "account/getPrice",
       getEthPrice: "account/getEthPrice"
     }),
@@ -182,7 +183,7 @@ export default {
       let foundSummary;
       if (token)
         foundSummary = self.getSummary.find(s => s.token_id === token.id);
-      if (!foundSummary || !token)
+      if (!foundSummary && token) {
         return {
           name: this.getActiveToken,
           symbol: this.getActiveToken,
@@ -192,10 +193,26 @@ export default {
           src: "/_nuxt/assets/default-token.png",
           order: "-",
           change: 0,
-          tokenAddress: "-",
+          tokenAddress: token.tokenAddress,
+          exchangeAddress: token.exchangeAddress
+        };
+      } else if (!foundSummary && !token) {
+        let ownedToken = this.getOwnedTokenList.find(
+          t => t.symbol === this.getActiveToken
+        );
+        return {
+          name: this.getActiveToken,
+          symbol: this.getActiveToken,
+          liquidity: 0,
+          volume: 0,
+          price: 0,
+          src: "/_nuxt/assets/default-token.png",
+          order: "-",
+          change: 0,
+          tokenAddress: (ownedToken) ? ownedToken.tokenAddress : '-',
           exchangeAddress: "-"
         };
-      else {
+      } else {
         return {
           name: token.name,
           symbol: token.symbol,
