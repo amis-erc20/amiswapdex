@@ -57,7 +57,7 @@
       </b-row>
     </div>
 
-    <div v-if="rows.length > 0">
+    <!-- <div v-if="rows.length > 0">
       <b-button-group class="buy-or-sell">
         <b-button
           v-bind:class="{ selected: chartCurrency === 'USD' }"
@@ -70,8 +70,9 @@
           @click="changeSelectedCurrency('ETH')"
         >{{ getActiveToken }} / ETH</b-button>
       </b-button-group>
-    </div>
-    <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe>
+    </div>-->
+    <Tokenpricechart />
+    <!-- <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe> -->
 
     <h5 v-if="rows.length > 0">Latest Transactions</h5>
     <vue-good-table
@@ -88,6 +89,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import Tokenpricechart from "~/components/Tokenpricechart.vue";
 import axios from "axios";
 import moment from "moment";
 import config from "../config";
@@ -105,6 +107,9 @@ import {
   getEvents
 } from "../assets/js/utils";
 export default {
+  components: {
+    Tokenpricechart
+  },
   data: function() {
     return {
       summary: null,
@@ -209,7 +214,7 @@ export default {
           src: "/_nuxt/assets/default-token.png",
           order: "-",
           change: 0,
-          tokenAddress: (ownedToken) ? ownedToken.tokenAddress : '-',
+          tokenAddress: ownedToken ? ownedToken.tokenAddress : "-",
           exchangeAddress: "-"
         };
       } else {

@@ -74,9 +74,6 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
         }
       })
       .catch(err => {
-        console.log({
-          err
-        })
         onErrorCallback(err)
       })
   },

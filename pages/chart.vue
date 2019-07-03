@@ -99,7 +99,7 @@ export default {
     try {
       this.chartInfo = JSON.parse(localStorage.getItem("chartInfo"));
     } catch (e) {
-      // self.chartInfo = self.defaultChart;
+      self.chartInfo = self.defaultChart;
     }
     if (this.chartInfo === null) this.chartInfo = this.defaultChart;
     this.initChart();
@@ -113,7 +113,7 @@ export default {
           self.chartInfo = newChartInfo;
         }
       } catch (e) {
-        // self.chartInfo = self.defaultChart;
+        self.chartInfo = self.defaultChart;
       }
     }, 1000);
   },

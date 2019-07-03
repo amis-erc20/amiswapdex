@@ -32,9 +32,12 @@
           <b-col class="value">{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
         </b-row>
       </div>
-      <vue-friendly-iframe src="/liquiditychart"></vue-friendly-iframe>
+      <Liquiditylinechart />
+      <Volumelinechart />
+      <Tokenlinechart />
+      <!-- <vue-friendly-iframe src="/liquiditychart"></vue-friendly-iframe>
       <vue-friendly-iframe src="/volumechart"></vue-friendly-iframe>
-      <vue-friendly-iframe src="/tokenchart"></vue-friendly-iframe>
+      <vue-friendly-iframe src="/tokenchart"></vue-friendly-iframe>-->
     </div>
 
     <div v-else class="loading-icon">
@@ -44,6 +47,9 @@
 </template>
 <script>
 import { mapGetters, mapActions } from "vuex";
+import Liquiditylinechart from "~/components/Liquiditylinechart.vue";
+import Volumelinechart from "~/components/Volumelinechart.vue";
+import Tokenlinechart from "~/components/Tokenlinechart.vue";
 import axios from "axios";
 import config from "../config";
 import * as R from "ramda";
@@ -57,6 +63,11 @@ export default {
     return {
       market: null
     };
+  },
+  components: {
+    Liquiditylinechart,
+    Volumelinechart,
+    Tokenlinechart
   },
   computed: {
     ...mapGetters({
@@ -105,24 +116,29 @@ export default {
       if (this.getActiveTab === "market" || force === true) {
         let data = {};
         let res = await axios.get(`${config.uniswapDexServer}api/marketdata`);
-        if (res.data.market) {
+        if (res.data.result) {
           let ethToUsd = await getETHToUSDPrice();
-          data.count = res.data.market.count;
-          data.count1ETH = res.data.market.count1;
+          data.count = res.data.result.count;
+          data.count1ETH = res.data.result.count1;
           let liquidityResponse = await axios.get(
-            `${config.uniswapDexServer}api/histodaymarket`
+            `${config.uniswapDexServer}api/histodaymarket?start=${Date.now() -
+              1000 * 60 * 60 * 24 * 3}`
           );
+          console.log(liquidityResponse);
           let todayLiquidity = R.last(liquidityResponse.data.result);
           data.total_usd = todayLiquidity.open * ethToUsd;
           data.total_eth = todayLiquidity.open;
+
+          let volumeResponse = await axios.get(
+            `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
+              1000 * 60 * 60 * 24 * 3}`
+          );
+          console.log(volumeResponse);
+          let todayVolume = R.last(volumeResponse.data.result);
+          data.volume_eth = todayVolume.amount_eth;
+          data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd;
+          this.market = data;
         }
-        let volumeResponse = await axios.get(
-          `${config.uniswapDexServer}api/histodayvolume`
-        );
-        let todayVolume = R.last(volumeResponse.data.result);
-        data.volume_eth = todayVolume.amount_eth;
-        data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd;
-        this.market = data;
       }
     }
   },
@@ -185,7 +201,7 @@ export default {
 }
 .market-info-table .row.count-all .value {
   height: 10px;
-  font-size:  13px;
+  font-size: 13px;
   font-weight: normal;
 }
 .market-info-table .row.count-all {

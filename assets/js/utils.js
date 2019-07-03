@@ -1152,9 +1152,12 @@ export const prepareChart = (widget, resetZoom = true) => {
       }
     } catch (e) {
       console.log(`No Visible Range value are detected.`)
-      widget.chart().setResolution('60', function (err) {
+      widget.chart().setResolution('1D', function (err) {
         if (err) console.log(`Failed to set resolution for chart`)
         else console.log(`Default resolution set to hourly.`)
+      })
+      widget.chart().setVisibleRange(defaultTimeRange, function (err) {
+        if (err) console.log(`Visible range is set for 1W range`)
       })
     }
     widget
