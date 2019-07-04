@@ -57,22 +57,9 @@
       </b-row>
     </div>
 
-    <!-- <div v-if="rows.length > 0">
-      <b-button-group class="buy-or-sell">
-        <b-button
-          v-bind:class="{ selected: chartCurrency === 'USD' }"
-          class="switch-sell"
-          @click="changeSelectedCurrency('USD')"
-        >{{ getActiveToken }} / USD</b-button>
-        <b-button
-          v-bind:class="{ selected: chartCurrency === 'ETH' }"
-          class="switch-buy"
-          @click="changeSelectedCurrency('ETH')"
-        >{{ getActiveToken }} / ETH</b-button>
-      </b-button-group>
-    </div>-->
-    <Tokenpricechart />
+    <!-- <Tokenpricechart /> -->
     <!-- <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe> -->
+    <vue-friendly-iframe v-if="rows.length > 0" src="/tokenpricechart"></vue-friendly-iframe>
 
     <h5 v-if="rows.length > 0">Latest Transactions</h5>
     <vue-good-table
@@ -341,8 +328,9 @@ export default {
 }
 .vue-friendly-iframe > iframe {
   width: 100%;
-  height: 540px;
+  height: 700px;
   border: none;
+  overflow: hidden;
 }
 .vgt-wrap {
   width: 90%;

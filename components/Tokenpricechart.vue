@@ -1,7 +1,7 @@
 <template>
   <div id="token-price-chart-section">
-    <!-- <p style="display: none">{{ getActiveToken}}, {{ currency }}, {{ resolution }}</p> -->
-    <p style="display: block">{{ getActiveToken}}, {{ currency }}, {{ resolution }}</p>
+    <p style="display: none">{{ getActiveToken}}, {{ currency }}, {{ resolution }}</p>
+    <!-- <p style="display: block">{{ getActiveToken}}, {{ currency }}, {{ resolution }}</p> -->
     <div>
       <b-button-group class="buy-or-sell">
         <b-button
@@ -39,16 +39,16 @@
       </b-button-group>
       <div
         id="serie-legend"
-      >{{getActiveToken}} / {{ currency }}, {{resolution}}, UniswapDEX : {{ price.toFixed(4) }}</div>
+      >{{getActiveToken}} / {{ currency }}, {{resolution}}, UniswapDEX, Close: {{ price.toFixed(4) }}, Volume: {{ volume.toFixed(4)}}</div>
     </div>
-    <div v-show="loading" class="loading-box">
+    <!-- <div v-show="loading" class="loading-box">
       <scale-loader :loading="loading" :color="`#b14ae2`" :height="`25px`" :width="`4px`"></scale-loader>
       <p>Loading Chart Data</p>
     </div>
     <div v-show="errorMessage.length > 0" class="loading-box">
       <scale-loader :loading="loading" :color="`#b14ae2`" :height="`25px`" :width="`4px`"></scale-loader>
       <p>{{ errorMessage}}</p>
-    </div>
+    </div>-->
     <!-- <div v-show="true" id="token-bar-chart">abc</div> -->
   </div>
 </template>
@@ -78,6 +78,7 @@ export default {
         tokenAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
       },
       price: 0,
+      volume: 0,
       shouldUpdateChart: false,
       loading: true,
       errorMessage: ""
@@ -95,32 +96,24 @@ export default {
     setTimeout(this.drawChart, 1000);
   },
   updated: async function() {
-    console.log("component updated...");
+    // console.log("component updated...");
     if (this.getActiveToken !== this.tokenName) {
       this.shouldUpdateChart = true;
       this.tokenName = this.getActiveToken;
     }
-    console.log(`shouldupdate: ${this.shouldUpdateChart}`);
     if (this.shouldUpdateChart) {
       this.errorMessage = "";
       this.loading = true;
-      // let chartData = await this.getChartData();
-      // let volumeChartData = chartData.map(d => ({
-      //   time: d.time,
-      //   value: d.volume,
-      //   color: "rgba(0, 150, 136, 0.8)"
-      // }));
-      // chartObj.candleSeries.setData(chartData);
-      // chartObj.volumeSeries.setData(volumeChartData);
-
-      setTimeout(this.removeVolumeSerie, 500);
-      setTimeout(this.removeCandleSerie, 1000);
+      setTimeout(this.removeVolumeSerie, 0);
+      setTimeout(this.removeCandleSerie, 4000);
       setTimeout(() => {
         this.drawChart();
         this.loading = false;
         this.shouldUpdateChart = false;
-      }, 1500);
-      // this.drawChart();
+      }, 6000);
+
+      // let chartData = await this.getChartData();
+      // chartObj.candleSeries.setData(chartData);
     }
   },
   methods: {
@@ -147,7 +140,7 @@ export default {
       let self = this;
       console.log("Drawing chart...");
       let chartWidth = parseInt(window.innerWidth * 0.9);
-
+      let container = document.querySelector("#token-bar-chart");
       if (!chartObj.chart) {
         let chartElement = document.createElement("div");
         chartElement.setAttribute("id", "token-bar-chart");
@@ -175,7 +168,15 @@ export default {
         },
         priceScale: {
           position: "right",
-          mode: 1
+          mode: 1,
+          autoScale: true,
+          alignLabels: true,
+          borderVisible: true,
+          borderColor: "#555ffd",
+          scaleMargins: {
+            top: 0.3,
+            bottom: 0.25
+          }
         },
         timeScale: {
           rightOffset: 12,
@@ -191,7 +192,6 @@ export default {
         }
       });
 
-      // this.syncToResolution();
       let chartData;
       if (!chartObj.candleSeries) {
         console.log("Drawing candle series for the first time");
@@ -206,13 +206,18 @@ export default {
         });
       }
 
+      chartObj.chart.applyOptions({
+        width: parseInt(window.innerWidth * 0.9)
+      });
+
       if (!chartObj.volumeSeries) {
-        // create volume chart
         let volumeChartData = chartData.map(d => ({
           time: d.time,
           value: d.volume,
           color:
-            d.close > d.open ? "rgba(0, 150, 136, 0.5)" : "rgba(255, 0, 0, 0.5)"
+            d.close > d.open
+              ? "rgba(23, 150, 89, 0.5)"
+              : "rgba(247, 74, 83, 0.5)"
         }));
         chartObj.volumeSeries = chartObj.chart.addHistogramSeries({
           color: "#26a69a",
@@ -241,6 +246,12 @@ export default {
           self.price = price || 0;
         }
       });
+      chartObj.chart.subscribeCrosshairMove(param => {
+        if (param.time) {
+          const price = param.seriesPrices.get(chartObj.volumeSeries);
+          self.volume = price || 0;
+        }
+      });
     },
     async getChartData() {
       let self = this;
@@ -262,7 +273,7 @@ export default {
           token.tokenAddress
         }&start=${1541379723000}`;
       }
-      console.log(url);
+      // console.log(url);
       let response = await axios.get(url);
       let data = response.data;
       if (!data.result || data.result.length === 0) {
@@ -299,7 +310,7 @@ export default {
           bars[0].volume = bars[0].volume * bars[0].price_eth_usd;
         }
         bars[bars.length - 1].close = bars[bars.length - 1].open;
-        console.log("Chart data received from server...");
+        // console.log("Chart data received from server...");
         return bars;
       } else {
         return [];
@@ -351,10 +362,10 @@ export default {
   background: #fdfdfd;
   padding: 5px;
 }
-.buy-or-sell .resolution-btn {
+/* .buy-or-sell .resolution-btn {
   background: #bbc1c3;
   border: none;
   font-size: 11px;
-}
+} */
 </style>
 

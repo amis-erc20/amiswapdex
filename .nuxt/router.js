@@ -9,6 +9,7 @@ const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* w
 const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
 const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
 const _b725ffbe = () => interopDefault(import('..\\pages\\tokenchart.vue' /* webpackChunkName: "pages_tokenchart" */))
+const _4bc3ba82 = () => interopDefault(import('..\\pages\\tokenpricechart.vue' /* webpackChunkName: "pages_tokenpricechart" */))
 const _6de4e8d0 = () => interopDefault(import('..\\pages\\volumechart.vue' /* webpackChunkName: "pages_volumechart" */))
 const _33f1d4f6 = () => interopDefault(import('..\\pages\\welcome.vue' /* webpackChunkName: "pages_welcome" */))
 const _4222f966 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
@@ -115,6 +116,10 @@ export function createRouter() {
       path: "/tokenchart",
       component: _b725ffbe,
       name: "tokenchart"
+    }, {
+      path: "/tokenpricechart",
+      component: _4bc3ba82,
+      name: "tokenpricechart"
     }, {
       path: "/volumechart",
       component: _6de4e8d0,
