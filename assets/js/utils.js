@@ -982,7 +982,8 @@ export const metamaskSendToken = async function (data) {
     value,
     currency,
     gasLimit,
-    gasPrice
+    gasPrice,
+    tokenAddress
   } = data
   console.log(data)
   const ethereum = window.ethereum
@@ -992,13 +993,13 @@ export const metamaskSendToken = async function (data) {
   let selectedAddress = ethereum.selectedAddress
   let amount = web3.utils.toHex(value)
   let count = await web3.eth.getTransactionCount(from)
-  let contractAddress = tokenAddresses[currency]
-  let contract = new web3.eth.Contract(tokenABI, contractAddress, {
+  // let contractAddress = tokenAddresses[currency]
+  let contract = new web3.eth.Contract(tokenABI, tokenAddress, {
     from: from
   })
   const transactionParameters = {
     from: selectedAddress,
-    to: contractAddress,
+    to: tokenAddress,
     value: '0x0',
     data: contract.methods.transfer(to, amount).encodeABI(),
     nonce: web3.utils.toHex(count),

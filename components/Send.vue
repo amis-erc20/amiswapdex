@@ -356,6 +356,10 @@ export default {
               gasLimit: this.gasLimit
             });
           } else {
+            let token = this.getOwnedTokenList.find(
+              t => t.symbol === self.form.currency
+            );
+            console.log(token);
             this.txHash = await metamaskSendToken({
               from: this.getAccount.address,
               to: this.form.targetAddress,
@@ -365,7 +369,8 @@ export default {
               ),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: this.gasLimit,
-              currency: this.form.currency
+              currency: this.form.currency,
+              tokenAddress: token.tokenAddress
             });
           }
           if (this.txHash) {
