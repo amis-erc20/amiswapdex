@@ -1,8 +1,8 @@
 <template>
   <div class="about-view">
-    <Nav/>
+    <Nav />
     <div id="about-description">
-      <img src="../assets/uniswapdex-logo.png" alt>
+      <img src="../assets/uniswapdex-logo.png" alt />
       <p>
         The UniswapDEX.com provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by
         <a
@@ -20,7 +20,6 @@
 import Nav from "~/components/Nav.vue";
 import config from "../config.js";
 export default {
-  middleware: "auth",
   components: { Nav },
   data: function() {
     return {

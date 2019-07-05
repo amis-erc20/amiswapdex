@@ -1,13 +1,13 @@
 <template>
   <div class="recovery-container">
-    <Nav/>
+    <Nav />
     <div v-if="!getConnection" class="no-internet-description">
       <p>No Internet Connection</p>
     </div>
     <div id="recovery-section" v-if="getConnection">
       <h4 v-if="!loading && success">Common Q & A</h4>
       <scale-loader :loading="loading && !success" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
-      <font-awesome-icon v-if="success" icon="check" size="2x" color="green"/>
+      <font-awesome-icon v-if="success" icon="check" size="2x" color="green" />
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <nuxt-link to="/" v-if="success">
         <b-button type="button" variant="primary" id="create-account-btn">Continue</b-button>
@@ -124,7 +124,7 @@
         </b-form-group>
         <b-form-group>
           <b-button variant="primary" @click="increaseUserQuestionCount" id="add-button">
-            <font-awesome-icon icon="plus" color="#dc3545"/>
+            <font-awesome-icon icon="plus" color="#dc3545" />
           </b-button>
           <!-- Unlock Request -->
           <b-modal
@@ -136,7 +136,7 @@
             <b-form @submit="addNewQuestion">
               <b-form-group id="exampleInputGroup1">
                 <label>Your Custom Question</label>
-                <b-form-input type="text" v-model="form.newQuestion"/>
+                <b-form-input type="text" v-model="form.newQuestion" />
               </b-form-group>
               <b-button type="submit" variant="primary">Add Custion Q & A</b-button>
             </b-form>
@@ -185,7 +185,6 @@ import { normalizeUnits } from "moment";
 import CONFIG from "../config.js";
 
 export default {
-  middleware: "auth",
   components: {
     ScaleLoader,
     Nav

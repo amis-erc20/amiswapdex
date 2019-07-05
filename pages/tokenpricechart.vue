@@ -314,7 +314,11 @@ export default {
           priceLineVisible: true,
           priceLineWidth: 1,
           priceLineColor: "#a41ce3",
-          priceLineStyle: 3
+          priceLineStyle: 3,
+          priceFormat: {
+            type: "price",
+            precision: 4
+          }
         });
       }
 

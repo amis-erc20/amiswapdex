@@ -60,6 +60,7 @@
     <!-- <Tokenpricechart /> -->
     <!-- <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe> -->
     <vue-friendly-iframe v-if="rows.length > 0" src="/tokenpricechart"></vue-friendly-iframe>
+    <!-- <iframe v-if="rows.length" src="http://dev.uniswapdex.com/tokenpricechart" frameborder="0"></iframe> -->
 
     <h5 v-if="rows.length > 0">Latest Transactions</h5>
     <vue-good-table
@@ -327,6 +328,12 @@ export default {
   text-align: right;
 }
 .vue-friendly-iframe > iframe {
+  width: 100%;
+  height: 700px;
+  border: none;
+  overflow: hidden;
+}
+iframe {
   width: 100%;
   height: 700px;
   border: none;

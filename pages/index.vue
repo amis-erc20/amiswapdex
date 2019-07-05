@@ -1,19 +1,19 @@
 <template>
   <section class="main-container">
-    <Nav :refreshInterval="refreshInterval"/>
+    <Nav :refreshInterval="refreshInterval" />
     <div class="main-tab">
       <b-card no-body>
         <b-tabs pills card justified>
           <b-tab title="Market" :active="getActiveTab === `market`" @click="onTabChange">
             <b-card-text>
-              <Loading v-if="redirecting"/>
-              <Market v-else/>
+              <Loading v-if="redirecting" />
+              <Market v-else />
             </b-card-text>
           </b-tab>
           <b-tab title="Exchange" :active="getActiveTab === `exchange`" @click="onTabChange">
             <b-card-text>
-              <Loading v-if="redirecting"/>
-              <Exchange v-else/>
+              <Loading v-if="redirecting" />
+              <Exchange v-else />
             </b-card-text>
           </b-tab>
           <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
@@ -23,8 +23,8 @@
                 <h2 v-if="getTotalValue >= 1">$ {{ getTotalValue.toFixed(2) }}</h2>
                 <h2 v-else>$ {{ getTotalValue.toFixed(4) }}</h2>
               </div>
-              <Tokenlist :balance="tokenBalance"/>
-              <periodic-backup :backupStatus="getBackupStatus()"/>
+              <Tokenlist :balance="tokenBalance" />
+              <periodic-backup :backupStatus="getBackupStatus()" />
               <b-modal
                 ref="backup_advice_modal"
                 id="backup_advice_modal"
@@ -47,7 +47,7 @@
                 <strong>Add to Homescreen</strong>
               </b-modal>
             </b-card-text>
-            <Noaccount v-else/>
+            <Noaccount v-else />
           </b-tab>
         </b-tabs>
       </b-card>
@@ -161,7 +161,6 @@ import { setTimeout } from "timers";
 import config from "../config";
 
 export default {
-  middleware: "auth",
   components: {
     Header,
     Tokenlist,
@@ -432,7 +431,7 @@ export default {
     let metamaskWeb3 = await getWeb3Metamask();
     let availableTokens = await getAllListedToken();
 
-    localStorage.removeItem('chartInfo')
+    localStorage.removeItem("chartInfo");
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
     this.updateActiveTab("market");
@@ -632,6 +631,6 @@ div {
   border-color: #773894;
 }
 .spinner-border {
-  margin: 20px!important;
+  margin: 20px !important;
 }
 </style>

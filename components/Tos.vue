@@ -1,6 +1,6 @@
 <template>
   <div class="tos-view">
-    <Nav/>
+    <Nav />
     <div id="tos-description">
       <p>The UniswapDEX.com service, henceforth referred to as Service provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by Uniswap.io.</p>
       <p>The Service does not store your private keys. The safe storage of your private keys are your responsibility. If you lose your private keys or forget your password, we cannot help you in any way.</p>
@@ -18,7 +18,6 @@
 <script>
 import Nav from "~/components/Nav.vue";
 export default {
-  middleware: "auth",
   components: { Nav }
 };
 </script>

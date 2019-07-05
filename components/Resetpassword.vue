@@ -75,7 +75,6 @@ import { normalizeUnits } from "moment";
 import CONFIG from "../config.js";
 
 export default {
-  middleware: "auth",
   components: {
     ScaleLoader,
     Nav
