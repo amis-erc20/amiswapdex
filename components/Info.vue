@@ -263,7 +263,6 @@ export default {
       return "row-style";
     },
     async setRows() {
-      console.log("setting rows...");
       let token = this.selectedToken;
       if (token.tokenAddress.length < 42 || token.exchangeAddress.length < 42) {
         this.rows = [];

@@ -197,7 +197,8 @@ export default {
       getBalance: "account/getBalance",
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
-      getAvailableTokenList: "account/getAvailableTokenList"
+      getAvailableTokenList: "account/getAvailableTokenList",
+      getOwnedTokenList: "account/getOwnedTokenList"
     }),
     validateTargetAddress() {
       return isValidAddress(this.form.targetAddress);
@@ -329,6 +330,7 @@ export default {
     },
     async onSubmit(evt) {
       evt.preventDefault();
+      let self = this;
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -342,6 +344,7 @@ export default {
       let txHash;
       // If user sign in with metamask
       this.form.targetAddress = this.form.targetAddress.trim().toLowerCase();
+
       if (this.getAccount.type === "metamask") {
         try {
           if (this.form.currency === "ETH") {
@@ -396,7 +399,11 @@ export default {
               this.getAccount.privateKey,
               web3
             );
-          else
+          else {
+            let token = this.getOwnedTokenList.find(
+              t => t.symbol === self.form.currency
+            );
+            console.log(token);
             txHash = await sendToken(
               {
                 from: this.getAccount.address,
@@ -409,8 +416,11 @@ export default {
               },
               this.form.currency,
               this.getAccount.privateKey,
-              web3
+              web3,
+              token.tokenAddress
             );
+          }
+
           this.loading = false;
           this.txHash = txHash;
 
@@ -420,6 +430,7 @@ export default {
           this.showSuccessToast(this.txHash);
         } catch (e) {
           this.loading = false;
+          console.log(e);
           alert(`Transaction is not submitted.`);
         }
       }
