@@ -114,6 +114,7 @@ export default {
         }
       }
     });
+    this.changeTimeRange("1M");
 
     this.chart.subscribeCrosshairMove(param => {
       if (param.time) {
@@ -122,14 +123,34 @@ export default {
       }
     });
 
-    window.onresize = function() {
+    // window.onresize = function() {
+    //   console.log(`window resized: ${window.innerWidth}`);
+    //   self.chart.applyOptions({
+    //     width: parseInt(window.innerWidth * 0.9)
+    //   });
+    // };
+
+    window.addEventListener("resize", function() {
       // console.log(`window resized: ${window.innerWidth}`);
       self.chart.applyOptions({
         width: parseInt(window.innerWidth * 0.9)
       });
-    };
+    });
   },
   methods: {
+    scrollToLatest(timeScale, range) {
+      let newScrollPosition;
+      if (range === "1Y" || range === "6M") {
+        newScrollPosition = 15;
+      } else if (range === "3M") {
+        newScrollPosition = 4;
+      } else if (range === "1M") {
+        newScrollPosition = 2;
+      } else {
+        newScrollPosition = 1;
+      }
+      timeScale.scrollToPosition(newScrollPosition, true);
+    },
     gotoRealtime() {
       if (!this.chart) return;
       let timeScale = this.chart.timeScale();
@@ -141,6 +162,7 @@ export default {
       let timeScale = this.chart.timeScale();
       let newTimeObject = this.getTimeObject(range);
       timeScale.setVisibleRange(newTimeObject);
+      this.scrollToLatest(timeScale, range);
       return;
     },
     getTimeObject(range) {
@@ -153,7 +175,7 @@ export default {
       else from = now - 60 * 60 * 24 * 7;
       return {
         from: from,
-        to: now
+        to: now + 60 * 60 * 24 * 1
       };
     }
   }

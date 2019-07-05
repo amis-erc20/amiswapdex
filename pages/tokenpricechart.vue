@@ -219,14 +219,18 @@ export default {
       setTimeout(this.drawChart, 3000);
     },
     removeCandleSerie() {
-      chartObj.chart.removeSeries(chartObj.candleSeries);
-      chartObj.candleSeries = null;
-      console.log(`Candle Serie is removed !`);
+      try {
+        chartObj.chart.removeSeries(chartObj.candleSeries);
+        chartObj.candleSeries = null;
+        console.log(`Candle Serie is removed !`);
+      } catch (e) {}
     },
     removeVolumeSerie() {
-      chartObj.chart.removeSeries(chartObj.volumeSeries);
-      chartObj.volumeSeries = null;
-      console.log(`Volume Serie is removed !`);
+      try {
+        chartObj.chart.removeSeries(chartObj.volumeSeries);
+        chartObj.volumeSeries = null;
+        console.log(`Volume Serie is removed !`);
+      } catch (e) {}
     },
     changeSelectedCurrency(currency) {
       this.loading = false;
@@ -345,9 +349,24 @@ export default {
           scaleMargins: {
             top: 0.8,
             bottom: 0
+          },
+          priceScale: {
+            position: "left",
+            mode: 3,
+            autoScale: false,
+            invertScale: true,
+            alignLabels: false,
+            borderVisible: false,
+            borderColor: "#555ffd",
+            scaleMargins: {
+              top: 0.3,
+              bottom: 0.25
+            }
           }
         });
         chartObj.volumeSeries.setData(volumeChartData);
+        // volumeChartData._series._priceScale._options.mode = 1;
+        // console.log(volumeChartData._series._priceScale._options);
       }
       if (this.resolution === "60") this.changeTimeRange("1M");
       if (this.resolution === "240") this.changeTimeRange("3M");

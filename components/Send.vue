@@ -29,7 +29,7 @@
               <button type="button" id="erase" @click="form.targetAddress = ''"></button>
             </div>
             <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
-              <font-awesome-icon icon="qrcode" size="2x" color="#fff"/>
+              <font-awesome-icon icon="qrcode" size="2x" color="#fff" />
             </b-button>
           </div>
           <b-form-invalid-feedback
@@ -100,7 +100,7 @@
             </div>
           </div>
           <div class="input-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit" />
             <button type="button" id="erase" @click="gasLimit = ''"></button>
           </div>
         </b-form-group>
@@ -358,7 +358,7 @@ export default {
               to: this.form.targetAddress,
               value: parseInt(
                 this.form.amount *
-                  Math.pow(10, this.getDecimal(this.getActiveToken))
+                  Math.pow(10, this.getDecimal(this.getActiveToken) || 18)
               ),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: this.gasLimit,
