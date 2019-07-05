@@ -300,7 +300,7 @@ export const signAndSendETH = async function (transaction, privateKey, web3) {
     to: transaction.to,
     value: transaction.amount
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -386,7 +386,7 @@ export const sendToken = async function (tx, currency, privateKey, web3) {
     data: contract.methods.transfer(toAddress, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -413,7 +413,7 @@ export const unlockToken = async (tx, tokenSymbol, data) => {
     data: contract.methods.approve(data.exchangeAddress, amount).encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  data.privateKey
+    data.privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -468,7 +468,7 @@ export const swapTokenToEth = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   } else {
     transaction = await web3.eth.accounts.signTransaction({
@@ -482,7 +482,7 @@ export const swapTokenToEth = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   }
   return new Promise(resolve => {
@@ -520,7 +520,7 @@ export const swapEthToToken = async function (
             .encodeABI(),
           nonce: web3.utils.toHex(count)
         },
-        privateKey
+          privateKey
         )
       } else {
         transaction = await web3.eth.accounts.signTransaction({
@@ -534,7 +534,7 @@ export const swapEthToToken = async function (
             .encodeABI(),
           nonce: web3.utils.toHex(count)
         },
-        privateKey
+          privateKey
         )
       }
       web3.eth
@@ -581,7 +581,7 @@ export const swapTokenToToken = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   } else {
     transaction = await web3.eth.accounts.signTransaction({
@@ -601,7 +601,7 @@ export const swapTokenToToken = async function (
         .encodeABI(),
       nonce: web3.utils.toHex(count)
     },
-    privateKey
+      privateKey
     )
   }
   return new Promise(resolve => {
@@ -646,7 +646,7 @@ export const addLiquidity = async function (
       .encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -727,7 +727,7 @@ export const removeLiquidity = async function (
       .encodeABI(),
     nonce: web3.utils.toHex(count)
   },
-  privateKey
+    privateKey
   )
   return new Promise(resolve => {
     web3.eth
@@ -983,6 +983,7 @@ export const metamaskSendToken = async function (data) {
     gasLimit,
     gasPrice
   } = data
+  console.log(data)
   const ethereum = window.ethereum
   let web3 = await getWeb3Metamask()
   await ethereum.enable()

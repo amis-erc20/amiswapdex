@@ -52,14 +52,14 @@
               v-if="getActiveToken==='ETH'"
               src="../assets/eth-logo.png"
               alt
-            >
-            <img class="logo-in-header" v-else-if="activeTokenLogo" :src="activeTokenLogo" alt>
+            />
+            <img class="logo-in-header" v-else-if="activeTokenLogo" :src="activeTokenLogo" alt />
             <img
               class="logo-in-header"
               v-else-if="!activeTokenLogo"
               src="../assets/default-token.png"
               alt
-            >
+            />
             <div class="token-symbol-name-group">
               <h4>{{ getActiveToken }}</h4>
               <span>{{activeTokenName}}</span>
@@ -74,7 +74,7 @@
           </div>
         </div>
         <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
-          <font-awesome-icon icon="bars" size="2x" color="#fff"/>
+          <font-awesome-icon icon="bars" size="2x" color="#fff" />
         </b-button>
       </template>
       <b-card no-body>
@@ -84,7 +84,7 @@
             :active="activeTokenSubTab === 'info'"
             @click="onTokenTabChange('info')"
           >
-            <Info/>
+            <Info />
             <!-- <TVChartContainer/> -->
           </b-tab>
           <b-tab
@@ -92,17 +92,17 @@
             title="Balance"
             @click="onTokenTabChange('balance')"
           >
-            <Header v-if="getSignIn"/>
-            <Transactionlist v-if="getSignIn"/>
-            <Noaccount v-else/>
+            <Header v-if="getSignIn" />
+            <Transactionlist v-if="getSignIn" />
+            <Noaccount v-else />
           </b-tab>
           <b-tab
             :active="activeTokenSubTab === 'receive'"
             title="Receive"
             @click="onTokenTabChange('receive')"
           >
-            <Receive v-if="getSignIn"/>
-            <Noaccount v-else/>
+            <Receive v-if="getSignIn" />
+            <Noaccount v-else />
           </b-tab>
           <b-tab
             :active="activeTokenSubTab === 'send'"
@@ -110,8 +110,8 @@
             @click="onTokenTabChange('send')"
           >
             <b-card-text>
-              <Send v-if="getSignIn"/>
-              <Noaccount v-else/>
+              <Send v-if="getSignIn" />
+              <Noaccount v-else />
             </b-card-text>
           </b-tab>
           <b-tab
@@ -120,8 +120,8 @@
             @click="onTokenTabChange('swap')"
           >
             <b-card-text>
-              <Swap v-if="getSignIn && getConnection"/>
-              <Noaccount v-else/>
+              <Swap v-if="getSignIn && getConnection" />
+              <Noaccount v-else />
             </b-card-text>
           </b-tab>
           <b-tab
@@ -131,8 +131,8 @@
             @click="onTokenTabChange('pool')"
           >
             <b-card-text>
-              <Liquidity v-if="getSignIn && getConnection"/>
-              <Noaccount v-else/>
+              <Liquidity v-if="getSignIn && getConnection" />
+              <Noaccount v-else />
             </b-card-text>
           </b-tab>
         </b-tabs>
@@ -152,8 +152,8 @@
             <h4 v-if="pageToRender === 'tos'">Term of Services</h4>
           </div>
         </template>
-        <About v-if="pageToRender === 'about'"/>
-        <Tos v-if="pageToRender === 'tos'"/>
+        <About v-if="pageToRender === 'about'" />
+        <Tos v-if="pageToRender === 'tos'" />
       </b-modal>
     </b-modal>
   </section>
@@ -527,6 +527,7 @@ export default {
   height: auto;
   width: 100%;
   padding-top: 0px;
+  overflow: hidden;
 }
 #token_info_modal,
 #about_tos_modal {

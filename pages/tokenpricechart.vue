@@ -120,8 +120,8 @@ export default {
       tokenName: "WETH",
       tokenAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       currency: "USD",
-      resolution: "60",
-      range: "1M",
+      resolution: "1D",
+      range: "3M",
       chart: null,
       candleSeries: null,
       volumeSeries: null,
@@ -312,18 +312,20 @@ export default {
       if (!chartObj.candleSeries) {
         console.log("Drawing candle series for the first time");
         chartData = await this.getChartData();
-        chartObj.candleSeries = chartObj.chart.addCandlestickSeries();
-        chartObj.candleSeries.setData(chartData);
-        chartObj.candleSeries.applyOptions({
-          priceLineVisible: true,
-          priceLineWidth: 1,
-          priceLineColor: "#a41ce3",
-          priceLineStyle: 3,
-          priceFormat: {
-            type: "price",
-            precision: 4
-          }
-        });
+        try {
+          chartObj.candleSeries = chartObj.chart.addCandlestickSeries();
+          chartObj.candleSeries.setData(chartData);
+          chartObj.candleSeries.applyOptions({
+            priceLineVisible: true,
+            priceLineWidth: 1,
+            priceLineColor: "#a41ce3",
+            priceLineStyle: 3,
+            priceFormat: {
+              type: "price",
+              precision: 4
+            }
+          });
+        } catch (e) {}
       }
 
       chartObj.chart.applyOptions({
@@ -339,32 +341,34 @@ export default {
               ? "rgba(23, 150, 89, 0.5)"
               : "rgba(247, 74, 83, 0.5)"
         }));
-        chartObj.volumeSeries = chartObj.chart.addHistogramSeries({
-          color: "#26a69a",
-          lineWidth: 2,
-          priceFormat: {
-            type: "volume"
-          },
-          overlay: true,
-          scaleMargins: {
-            top: 0.8,
-            bottom: 0
-          },
-          priceScale: {
-            position: "left",
-            mode: 3,
-            autoScale: false,
-            invertScale: true,
-            alignLabels: false,
-            borderVisible: false,
-            borderColor: "#555ffd",
+        try {
+          chartObj.volumeSeries = chartObj.chart.addHistogramSeries({
+            color: "#26a69a",
+            lineWidth: 2,
+            priceFormat: {
+              type: "volume"
+            },
+            overlay: true,
             scaleMargins: {
-              top: 0.3,
-              bottom: 0.25
+              top: 0.8,
+              bottom: 0
+            },
+            priceScale: {
+              position: "left",
+              mode: 3,
+              autoScale: false,
+              invertScale: true,
+              alignLabels: false,
+              borderVisible: false,
+              borderColor: "#555ffd",
+              scaleMargins: {
+                top: 0.3,
+                bottom: 0.25
+              }
             }
-          }
-        });
-        chartObj.volumeSeries.setData(volumeChartData);
+          });
+          chartObj.volumeSeries.setData(volumeChartData);
+        } catch (e) {}
         // volumeChartData._series._priceScale._options.mode = 1;
         // console.log(volumeChartData._series._priceScale._options);
       }

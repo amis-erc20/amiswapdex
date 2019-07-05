@@ -1,6 +1,7 @@
 <template>
   <div class="token-info-section">
     <div class="token-info-table">
+      <h1 style="display: none">{{ selectedToken.exchangeAddress }}</h1>
       <b-row>
         <b-col>Name</b-col>
         <b-col v-if="getActiveToken === 'ETH'">Ether</b-col>
@@ -59,17 +60,20 @@
 
     <!-- <Tokenpricechart /> -->
     <!-- <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe> -->
-    <vue-friendly-iframe v-if="rows.length > 0" src="/tokenpricechart"></vue-friendly-iframe>
+    <vue-friendly-iframe
+      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42"
+      src="/tokenpricechart"
+    ></vue-friendly-iframe>
     <!-- <iframe v-if="rows.length" src="http://dev.uniswapdex.com/tokenpricechart" frameborder="0"></iframe> -->
 
-    <h5 v-if="rows.length > 0">Latest Transactions</h5>
+    <h5 v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42">Latest Transactions</h5>
     <vue-good-table
       :columns="columns"
       :rows="rows"
       :line-numbers="true"
       max-height="500px"
       :fixed-header="true"
-      v-if="getActiveToken !== 'ETH' && rows.length > 0"
+      v-if="getActiveToken !== 'ETH' && rows.length > 0 && selectedToken.exchangeAddress.length === 42"
       :row-style-class="rowStyleClassFn"
     />
   </div>
@@ -168,7 +172,7 @@ export default {
     selectedToken: function() {
       let self = this;
       let selectedTokenSymbol;
-      if (this.getActiveToken === "ETH") selectedTokenSymbol = "USDC";
+      if (this.getActiveToken === "ETH") selectedTokenSymbol = "WETH";
       else selectedTokenSymbol = this.getActiveToken;
       let token = this.getAvailableTokenList.find(
         t => t.symbol === selectedTokenSymbol
@@ -259,8 +263,9 @@ export default {
       return "row-style";
     },
     async setRows() {
+      console.log("setting rows...");
       let token = this.selectedToken;
-      if (token.tokenAddress.length < 42) {
+      if (token.tokenAddress.length < 42 || token.exchangeAddress.length < 42) {
         this.rows = [];
         return;
       }
