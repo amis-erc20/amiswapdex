@@ -129,7 +129,8 @@ export default {
       volume: 0,
       shouldUpdateChart: false,
       loading: true,
-      errorMessage: ""
+      errorMessage: "",
+      realTimeUpdateInterval: null
     };
   },
   computed: {
@@ -206,8 +207,8 @@ export default {
           })
         );
       }
-    });
-    setTimeout(this.drawChart, 1000);
+    }, 1000);
+    // setTimeout(this.drawChart, 1000);
   },
   methods: {
     updateChart() {
@@ -256,7 +257,41 @@ export default {
         })
       );
     },
-    async syncToResolution() {},
+    async listenNewData() {
+      let self = this;
+      // let i = 1;
+      chartObj.refreshListener = setInterval(async () => {
+        // console.log("refreshing chart data...");
+        let timeObj = self.getTimeObject();
+        let chartData = await self.getChartData(timeObj.from);
+        let volumeChartData = chartData.map(d => ({
+          time: d.time,
+          value: d.volume,
+          color:
+            d.close > d.open
+              ? "rgba(23, 150, 89, 0.5)"
+              : "rgba(247, 74, 83, 0.5)"
+        }));
+        try {
+          if (chartObj.candleSeries) {
+            let lastData = chartData[chartData.length - 1];
+            // lastData.time = lastData.time + 60 * 60 * i;
+            chartObj.chart.updateData(chartObj.candleSeries._series, lastData);
+          }
+          if (chartObj.volumeSeries) {
+            let lastData = volumeChartData[volumeChartData.length - 1];
+            // lastData.time = lastData.time + 60 * 60 * i;
+            // lastData.volume = lastData.volume + lastData.volume * Math.random();
+            // i += 1;
+            chartObj.chart.updateData(chartObj.volumeSeries._series, lastData);
+          }
+        } catch (e) {
+          console.log(e);
+          return;
+        }
+        // console.log("update success...");
+      }, 10000);
+    },
     async drawChart() {
       let self = this;
       if (!chartObj.chart) {
@@ -327,7 +362,6 @@ export default {
           });
         } catch (e) {}
       }
-
       chartObj.chart.applyOptions({
         width: parseInt(window.innerWidth * 0.9)
       });
@@ -394,6 +428,8 @@ export default {
           self.volume = price || 0;
         }
       });
+      if (chartObj.refreshListener) clearInterval(chartObj.refreshListener);
+      self.listenNewData();
     },
     gotoRealtime() {
       if (!chartObj.chart) return;
@@ -434,27 +470,34 @@ export default {
       else if (range === "6M") from = now - 60 * 60 * 24 * 180;
       else if (range === "3M") from = now - 60 * 60 * 24 * 90;
       else if (range === "1M") from = now - 60 * 60 * 24 * 30;
-      else from = now - 60 * 60 * 24 * 7;
+      else if (range === "1W") from = now - 60 * 60 * 24 * 7;
+      else from = now - 60 * 60 * 24 * 3;
       return {
         from: from,
         to: now
       };
     },
-    async getChartData() {
+    async getChartData(start) {
       let self = this;
       let url;
+      let from;
+      let now = Math.round(new Date() / 1000);
+      // decide starting timestamp
+      if (start) from = start;
+      else from = now - 60 * 60 * 24 * 365;
+
       if (this.resolution === "60") {
         url = `${config.uniswapDexServer}api/histohour?tokenAddress=${
           this.tokenAddress
-        }&start=${1541379723000}`;
+        }&start=${from * 1000}`;
       } else if (this.resolution === "240") {
         url = `${config.uniswapDexServer}api/histo4hour?tokenAddress=${
           this.tokenAddress
-        }&start=${1541379723000}`;
+        }&start=${from * 1000}`;
       } else {
         url = `${config.uniswapDexServer}api/histoday?tokenAddress=${
           this.tokenAddress
-        }&start=${1541379723000}`;
+        }&start=${from * 1000}`;
       }
       console.log(url);
       let response = await axios.get(url);
