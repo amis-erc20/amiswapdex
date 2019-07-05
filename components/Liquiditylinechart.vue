@@ -71,9 +71,9 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    let url = `${
-      config.uniswapDexServer
-    }api/histodaymarket?start=${1541379723000}`;
+    let now = Math.round(new Date() / 1000);
+    let from = now - 60 * 60 * 24 * 365;
+    let url = `${config.uniswapDexServer}api/histodaymarket?start=${from}`;
     let response = await axios.get(url);
     let data = response.data.result.map(el => ({
       time: parseInt(parseInt(el.timestamp) / 1000),
@@ -163,6 +163,7 @@ export default {
 #liquidity-line-chart {
   width: 90%;
   margin: 0px auto;
+  /* margin-top: 0px; */
 }
 #liquidity-line-chart > div,
 #liquidity-line-chart > div > table {
