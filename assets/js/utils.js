@@ -1,3 +1,4 @@
+/* eslint-disable handle-callback-err */
 import Web3 from 'web3'
 import axios from 'axios'
 import {
@@ -118,18 +119,6 @@ export const getExchangeAddress = async function (tokenAddress) {
   }
 }
 
-export const getULTToUSDPrice = async () => {
-  try {
-    let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
-    if (response.data.transactions && response.data.transactions.length > 0) {
-      return response.data.transactions[0].close
-    } else return 0
-  } catch (e) {
-    // console.log(`ERROR - getULToUSDPrice`)
-    // console.log(e)
-  }
-}
-
 export const getCurrentReserve = async (currency, web3) => {
   let tokenContract = tokenContracts[currency]
   let exchangeAddress = exchangeAddresses[currency]
@@ -143,34 +132,6 @@ export const getCurrentReserve = async (currency, web3) => {
   }
 }
 
-export const getETHToUSDPrice = async () => {
-  try {
-    let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
-    if (response.data.transactions && response.data.transactions.length > 0) {
-      let ethUsdPrice = response.data.transactions[0].price_eth_usd
-      return ethUsdPrice
-    } else {
-      let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
-      return response.data.result.ethusd
-    }
-  } catch (e) {
-    console.log(`ERROR - getETHToUSDPrice`)
-    console.log(e)
-    return 0
-  }
-}
-
-export const getEthAndUltPrice = async () => {
-  let response = await axios.get(`${CONFIG.chartServerUrl}/histohour?limit=1`)
-  if (response.data.transactions && response.data.transactions.length > 0) {
-    let ethUsdPrice = response.data.transactions[0].price_eth_usd
-    let ultUsdPrice = response.data.transactions[0].close
-    return {
-      ethUsdPrice,
-      ultUsdPrice
-    }
-  }
-}
 export const getTokenToUSDPrice = async (symbol) => {
   try {
     let response = await axios.get(
@@ -230,14 +191,6 @@ export const getTokenBalance = async function (address, currency, web3, ownedTok
       .balanceOf(address)
       .call()
     return parseInt(tokenBalance)
-
-    // GET TOKEN BALANCE FROM ETHERSCAN API INSTEAD OF USING WEB3
-    // let tokenAddress = tokenAddresses[currency]
-    // const url = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${tokenAddress}&address=${address}&tag=latest&apikey=Y1C96ES3CDKANT866DQMTJTMF2G52FBBN9`
-    // let response = await axios.get(url)
-    // if (response.data.status === "1") {
-    //   return parseInt(response.data.result)
-    // }
   } catch (e) {
     // console.log(`ERROR - getTokenBalance`)
     // console.log(e)
@@ -248,13 +201,11 @@ export const estimateGas = async function (transaction, web3) {
   try {
     let gas = await web3.eth.estimateGas({
       from: transaction.from,
-      // to: transaction.to,
       to: transaction.from,
       value: transaction.value
     })
     return gas
   } catch (e) {
-    console.error(e)
     return 0
   }
 }
@@ -278,7 +229,6 @@ export const estimateGasForSwap = async function (transaction, web3, exchangeAdd
           resolve(gasAmount)
         })
         .catch(function (error) {
-          // console.log(error)
           resolve(0)
         })
     })
@@ -1083,6 +1033,18 @@ export const getEthToUsdcPrice = async () => {
   for (let i = 0; i < events.length; i++) {
     let event = events[i]
     if (event.price > 0) return parseFloat(1 / event.price)
+  }
+}
+
+export const getETHToUSDPrice = async () => {
+  try {
+    let ethToUsdc = await getEthToUsdcPrice()
+    return ethToUsdc || 0
+  } catch (e) {
+    // console.log(`ERROR - getETHToUSDPrice`)
+    // console.log(e)
+    let response = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${CONFIG.etherscanApiKey}`)
+    return response.data.result.ethusd
   }
 }
 

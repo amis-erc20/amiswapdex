@@ -14,11 +14,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import {
-  getULTToUSDPrice,
-  getETHToUSDPrice,
-  getTokenToUSDPrice
-} from "../assets/js/utils";
+import { getETHToUSDPrice, getTokenToUSDPrice } from "../assets/js/utils";
 export default {
   data: function() {
     return {

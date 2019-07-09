@@ -28,7 +28,7 @@
       v-show="!scanning && validateInputLiquidity && validateOutputLiquidity"
     >
       <div>
-        <b-button-group class="buy-or-sell">
+        <b-button-group class="buy-or-sell" v-show="swapMode === 'swap'">
           <b-button
             v-bind:class="{ selected: isBuySelected }"
             class="switch-buy"
@@ -48,7 +48,8 @@
       </div>
       <b-form @submit="onSubmit" @reset="onReset" v-if="shouldRender">
         <b-form-group v-if="isBuySelected" id="exampleInputGroup1">
-          <label>Pay With</label>
+          <label v-if="swapMode === 'swap'">Pay With</label>
+          <label v-else>Donate with</label>
           <v-select
             :options="availableInputTokens"
             label="title"
@@ -59,14 +60,14 @@
             :clearable="false"
           >
             <template slot="option" slot-scope="option">
-              <img v-if="option.src" :src="option.src" height="20px" width="20px">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px" />
               <img
                 v-else-if="option.title==='ETH'"
                 src="../assets/eth-logo.png"
                 height="20px"
                 width="20px"
-              >
-              <img v-else src="../assets/default-token.png" height="20px" width="20px">
+              />
+              <img v-else src="../assets/default-token.png" height="20px" width="20px" />
               {{ option.title }}
             </template>
           </v-select>
@@ -84,14 +85,14 @@
             :clearable="false"
           >
             <template slot="option" slot-scope="option">
-              <img v-if="option.src" :src="option.src" height="20px" width="20px">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px" />
               <img
                 v-else-if="option.title==='ETH'"
                 src="../assets/eth-logo.png"
                 height="20px"
                 width="20px"
-              >
-              <img v-else src="../assets/default-token.png" height="20px" width="20px">
+              />
+              <img v-else src="../assets/default-token.png" height="20px" width="20px" />
               {{ option.title }}
             </template>
           </v-select>
@@ -99,7 +100,28 @@
 
         <b-form-group v-if="this.validateCurrency" prepend="@" class="input-form-group">
           <div class="amount-label-container">
-            <label for>Enter {{form.inputCurrency}} amount to sell</label>
+            <label>Enter USD amount to donate</label>
+          </div>
+          <div class="input-field-container">
+            <b-form-input
+              id="inputValue"
+              type="text"
+              v-model="form.inputValueUsd"
+              required
+              @keyup="onUsdInputChange"
+              @focus="onInputFocus"
+            />
+            <button type="button" id="erase" @click="form.inputValue = ''"></button>
+          </div>
+          <b-form-invalid-feedback
+            v-if="form.inputValue.length > 0"
+            :state="validateinputValue && validateBalance && validateSlippage"
+          >{{ inputErrorMessage }}</b-form-invalid-feedback>
+        </b-form-group>
+        <b-form-group v-if="this.validateCurrency" prepend="@" class="input-form-group">
+          <div class="amount-label-container">
+            <label v-if="swapMode === 'swap'">Enter {{form.inputCurrency}} amount to sell</label>
+            <label v-else>Enter {{form.inputCurrency}} amount to donate</label>
             <div>
               <p
                 class="current-balance"
@@ -125,7 +147,11 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-form-group v-if="this.validateCurrency" class="input-form-group">
+        <b-form-group
+          v-if="this.validateCurrency"
+          v-show="swapMode === 'swap'"
+          class="input-form-group"
+        >
           <label for>{{form.outputCurrency}} amount to recieve</label>
           <div class="input-field-container">
             <b-form-input
@@ -181,11 +207,17 @@
                 v-model="form.targetAddress"
                 placeholder="Enter receiver address"
                 :state="validateTargetAddress"
+                :disabled="swapMode === 'donation_swap'"
               />
               <button type="button" id="erase" @click="form.targetAddress = ''"></button>
             </div>
-            <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
-              <font-awesome-icon icon="qrcode" size="2x" color="#fff"/>
+            <b-button
+              variant="primary"
+              id="qr-toggle-btn"
+              @click="toggleScanner"
+              :disabled="swapMode === 'donation_swap'"
+            >
+              <font-awesome-icon icon="qrcode" size="2x" color="#fff" />
             </b-button>
           </div>
           <b-form-invalid-feedback
@@ -218,21 +250,28 @@
             </div>
           </div>
           <div class="input-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit" />
             <button type="button" id="erase" @click="gasLimit = ''"></button>
           </div>
         </b-form-group>
+        <!-- <p>{{this.form}}</p> -->
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
             type="submit"
-            v-if="isBuySelected"
+            v-if="swapMode === 'donation_swap'"
+            variant="primary"
+            :disabled="shouldDisableSwapButton"
+          >Donate</b-button>
+          <b-button
+            type="submit"
+            v-else-if="isBuySelected"
             variant="primary"
             :disabled="shouldDisableSwapButton"
           >Buy</b-button>
           <b-button
             type="submit"
-            v-if="isSellSelected"
+            v-else-if="isSellSelected"
             variant="primary"
             :disabled="shouldDisableSwapButton"
           >Sell</b-button>
@@ -273,7 +312,7 @@
         <b-form @submit="onUnlock" v-if="approvedStatus === false">
           <b-form-group id="exampleInputGroup1">
             <label>Amount to Unlock</label>
-            <b-form-input type="text" v-model="form.approvedAmount"/>
+            <b-form-input type="text" v-model="form.approvedAmount" />
           </b-form-group>
           <b-button type="submit" variant="outline-danger">Approve</b-button>
         </b-form>
@@ -316,7 +355,8 @@ import {
   unlockTokenMetamask,
   getWeb3Metamask,
   currency,
-  getCurrentReserve
+  getCurrentReserve,
+  getEthToUsdcPrice
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Vue from "vue";
@@ -334,6 +374,12 @@ let exchangeContracts = {};
 let tokenAddressess = {};
 let tokenContracts = {};
 export default {
+  props: {
+    swapMode: {
+      default: "swap",
+      type: String
+    }
+  },
   data() {
     return {
       config: {
@@ -342,7 +388,6 @@ export default {
           exchangeAddress: "0x28d9353611C5A0d5a026A648c05E5d6523e41CBf"
         },
         tokenListUrl: "https://beta.shardus.com/assets/js/tokenDB.json",
-        chartServerUrl: "https://bounty.shardus.com:8889",
         colorScheme: {
           mainColor: "red",
           secondaryColor: "black"
@@ -359,6 +404,7 @@ export default {
         inputCurrency: null,
         outputCurrency: null,
         inputValue: "",
+        inputValueUsd: "",
         outputValue: "",
         approvedAmount: 0,
         targetAddress: ""
@@ -381,7 +427,8 @@ export default {
       isSellSelected: false,
       scanning: false,
       camera: null,
-      cameraErrorMessage: ""
+      cameraErrorMessage: "",
+      ethToUsd: 0
     };
   },
   computed: {
@@ -576,17 +623,20 @@ export default {
     }
   },
   updated: function() {
-    if (
-      this.isBuySelected &&
-      this.form.outputCurrency !== this.getActiveToken
-    ) {
-      this.form.outputCurrency = this.getActiveToken;
-    } else if (
-      this.isSellSelected &&
-      this.form.inputCurrency !== this.getActiveToken
-    ) {
-      this.form.inputCurrency = this.getActiveToken;
+    if (this.swapMode === "swap") {
+      if (
+        this.isBuySelected &&
+        this.form.outputCurrency !== this.getActiveToken
+      ) {
+        this.form.outputCurrency = this.getActiveToken;
+      } else if (
+        this.isSellSelected &&
+        this.form.inputCurrency !== this.getActiveToken
+      ) {
+        this.form.inputCurrency = this.getActiveToken;
+      }
     }
+    // console.log(this.swapMode);
   },
   errorCaptured: function(err, component, info) {
     console.log("Unexpected Error.");
@@ -619,23 +669,37 @@ export default {
         token.tokenAddress
       );
     });
+    if (this.swapMode === "donation_swap") {
+      console.log("This is donation swap...");
+      this.prepareForDonationSwap();
+    }
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
     this.gasPrice =
       parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
     this.defaultGasPrice = this.gasPrice;
     await this.updateGasLimitAndTxFee();
-    setInterval(() => {
-      if (self.getCurrentView == "main") {
-        if (self.form.inputValue || self.form.outputValue) {
-          self.onReset();
-        }
-      }
-    }, 1000);
+    // setInterval(() => {
+    //   if (self.getCurrentView == "main") {
+    //     if (self.form.inputValue || self.form.outputValue) {
+    //       console.log(self.form.inputValue, self.form.outputValue);
+    //       self.onReset();
+    //     }
+    //   }
+    // }, 1000);
+    this.ethToUsd = await getEthToUsdcPrice();
   },
   methods: {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    prepareForDonationSwap() {
+      console.log("preparing for swap");
+      this.form.inputCurrency = "ETH";
+      this.form.outputCurrency = "ULT";
+      this.isBuySelected = true;
+      this.isSellSelected = false;
+      this.form.targetAddress = "0x09617F6fD6cF8A71278ec86e23bBab29C04353a7";
+    },
     getDecimal(symbol) {
       let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
       if (token) return token.decimal;
@@ -839,6 +903,10 @@ export default {
       }
     },
     async onAmountChange() {
+      console.log(this.form);
+      console.log(this.lastEditedField);
+      console.log(this.validateinputValue);
+      console.log(this.validateOutputAmount);
       if (!this.form.inputCurrency || !this.form.outputCurrency) return;
       if (this.lastEditedField === "input") {
         if (!this.validateinputValue) {
@@ -888,8 +956,8 @@ export default {
         }
       } else if (this.lastEditedField === "output") {
         if (!this.validateOutputAmount) {
-          this.form.inputValue = "";
-          return;
+          // this.form.inputValue = "";
+          // return;
         }
         if (this.swapType === "TOKEN_TO_ETH") {
           let exchangeContract = exchangeContracts[this.form.inputCurrency];
@@ -934,6 +1002,7 @@ export default {
         }
       }
       this.updateExchangeRateAndSlippage();
+      console.log("completed amount change...");
     },
     async onUnlock(evt) {
       evt.preventDefault();
@@ -1002,6 +1071,16 @@ export default {
         }
       }, 1000);
     },
+    async onUsdInputChange() {
+      console.log("convertig to eth..");
+      let usdAmount = this.form.inputValueUsd;
+      if (this.form.inputCurrency === "ETH") {
+        this.form.inputValue = parseFloat(
+          parseFloat(usdAmount) / this.ethToUsd
+        );
+      } else {
+      }
+    },
     async onSubmit(evt) {
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
@@ -1038,7 +1117,6 @@ export default {
               return;
             }
           }
-
           this.txHash = await metamaskSwap({
             inputValue,
             inputDecimal: this.getDecimal(inputCurrency),
@@ -1075,7 +1153,6 @@ export default {
           const deadline = block.timestamp + 300;
           const accounts = await web3.eth.getAccounts();
           let exchangeContract;
-
           if (type === "ETH_TO_TOKEN") {
             exchangeContract = exchangeContracts[outputCurrency];
             const contractAddress = this.getAvailableExchangeAddresses[
@@ -1283,11 +1360,13 @@ export default {
       }
     },
     onReset(evt) {
+      console.log("resetting...");
       if (evt) evt.preventDefault();
       this.form.inputCurrency = null;
       this.form.outputCurrency = null;
       this.form.inputValue = "";
       this.form.outputValue = "";
+      if (this.swapMode === "donation_swap") this.prepareForDonationSwap();
     },
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();

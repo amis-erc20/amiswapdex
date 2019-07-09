@@ -1,19 +1,19 @@
 <template>
   <div class="nav-section">
     <nuxt-link to="/" v-if="currentRoute !== '/'">
-      <font-awesome-icon icon="chevron-left" size="2x" color="#fff" @click="onPressBack"/>
+      <font-awesome-icon icon="chevron-left" size="2x" color="#fff" @click="onPressBack" />
     </nuxt-link>
     <div class="title">
       <div id="main-title-no-connection-container">
         <div class="logo-title-container">
-          <img id="uniswapdex-logo" src="../assets/uniswapdex-logo.png" alt>
+          <img id="uniswapdex-logo" src="../assets/uniswapdex-logo.png" alt />
           <h4>{{ title }}</h4>
         </div>
-        <no-connection/>
+        <no-connection />
       </div>
     </div>
     <b-button v-b-modal.settingModal variant="outline-light">
-      <font-awesome-icon icon="bars" size="2x" color="#fff"/>
+      <font-awesome-icon icon="bars" size="2x" color="#fff" />
     </b-button>
     <b-modal ref="settingModal_ref" id="settingModal" title="Options" :hide-footer="true">
       <b-list-group v-if="getSignIn">
@@ -40,6 +40,9 @@
       <b-list-group v-else>
         <b-list-group-item @click="showPage('about')">About</b-list-group-item>
         <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
+        <b-list-group-item>
+          <a href="https://gitlab.com/shardus/uniswapdex/issues/new" target="_blank">Report Issues</a>
+        </b-list-group-item>
       </b-list-group>
     </b-modal>
     <!-- Metamask Modal -->
@@ -61,12 +64,12 @@
           <h4 v-if="pageToRender === 'tos'">Term of Services</h4>
         </div>
       </template>
-      <Backup v-if="pageToRender === 'backup'"/>
-      <Recoverysetup v-if="pageToRender === 'recoverysetup'"/>
-      <Resetpassword v-if="pageToRender === 'reset_password'"/>
-      <Private v-if="pageToRender === 'private'"/>
-      <About v-if="pageToRender === 'about'"/>
-      <Tos v-if="pageToRender === 'tos'"/>
+      <Backup v-if="pageToRender === 'backup'" />
+      <Recoverysetup v-if="pageToRender === 'recoverysetup'" />
+      <Resetpassword v-if="pageToRender === 'reset_password'" />
+      <Private v-if="pageToRender === 'private'" />
+      <About v-if="pageToRender === 'about'" />
+      <Tos v-if="pageToRender === 'tos'" />
     </b-modal>
   </div>
 </template>
@@ -280,6 +283,12 @@ export default {
 #settingModal .list-group-item {
   cursor: pointer;
   font-size: 13px;
+}
+#settingModal .list-group-item a {
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  text-decoration: none;
 }
 #main-title-no-connection-container {
   width: 100%;

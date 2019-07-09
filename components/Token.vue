@@ -1,10 +1,10 @@
 <template>
   <b-row class="token row">
     <b-col class="token-name">
-      <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
-      <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
-      <img v-else-if="token.src" :src="token.src" alt>
-      <img v-else src="../assets/default-token.png">
+      <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt />
+      <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt />
+      <img v-else-if="token.src" :src="token.src" alt />
+      <img v-else src="../assets/default-token.png" />
       <div>
         <div class="token-symbol">{{token.name}}</div>
         <div class="token-fullname" v-if="token.name === 'ETH'">Ether</div>
@@ -36,7 +36,6 @@
 </template>
 
 <script>
-import { getULTToUSDPrice } from "../assets/js/utils";
 import { mapGetters, mapActions } from "vuex";
 export default {
   props: {

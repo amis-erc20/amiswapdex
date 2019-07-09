@@ -117,7 +117,6 @@ import {
   getHistory,
   initContracts,
   getTokenHistory,
-  getULTToUSDPrice,
   isIos,
   isInStandaloneMode,
   getETHToUSDPrice,
@@ -177,7 +176,6 @@ export default {
   data: function() {
     return {
       backupCheckInterval: 3 * 60 * 1000,
-      ultInUSD: 0,
       currentTokenCount: 0,
       refreshInterval: null,
       redirecting: false,
@@ -270,10 +268,6 @@ export default {
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();
     },
-    async updateUSDPrices() {
-      let ultUSD = await getULTToUSDPrice();
-      this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
-    },
     async refreshWallet(web3) {
       if (
         !this.getSignIn ||
@@ -327,15 +321,9 @@ export default {
       if (this.getAccount.type !== "credentials") return;
       let self = this;
       let account = this.getAccount;
-      let balance = this.getBalance["ETH"];
-      let balanceULT = this.getBalance["ULT"];
-      let balanceDAI = this.getBalance["DAI"];
+      let balance = this.getTotalValue;
       try {
-        if (
-          (account.address && balance > 0) ||
-          (account.address && balanceULT > 0) ||
-          (account.address && balanceDAI > 0)
-        ) {
+        if (account.address && balance > 0) {
           let { Ns } = this.getCredentials;
           let { backupStatus } = JSON.parse(localStorage.getItem(Ns));
           if (backupStatus === false) {
@@ -512,15 +500,6 @@ export default {
   color: #333;
   position: fixed;
   top: 150px;
-}
-#ult-chart-link {
-  position: relative;
-  bottom: -30px;
-  text-decoration: none;
-  color: #2d547b;
-  text-transform: uppercase;
-  font-size: 12px;
-  font-weight: bolder;
 }
 .main-tab {
   top: 64px;

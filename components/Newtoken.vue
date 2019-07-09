@@ -16,8 +16,8 @@
         <label for>Please select a token to add</label>
         <v-select :options="tokenList" label="title" v-model="selectedToken">
           <template slot="option" slot-scope="option">
-            <img v-if="option.src" :src="option.src" height="20px">
-            <img v-else src="../assets/default-token.png" height="20px">
+            <img v-if="option.src" :src="option.src" height="20px" />
+            <img v-else src="../assets/default-token.png" height="20px" />
             {{ option.title }}
           </template>
         </v-select>
@@ -39,7 +39,6 @@ import {
   getHistory,
   initContracts,
   getTokenHistory,
-  getULTToUSDPrice,
   isIos,
   isInStandaloneMode,
   getTokenToUSDPrice,

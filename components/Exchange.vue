@@ -1,6 +1,6 @@
 <template>
   <section id="exchange-container">
-    <Loading v-if="redirecting"/>
+    <Loading v-if="redirecting" />
     <b-form>
       <b-form-group>
         <div class="search-field-container">
@@ -111,10 +111,10 @@
                 <p class="token-order">{{ token.order }}.</p>
               </div>
               <div class="token-name">
-                <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt>
-                <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt>
-                <img v-else-if="token.src" :src="token.src" alt>
-                <img v-else src="../assets/default-token.png">
+                <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt />
+                <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt />
+                <img v-else-if="token.src" :src="token.src" alt />
+                <img v-else src="../assets/default-token.png" />
                 <div>
                   <p class="exchange-token-symbol">{{token.name}}</p>
                   <p class="exchange-token-fullname">{{token.fullname}}</p>
@@ -184,14 +184,14 @@
             :clearable="false"
           >
             <template slot="option" slot-scope="option">
-              <img v-if="option.src" :src="option.src" height="20px" width="20px">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px" />
               <img
                 v-else-if="option.title==='ETH'"
                 src="../assets/eth-logo.png"
                 height="20px"
                 width="20px"
-              >
-              <img v-else src="../assets/default-token.png" height="20px" width="20px">
+              />
+              <img v-else src="../assets/default-token.png" height="20px" width="20px" />
               {{ option.title }}
             </template>
           </v-select>
@@ -508,10 +508,6 @@ export default {
         t => t.symbol === self.form.selectedTokenToList.title
       );
       this.form.tokenAddress = foundToken.tokenAddress.toLowerCase();
-    },
-    async updateUSDPrices() {
-      let ultUSD = await getULTToUSDPrice();
-      this.ultInUSD = parseFloat(this.getBalance["ULT"] * ultUSD);
     },
     loadMoreToken() {
       this.showLimit += 20;

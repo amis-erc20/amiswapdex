@@ -38,6 +38,49 @@
       <!-- <vue-friendly-iframe src="/liquiditychart"></vue-friendly-iframe>
       <vue-friendly-iframe src="/volumechart"></vue-friendly-iframe>
       <vue-friendly-iframe src="/tokenchart"></vue-friendly-iframe>-->
+      <div id="donation-info">
+        <p>The Uniswap contracts charge a 0.3% fee for providing liquidity. We don’t charge any fees for using this site. To keep this site operational please make a donation.</p>
+        <b-button variant="primary" id="donate-button" @click="showModal('donate_modal')">Donate</b-button>
+        <!-- donation modal -->
+        <b-modal ref="donate_modal" id="donate_modal" :hide-footer="true">
+          <template slot="modal-header">
+            <font-awesome-icon
+              class="back-button-svg"
+              icon="chevron-left"
+              size="2x"
+              color="#fff"
+              @click="closeDonationModal"
+            />
+            <div id="main-title-no-connection-container">
+              <h4>Donation</h4>
+            </div>
+          </template>
+          <Swap v-if="getSignIn" swapMode="donation_swap" />
+          <Noaccount v-else />
+        </b-modal>
+
+        <!-- <b-modal ref="donate_modal" id="donate_modal" title="Make a Donation" :hide-footer="true">
+          <div>
+            <label for>Please select ETH or ERC-20 token to donate</label>
+            <v-select :options="tokenList" label="title" v-model="donationCurrency">
+              <template slot="option" slot-scope="option">
+                <img v-if="option.src" :src="option.src" height="20px" />
+                <img v-else src="../assets/default-token.png" height="20px" />
+                {{ option.title }}
+              </template>
+            </v-select>
+            <Swap swapMode="donation_swap" />
+          </div>
+        
+        </b-modal>-->
+      </div>
+      <div class="built-by-message">
+        <img src="../assets/logo.svg" width="30px" height="30px" alt="shardus" />
+        <p>
+          Built by the
+          <a href="https://shardus.com" target="_blank">Shardus</a> team
+        </p>
+      </div>
     </div>
 
     <div v-else class="loading-icon">
@@ -50,24 +93,25 @@ import { mapGetters, mapActions } from "vuex";
 import Liquiditylinechart from "~/components/Liquiditylinechart.vue";
 import Volumelinechart from "~/components/Volumelinechart.vue";
 import Tokenlinechart from "~/components/Tokenlinechart.vue";
+import Swap from "~/components/Swap.vue";
+import Noaccount from "~/components/Noaccount.vue";
 import axios from "axios";
 import config from "../config";
 import * as R from "ramda";
-import {
-  getULTToUSDPrice,
-  getETHToUSDPrice,
-  getTokenToUSDPrice
-} from "../assets/js/utils";
+import { getETHToUSDPrice, getTokenToUSDPrice } from "../assets/js/utils";
 export default {
   data: function() {
     return {
-      market: null
+      market: null,
+      donationCurrency: "ETH"
     };
   },
   components: {
     Liquiditylinechart,
     Volumelinechart,
-    Tokenlinechart
+    Tokenlinechart,
+    Swap,
+    Noaccount
   },
   computed: {
     ...mapGetters({
@@ -78,14 +122,33 @@ export default {
       getTokenList: "account/getTokenList",
       getTotalValue: "account/getTotalValue",
       getActiveTab: "getActiveTab",
-      getConnection: "getConnection"
-    })
+      getConnection: "getConnection",
+      getSignIn: "getSignIn"
+    }),
+    tokenList: function() {
+      return [];
+    },
+    isValid: function() {
+      return true;
+    }
   },
   methods: {
     ...mapActions({
       updatePrice: "account/updatePrice",
       updateSummary: "updateSummary"
     }),
+    closeDonationModal() {
+      this.hideModal("donate_modal");
+    },
+    redirect(url) {
+      this.$router.push(url);
+    },
+    showModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].show();
+    },
+    hideModal(ref) {
+      if (this.$refs[ref]) this.$refs[ref].hide();
+    },
     calculateBalance: function(balance) {
       if (!balance) return 0.0;
       return balance.toFixed(4);
@@ -124,7 +187,6 @@ export default {
             `${config.uniswapDexServer}api/histodaymarket?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
           );
-          console.log(liquidityResponse);
           let todayLiquidity = R.last(liquidityResponse.data.result);
           data.total_usd = todayLiquidity.open * ethToUsd;
           data.total_eth = todayLiquidity.open;
@@ -133,14 +195,14 @@ export default {
             `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
           );
-          console.log(volumeResponse);
           let todayVolume = R.last(volumeResponse.data.result);
           data.volume_eth = todayVolume.amount_eth;
           data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd;
           this.market = data;
         }
       }
-    }
+    },
+    onSubmitDonation() {}
   },
   mounted: async function() {
     let self = this;
@@ -206,5 +268,121 @@ export default {
 }
 .market-info-table .row.count-all {
   height: 33px;
+}
+.built-by-message {
+  text-align: center;
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.built-by-message p {
+  padding-top: 10px;
+  margin-left: 10px;
+}
+.built-by-message a {
+  color: #ed1b24 !important;
+  text-decoration: none;
+  font-weight: bold;
+}
+.built-by-message a:hover {
+  color: #a41de4;
+  text-decoration: none;
+}
+#donation-info > p {
+  width: 50%;
+  max-width: 600px;
+  font-size: 13px;
+  text-align: center;
+  margin: 10px auto;
+  line-height: 1.5;
+}
+#donate-button {
+  width: 160px;
+  height: 40px;
+  margin: 20px auto;
+}
+
+#token_info_modal,
+#donate_modal {
+  position: fixed;
+  top: 0px;
+}
+#token_info_modal .modal-header,
+#donate_modal .modal-header {
+  border-radius: 0px !important;
+  border: none;
+  position: fixed;
+  top: 0px;
+  z-index: 666;
+}
+
+#token_info_modal .token-info-section {
+  height: auto;
+  width: 100%;
+  padding-top: 0px;
+  overflow: hidden;
+}
+#token_info_modal,
+#donate_modal {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100vh;
+  max-width: 100%;
+  padding: 0;
+  z-index: 2000;
+}
+#token_info_modal .modal-dialog,
+#donate_modal .modal-dialog {
+  width: 100%;
+  margin: 0 auto;
+}
+#token_info_modal .modal-body,
+#donate_modal .modal-body {
+  padding: 0;
+  background: #eceeef;
+  position: relative;
+  top: 70px;
+  z-index: 500;
+}
+
+#token_info_modal .modal-dialog,
+#token-info-modal .modal-content,
+#donate_modal .modal-dialog,
+#donate_modal .modal-content {
+  background-color: #eceeef;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100vw !important;
+  margin: 0px;
+  padding: 0;
+  border-radius: 0px;
+}
+#donate_modal .modal-dialog,
+#donate_modal .modal-content {
+  /* overflow: hidden; */
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+#token_info_modal___BV_modal_content_ {
+  border: none;
+}
+#token-info-modal .modal-header .title,
+#donate_modal .modal-header .title {
+  text-align: center;
+  flex-grow: 3;
+  padding-left: 20px;
+  display: flex;
+  justify-content: center;
+}
+.logo-in-header {
+  margin-right: 15px;
+  width: 30px;
+  height: 30px;
+}
+#token-info-modal .modal-header a,
+#donate_modal .modal-header a {
+  padding-top: 10px;
 }
 </style>

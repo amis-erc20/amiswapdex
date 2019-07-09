@@ -46,16 +46,16 @@
         <div id="serie-legend">Volume: {{ volume.toFixed(4)}}</div>
       </div>
     </div>
-    <!-- <div v-show="loading" class="loading-box">
+    <div v-show="loading" class="loading-box">
       <scale-loader :loading="loading" :color="`#b14ae2`" :height="`25px`" :width="`4px`"></scale-loader>
-      <p>Loading Chart Data</p>
+      <p style="text-align: center">Loading Chart...</p>
     </div>
     <div v-show="errorMessage.length > 0" class="loading-box">
       <scale-loader :loading="loading" :color="`#b14ae2`" :height="`25px`" :width="`4px`"></scale-loader>
-      <p>{{ errorMessage}}</p>
-    </div>-->
-    <div v-show="true" id="token-bar-chart"></div>
-    <div id="chart-footer-bar">
+      <p style="text-align: center">{{ errorMessage}}</p>
+    </div>
+    <div v-show="!loading && errorMessage.length === 0" id="token-bar-chart"></div>
+    <div v-show="!loading" id="chart-footer-bar">
       <b-button-group class="timerange-button-group">
         <b-button
           v-bind:class="{ selected: range === '1Y' }"
@@ -276,6 +276,8 @@ export default {
           if (chartObj.candleSeries) {
             let lastData = chartData[chartData.length - 1];
             // lastData.time = lastData.time + 60 * 60 * i;
+            // console.log(new Date(lastData.time * 1000));
+            // console.log(lastData);
             chartObj.chart.updateData(chartObj.candleSeries._series, lastData);
           }
           if (chartObj.volumeSeries) {
@@ -345,7 +347,6 @@ export default {
 
       let chartData;
       if (!chartObj.candleSeries) {
-        console.log("Drawing candle series for the first time");
         chartData = await this.getChartData();
         try {
           chartObj.candleSeries = chartObj.chart.addCandlestickSeries();
@@ -409,6 +410,7 @@ export default {
       if (this.resolution === "60") this.changeTimeRange("1M");
       if (this.resolution === "240") this.changeTimeRange("3M");
       else this.changeTimeRange(this.range);
+      this.loading = false;
 
       window.onresize = function() {
         chartObj.chart.applyOptions({
@@ -499,11 +501,12 @@ export default {
           this.tokenAddress
         }&start=${from * 1000}`;
       }
-      console.log(url);
+      // console.log(url);
       let response = await axios.get(url);
       let data = response.data;
       if (!data.result || data.result.length === 0) {
         console.log("Fail to get chart data from server !");
+        console.log(url);
         this.errorMessage = "Fail to get chart data from server !";
         return [];
       }
@@ -536,7 +539,7 @@ export default {
           bars[0].volume = bars[0].volume * bars[0].price_eth_usd;
         }
         bars[bars.length - 1].close = bars[bars.length - 1].open;
-        console.log("Chart data received from server...");
+        // console.log("Chart data received from server...");
         return bars;
       } else {
         return [];
@@ -562,6 +565,12 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+.loading-box p {
+  margin: 10px;
+  font-weight: bold;
+  font-size: 13px;
+  text-transform: uppercase;
 }
 #token-bar-chart > div,
 #token-bar-chart > div > table {

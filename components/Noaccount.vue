@@ -7,7 +7,7 @@
       variant="danger"
     >Connection Issue to Server !</b-alert>
     <div v-if="getConnection && getServerStatus">
-      <div class="signin-method">
+      <!-- <div class="signin-method">
         <p>
           Please sign in or create a new
           <strong>uniswapDEX</strong> wallet.
@@ -24,7 +24,7 @@
           id="backup-btn"
           @click="onSelectSignInMethod('signin')"
         >Sign In</b-button>
-      </div>
+      </div>-->
       <div class="signin-method">
         <p>
           Use
@@ -37,7 +37,7 @@
           @click="onSelectSignInMethod('metamask')"
         >Metamask</b-button>
       </div>
-      <div class="signin-method">
+      <!-- <div class="signin-method">
         <p>
           Use
           <strong>private key</strong> to access your wallet
@@ -48,30 +48,30 @@
           id="metamask-btn"
           @click="onSelectSignInMethod('privatekey')"
         >Private Key</b-button>
-        <!-- Metamask Modal -->
-        <b-modal ref="signin_modal" id="signin_modal" :hide-footer="true">
-          <template slot="modal-header">
-            <font-awesome-icon
-              class="back-button-svg"
-              icon="chevron-left"
-              size="2x"
-              color="#fff"
-              @click="closeSignInModal"
-            />
-            <div id="main-title-no-connection-container">
-              <h4 v-if="signInMethod === 'signup'">Create Wallet</h4>
-              <h4 v-else>Sign In</h4>
-            </div>
-            <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
+      </div>-->
+      <!-- Metamask Modal -->
+      <b-modal ref="signin_modal" id="signin_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="2x"
+            color="#fff"
+            @click="closeSignInModal"
+          />
+          <div id="main-title-no-connection-container">
+            <h4 v-if="signInMethod === 'signup'">Create Wallet</h4>
+            <h4 v-else>Sign In</h4>
+          </div>
+          <!-- <b-button id="menu-button" v-b-modal.settingModalInInfo variant="outline-light">
               <font-awesome-icon icon="bars" size="2x" color="#fff"/>
-            </b-button>-->
-          </template>
-          <Metamask v-if="signInMethod === 'metamask'"/>
-          <Privatekey v-if="signInMethod === 'privatekey'"/>
-          <Signin v-if="signInMethod === 'signin'"/>
-          <Signup v-if="signInMethod === 'signup'"/>
-        </b-modal>
-      </div>
+          </b-button>-->
+        </template>
+        <Metamask v-if="signInMethod === 'metamask'" />
+        <Privatekey v-if="signInMethod === 'privatekey'" />
+        <Signin v-if="signInMethod === 'signin'" />
+        <Signup v-if="signInMethod === 'signup'" />
+      </b-modal>
     </div>
   </div>
 </template>

@@ -126,7 +126,7 @@
             </div>
           </div>
           <div class="input-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit" />
             <button type="button" id="erase" @click="gasLimit = ''"></button>
           </div>
         </b-form-group>
@@ -230,7 +230,7 @@
             </div>
           </div>
           <div class="input-field-container">
-            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit"/>
+            <b-form-input type="text" v-model="gasLimit" required :state="validateGasLimit" />
             <button type="button" id="erase" @click="gasLimit = ''"></button>
           </div>
         </b-form-group>
@@ -281,7 +281,7 @@
           <b-form-group id="exampleInputGroup1">
             <p>Please unlock your token before using it to add liquidity.</p>
             <label>Amount to Unlock ({{activeToken}})</label>
-            <b-form-input type="text" v-model="form.approvedAmount"/>
+            <b-form-input type="text" v-model="form.approvedAmount" />
           </b-form-group>
           <b-button type="submit" variant="primary">Approve</b-button>
         </b-form>
@@ -342,7 +342,6 @@ export default {
     return {
       config: {
         tokenListUrl: "https://beta.shardus.com/assets/js/tokenDB.json",
-        chartServerUrl: "https://bounty.shardus.com:8889",
         colorScheme: {
           mainColor: "red",
           secondaryColor: "black"
