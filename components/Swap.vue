@@ -612,7 +612,8 @@ export default {
         !this.validateOutputAmount ||
         !this.validateBalance ||
         !this.validateSlippage ||
-        !this.validateGasLimit
+        !this.validateGasLimit ||
+        !this.validateUsdAmount
       );
     },
     validateTargetAddress() {

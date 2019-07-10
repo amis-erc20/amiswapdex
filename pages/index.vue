@@ -220,9 +220,13 @@ export default {
       updateAuthRedirectUrl: "updateAuthRedirectUrl",
       updateChartInfo: "updateChartInfo"
     }),
+    scrollToTop(x, y) {
+      window.scrollTo(x, y);
+    },
     onTabChange(e) {
       let selectedTab = e.target.text.toLowerCase();
       this.updateActiveTab(selectedTab);
+      this.scrollToTop(0, 0);
       if (selectedTab === "exchange") {
         this.updateAuthRedirectUrl({ url: "/", token: null });
       }

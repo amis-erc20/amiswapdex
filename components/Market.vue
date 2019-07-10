@@ -31,9 +31,10 @@
           <b-col class="value">{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
         </b-row>
       </div>
-      <Liquiditylinechart />
-      <Volumelinechart />
       <Tokenlinechart />
+      <Volumelinechart />
+      <Liquiditylinechart />
+
       <!-- <vue-friendly-iframe src="/liquiditychart"></vue-friendly-iframe>
       <vue-friendly-iframe src="/volumechart"></vue-friendly-iframe>
       <vue-friendly-iframe src="/tokenchart"></vue-friendly-iframe>-->
@@ -99,7 +100,8 @@
         <img src="../assets/logo.svg" width="30px" height="30px" alt="shardus" />
         <p>
           Built by the
-          <a href="https://shardus.com" target="_blank">Shardus</a> team
+          <a href="https://shardus.com" target="_blank">Shardus</a> team on
+          <a href="https://gitlab.com/shardus/uniswapdex/" target="_blank">Gitlab</a>
         </p>
       </div>
     </div>
@@ -244,8 +246,8 @@ export default {
           );
           let todayLiquidity = R.last(liquidityResponse.data.result);
           if (todayLiquidity) {
-            data.total_usd = todayLiquidity.open * ethToUsd;
-            data.total_eth = todayLiquidity.open;
+            data.total_usd = todayLiquidity.close * ethToUsd;
+            data.total_eth = todayLiquidity.close;
           }
 
           let volumeResponse = await axios.get(
