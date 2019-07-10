@@ -1,5 +1,7 @@
 <template>
   <div>
+    <!-- <p>{{form}}</p> -->
+    <p style="display: none">{{donationCurrency}}</p>
     <div class="qr-scanner-container" v-if="scanning">
       <p class="camera-error-message">{{this.cameraErrorMessage}}</p>
       <qrcode-stream
@@ -47,7 +49,7 @@
         </p>
       </div>
       <b-form @submit="onSubmit" @reset="onReset" v-if="shouldRender">
-        <b-form-group v-if="isBuySelected" id="exampleInputGroup1">
+        <b-form-group v-if="isBuySelected && swapMode === 'swap'" id="exampleInputGroup1">
           <label v-if="swapMode === 'swap'">Pay With</label>
           <label v-else>Donate with</label>
           <v-select
@@ -98,7 +100,11 @@
           </v-select>
         </b-form-group>
 
-        <b-form-group v-if="this.validateCurrency" prepend="@" class="input-form-group">
+        <b-form-group
+          v-if="this.validateCurrency && swapMode==='donation_swap'"
+          prepend="@"
+          class="input-form-group"
+        >
           <div class="amount-label-container">
             <label>Enter USD amount to donate</label>
           </div>
@@ -108,16 +114,18 @@
               type="text"
               v-model="form.inputValueUsd"
               required
+              :state="validateUsdAmount"
               @keyup="onUsdInputChange"
               @focus="onInputFocus"
             />
             <button type="button" id="erase" @click="form.inputValue = ''"></button>
           </div>
           <b-form-invalid-feedback
-            v-if="form.inputValue.length > 0"
-            :state="validateinputValue && validateBalance && validateSlippage"
-          >{{ inputErrorMessage }}</b-form-invalid-feedback>
+            v-if="form.inputValueUsd"
+            :state="validateUsdAmount"
+          >Minimum $5 required.</b-form-invalid-feedback>
         </b-form-group>
+        <p style="display: none">{{getBalance}}</p>
         <b-form-group v-if="this.validateCurrency" prepend="@" class="input-form-group">
           <div class="amount-label-container">
             <label v-if="swapMode === 'swap'">Enter {{form.inputCurrency}} amount to sell</label>
@@ -356,7 +364,8 @@ import {
   getWeb3Metamask,
   currency,
   getCurrentReserve,
-  getEthToUsdcPrice
+  getEthToUsdcPrice,
+  getETHToUSDPrice
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Vue from "vue";
@@ -377,6 +386,10 @@ export default {
   props: {
     swapMode: {
       default: "swap",
+      type: String
+    },
+    donationCurrency: {
+      default: "ETH",
       type: String
     }
   },
@@ -428,7 +441,7 @@ export default {
       scanning: false,
       camera: null,
       cameraErrorMessage: "",
-      ethToUsd: 0
+      ethToUsd: null
     };
   },
   computed: {
@@ -538,6 +551,14 @@ export default {
       if (!reg.test(this.gasLimit)) return false;
       return !Number.isNaN(parseInt(this.gasLimit));
     },
+    validateUsdAmount() {
+      if (this.swapMode !== "donation_swap") return true;
+      let amount = parseFloat(this.form.inputValueUsd * 1);
+      const isNaN = Number.isNaN(amount);
+      if (isNaN || amount <= 0) return false;
+      if (amount < 5) return false;
+      return true;
+    },
     validateinputValue() {
       let amount = parseFloat(this.form.inputValue * 1);
       const isNaN = Number.isNaN(amount);
@@ -635,8 +656,11 @@ export default {
       ) {
         this.form.inputCurrency = this.getActiveToken;
       }
+    } else if (this.swapMode === "donation_swap") {
+      this.form.inputCurrency = this.donationCurrency;
+      this.gasLimit = 160000;
+      // this.onCurrencyChange();
     }
-    // console.log(this.swapMode);
   },
   errorCaptured: function(err, component, info) {
     console.log("Unexpected Error.");
@@ -648,6 +672,7 @@ export default {
     this.form.inputCurrency = null;
     this.web3 = await getWeb3();
     this.web3Metamask = await getWeb3Metamask();
+    console.log(this.web3Metamask);
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       try {
@@ -673,11 +698,15 @@ export default {
       console.log("This is donation swap...");
       this.prepareForDonationSwap();
     }
-    let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
-    this.gasPrice =
-      parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
-    this.defaultGasPrice = this.gasPrice;
-    await this.updateGasLimitAndTxFee();
+    try {
+      let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
+      this.gasPrice =
+        parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+      this.defaultGasPrice = this.gasPrice;
+      await this.updateGasLimitAndTxFee();
+    } catch (e) {
+      console.log("Unable to estimate gas.");
+    }
     // setInterval(() => {
     //   if (self.getCurrentView == "main") {
     //     if (self.form.inputValue || self.form.outputValue) {
@@ -686,15 +715,16 @@ export default {
     //     }
     //   }
     // }, 1000);
-    this.ethToUsd = await getEthToUsdcPrice();
+    this.ethToUsd = await getETHToUSDPrice();
   },
   methods: {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
     prepareForDonationSwap() {
-      console.log("preparing for swap");
-      this.form.inputCurrency = "ETH";
+      console.log("preparing for donation");
+      console.log(this.donationCurrency);
+      this.form.inputCurrency = this.donationCurrency;
       this.form.outputCurrency = "ULT";
       this.isBuySelected = true;
       this.isSellSelected = false;
@@ -706,14 +736,18 @@ export default {
       else return 18;
     },
     async calculateAbsPrice(symbol) {
-      let { ethReserve, tokenReserve } = await getCurrentReserve(
-        symbol,
-        this.web3
-      );
-      let decimal = this.getDecimal(symbol);
-      let absPrice =
-        ethReserve / Math.pow(10, 18) / (tokenReserve / Math.pow(10, decimal));
-      return absPrice;
+      try {
+        let { ethReserve, tokenReserve } = await getCurrentReserve(
+          symbol,
+          this.web3
+        );
+        let decimal = this.getDecimal(symbol);
+        let absPrice =
+          ethReserve /
+          Math.pow(10, 18) /
+          (tokenReserve / Math.pow(10, decimal));
+        return absPrice;
+      } catch (e) {}
     },
     onSelectInputCurrency(value) {
       if (!value) return;
@@ -726,7 +760,11 @@ export default {
       this.onCurrencyChange();
     },
     showSuccessToast(txHash) {
-      let successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
+      let successHTML;
+      if (this.swapMode === "donation_swap")
+        successHTML = `<p>Thank you for your donation !</p>`;
+      else
+        successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
       this.$toasted.show(successHTML, {
         theme: "outline",
         type: "success",
@@ -903,16 +941,13 @@ export default {
       }
     },
     async onAmountChange() {
-      console.log(this.form);
-      console.log(this.lastEditedField);
-      console.log(this.validateinputValue);
-      console.log(this.validateOutputAmount);
       if (!this.form.inputCurrency || !this.form.outputCurrency) return;
       if (this.lastEditedField === "input") {
         if (!this.validateinputValue) {
           this.form.outputValue = "";
           return;
         }
+        this.updateUsdAmount();
         if (this.swapType === "TOKEN_TO_ETH") {
           let exchangeContract = exchangeContracts[this.form.inputCurrency];
           let tokenSold = new BigNumber(
@@ -1072,13 +1107,45 @@ export default {
       }, 1000);
     },
     async onUsdInputChange() {
-      console.log("convertig to eth..");
       let usdAmount = this.form.inputValueUsd;
+      if (!this.validateUsdAmount) {
+        return;
+      }
       if (this.form.inputCurrency === "ETH") {
+        if (!this.ethToUsd) this.ethToUsd = await getETHToUSDPrice();
         this.form.inputValue = parseFloat(
           parseFloat(usdAmount) / this.ethToUsd
         );
       } else {
+        let tokenToUsd = this.getPrice[this.form.inputCurrency];
+        this.form.inputValue = parseFloat(
+          parseFloat(usdAmount) / parseFloat(tokenToUsd)
+        );
+      }
+      this.onAmountChange();
+    },
+    async updateUsdAmount() {
+      let inputAmount = this.form.inputValue;
+      if (!this.validateinputValue) {
+        return;
+      }
+      if (this.form.inputCurrency === "ETH") {
+        let updatedUsdValue = parseFloat(inputAmount * this.ethToUsd);
+        let shouldUpdate =
+          Math.abs(updatedUsdValue - this.form.inputValueUsd) > 0.01
+            ? true
+            : false;
+
+        if (shouldUpdate) this.form.inputValueUsd = updatedUsdValue;
+      } else {
+        let tokenToUsd = this.getPrice[this.form.inputCurrency];
+        let updatedUsdValue = parseFloat(inputAmount * tokenToUsd);
+        let shouldUpdate =
+          Math.abs(updatedUsdValue - this.form.inputValueUsd) > 0.01
+            ? true
+            : false;
+
+        if (shouldUpdate) this.form.inputValueUsd = updatedUsdValue;
       }
     },
     async onSubmit(evt) {

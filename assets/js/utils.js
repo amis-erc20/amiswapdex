@@ -233,7 +233,6 @@ export const estimateGasForSwap = async function (transaction, web3, exchangeAdd
         })
     })
   } catch (e) {
-    console.error(e)
     return 0
   }
 }

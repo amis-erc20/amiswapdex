@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <p>{{form}}</p> -->
     <div class="qr-scanner-container" v-if="scanning">
       <p class="camera-error-message">{{this.cameraErrorMessage}}</p>
       <qrcode-stream
@@ -15,7 +16,30 @@
       <div v-if="form.currency"></div>
       <p v-else>Please select ETH or token to send</p>
       <b-form @submit="onSubmit" @reset="onReset">
-        <b-form-group id="exampleInputGroup1" v-if="form.currency !== null">
+        <b-form-group v-if="this.sendMode === 'donation_send'" prepend="@" class="input-form-group">
+          <div class="amount-label-container">
+            <label>Enter USD amount to donate</label>
+          </div>
+          <div class="input-field-container">
+            <b-form-input
+              id="inputValue"
+              type="text"
+              v-model="form.inputValueUsd"
+              required
+              :state="validateUsdAmount"
+              @keyup="onUsdInputChange"
+            />
+            <button type="button" id="erase" @click="form.inputValueUsd = ''"></button>
+          </div>
+          <b-form-invalid-feedback
+            v-if="form.inputValueUsd"
+            :state="validateUsdAmount"
+          >Minimum $5 required.</b-form-invalid-feedback>
+        </b-form-group>
+        <b-form-group
+          id="exampleInputGroup1"
+          v-if="form.currency !== null && sendMode !== 'donation_send'"
+        >
           <label for>Receiver Address</label>
           <div id="address-qr-btn-container">
             <div class="input-field-container address-field-container">
@@ -25,10 +49,21 @@
                 required
                 placeholder="Enter receiver address"
                 :state="validateTargetAddress"
+                :disabled="sendMode === 'donation_send'"
               />
-              <button type="button" id="erase" @click="form.targetAddress = ''"></button>
+              <button
+                type="button"
+                id="erase"
+                @click="form.targetAddress = ''"
+                :disabled="sendMode === 'donation_send'"
+              ></button>
             </div>
-            <b-button variant="primary" id="qr-toggle-btn" @click="toggleScanner">
+            <b-button
+              variant="primary"
+              id="qr-toggle-btn"
+              @click="toggleScanner"
+              :disabled="sendMode === 'donation_send'"
+            >
               <font-awesome-icon icon="qrcode" size="2x" color="#fff" />
             </b-button>
           </div>
@@ -37,11 +72,17 @@
             :state="validateTargetAddress"
           >Invalid Receiver Address</b-form-invalid-feedback>
         </b-form-group>
+
         <b-form-group v-if="form.currency !== null">
           <div class="amount-label-container">
-            <label for>Amount</label>
+            <label v-if="sendMode === 'donation_send'">Enter {{form.currency}} amount to donate</label>
+            <label v-else>Amount to send</label>
             <div>
-              <p class="current-balance">{{getBalance[getActiveToken]}} {{getActiveToken}}</p>
+              <p
+                v-if="sendMode === 'donation_send'"
+                class="current-balance"
+              >{{getBalance['ULT']}} ULT</p>
+              <p v-else class="current-balance">{{getBalance[getActiveToken]}} {{getActiveToken}}</p>
               <label class="use-all-funds" @click="useAllFunds">Use All Funds</label>
             </div>
           </div>
@@ -53,6 +94,7 @@
               required
               :placeholder="`Enter amount in ${form.currency}`"
               :state="validateAmount"
+              @keyup="updateUsdAmount"
             />
             <button type="button" id="erase" @click="form.amount = ''"></button>
           </div>
@@ -93,7 +135,7 @@
         </b-form-group>
 
         <b-form-group v-if="form.currency !== null && validateTargetAddress && showAdvanced">
-          <div class="amount-label-container" v-if="form.inputCurrency !== null && showAdvanced">
+          <div class="amount-label-container" v-if="form.currency !== null && showAdvanced">
             <label for="range-1">Gas Limit: {{ gasLimit }} gas</label>
             <div>
               <label class="reset-gas-price" @click="resetGasLimit">Reset Gas Limit</label>
@@ -106,11 +148,18 @@
         </b-form-group>
 
         <div class="submit-button-group">
-          <b-button type="reset" variant="outline-dark">Reset</b-button>
+          <b-button type="reset" @click="onReset" variant="outline-dark">Reset</b-button>
           <b-button
             type="submit"
+            v-if="sendMode === 'donation_send'"
             variant="primary"
-            :disabled="loading || !validateTargetAddress || !validateAmount || !validateGasLimit"
+            :disabled="loading || !validateTargetAddress || !validateAmount || !validateGasLimit || !validateUsdAmount"
+          >Donate</b-button>
+          <b-button
+            type="submit"
+            v-else
+            variant="primary"
+            :disabled="loading || !validateTargetAddress || !validateAmount || !validateGasLimit || !validateUsdAmount"
           >Send</b-button>
         </div>
       </b-form>
@@ -160,19 +209,20 @@ const defaultCamera = {
 Vue.use(VueQrcodeReader);
 
 export default {
+  props: {
+    sendMode: {
+      default: "swap",
+      type: String
+    }
+  },
   data() {
     return {
       form: {
         targetAddress: "",
         amount: "",
-        currency: null
+        currency: null,
+        inputValueUsd: ""
       },
-      availableTokens: [
-        { value: null, text: "Please select currency to send" },
-        { value: "ETH", text: "ETH" },
-        { value: "ULT", text: "ULT" },
-        { value: "DAI", text: "DAI" }
-      ],
       loading: false,
       showAdvanced: false,
       gasPrice: 6,
@@ -198,7 +248,8 @@ export default {
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
       getAvailableTokenList: "account/getAvailableTokenList",
-      getOwnedTokenList: "account/getOwnedTokenList"
+      getOwnedTokenList: "account/getOwnedTokenList",
+      getPrice: "account/getPrice"
     }),
     validateTargetAddress() {
       return isValidAddress(this.form.targetAddress);
@@ -231,11 +282,27 @@ export default {
         }
       }
       return true;
+    },
+    validateUsdAmount() {
+      if (this.sendMode !== "donation_send") return true;
+      let amount = parseFloat(this.form.inputValueUsd * 1);
+      const isNaN = Number.isNaN(amount);
+      if (isNaN || amount <= 0) return false;
+      if (amount < 5) return false;
+      return true;
     }
+  },
+  errorCaptured: function(err, vm, info) {
+    console.log(err);
+    return false;
   },
   mounted: async function() {
     let self = this;
-    this.form.currency = this.getActiveToken;
+    if (this.sendMode !== "donation_send")
+      this.form.currency = this.getActiveToken;
+    if (this.sendMode === "donation_send") {
+      this.prepareForDonationSend();
+    }
     this.web3 = await getWeb3();
     let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
     if (estimatedGasPriceFromNetwork > 0) {
@@ -246,16 +313,17 @@ export default {
     }
     this.defaultGasPrice = this.gasPrice;
     this.updateGasLimitAndTxFee();
-    setInterval(() => {
-      if (self.getCurrentView === "main") {
-        if (self.form.amount || self.form.targetAddress) {
-          self.onReset();
-        }
-      }
-    }, 1000);
+    // setInterval(() => {
+    //   if (self.getCurrentView === "main") {
+    //     if (self.form.amount || self.form.targetAddress) {
+    //       self.onReset();
+    //     }
+    //   }
+    // }, 1000);
   },
   updated: async function() {
-    this.form.currency = this.getActiveToken;
+    if (this.sendMode === "donation_send") this.form.currency = "ULT";
+    else this.form.currency = this.getActiveToken;
   },
   methods: {
     ...mapActions({
@@ -288,6 +356,32 @@ export default {
     },
     redirect() {
       this.$router.push("/tokendetail");
+    },
+    async onUsdInputChange() {
+      console.log("Updating token amount...");
+      let usdAmount = this.form.inputValueUsd;
+      if (!this.validateUsdAmount) {
+        return;
+      }
+      let tokenToUsd = this.getPrice[this.form.currency];
+      this.form.amount = parseFloat(
+        parseFloat(usdAmount) / parseFloat(tokenToUsd)
+      );
+    },
+    prepareForDonationSend() {
+      console.log("preparing for donation");
+      this.form.currency = "ULT";
+      this.form.targetAddress = "0x09617F6fD6cF8A71278ec86e23bBab29C04353a7";
+    },
+    async updateUsdAmount() {
+      console.log("updating usd amount");
+      let inputAmount = this.form.amount;
+      if (!this.validateAmount) {
+        return;
+      }
+
+      let tokenToUsd = this.getPrice[this.form.currency];
+      this.form.inputValueUsd = parseFloat(inputAmount * tokenToUsd);
     },
     async getEstimatedGas() {
       let estimatedGas = await estimateGas(
@@ -447,6 +541,7 @@ export default {
         amount: "",
         currency: this.getActiveToken
       };
+      if (this.sendMode === "donation_send") this.prepareForDonationSend();
     },
     showModal(ref) {
       this.$refs[ref].show();

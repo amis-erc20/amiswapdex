@@ -1,7 +1,6 @@
 <template>
   <div class="market-section">
     <div v-if="market">
-      <!-- <h4>SUMMARY</h4> -->
       <div class="market-info-table">
         <b-row class="count">
           <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
@@ -55,24 +54,46 @@
               <h4>Donation</h4>
             </div>
           </template>
-          <Swap v-if="getSignIn" swapMode="donation_swap" />
-          <Noaccount v-else />
-        </b-modal>
 
-        <!-- <b-modal ref="donate_modal" id="donate_modal" title="Make a Donation" :hide-footer="true">
-          <div>
-            <label for>Please select ETH or ERC-20 token to donate</label>
-            <v-select :options="tokenList" label="title" v-model="donationCurrency">
+          <Loading v-if="isLoadingWallet" />
+
+          <div v-if="getSignIn && !isLoadingWallet" class="select-donation-currency">
+            <!-- <p>{{isLoadingWallet}}</p>
+            <p>{{getOwnedTokenList}}</p>-->
+
+            <label>Donate with</label>
+            <v-select
+              :options="availableInputTokens"
+              label="title"
+              placeholder="Please select a curreny"
+              :value="donationCurrency"
+              @input="onSelectDonationCurrency"
+              :clearable="false"
+            >
               <template slot="option" slot-scope="option">
-                <img v-if="option.src" :src="option.src" height="20px" />
-                <img v-else src="../assets/default-token.png" height="20px" />
+                <img v-if="option.src" :src="option.src" height="20px" width="20px" />
+                <img
+                  v-else-if="option.title==='ETH'"
+                  src="../assets/eth-logo.png"
+                  height="20px"
+                  width="20px"
+                />
+                <img v-else src="../assets/default-token.png" height="20px" width="20px" />
                 {{ option.title }}
               </template>
             </v-select>
-            <Swap swapMode="donation_swap" />
           </div>
-        
-        </b-modal>-->
+          <Send
+            v-if="getSignIn && !loadingWallet && donationCurrency === 'ULT'"
+            sendMode="donation_send"
+          />
+          <Swap
+            v-if="getSignIn  && !loadingWallet && donationCurrency.length > 0 && donationCurrency !== 'ULT'"
+            swapMode="donation_swap"
+            :donationCurrency="donationCurrency"
+          />
+          <Noaccount v-if="!getSignIn && !loadingWallet " />
+        </b-modal>
       </div>
       <div class="built-by-message">
         <img src="../assets/logo.svg" width="30px" height="30px" alt="shardus" />
@@ -94,7 +115,9 @@ import Liquiditylinechart from "~/components/Liquiditylinechart.vue";
 import Volumelinechart from "~/components/Volumelinechart.vue";
 import Tokenlinechart from "~/components/Tokenlinechart.vue";
 import Swap from "~/components/Swap.vue";
+import Send from "~/components/Send.vue";
 import Noaccount from "~/components/Noaccount.vue";
+import Loading from "~/components/Loading.vue";
 import axios from "axios";
 import config from "../config";
 import * as R from "ramda";
@@ -103,7 +126,8 @@ export default {
   data: function() {
     return {
       market: null,
-      donationCurrency: "ETH"
+      donationCurrency: "",
+      loadingWallet: false
     };
   },
   components: {
@@ -111,13 +135,17 @@ export default {
     Volumelinechart,
     Tokenlinechart,
     Swap,
-    Noaccount
+    Send,
+    Noaccount,
+    Loading
   },
   computed: {
     ...mapGetters({
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
+      getOwnedTokenList: "account/getOwnedTokenList",
       getPrice: "account/getPrice",
+      getAvailableTokenList: "account/getAvailableTokenList",
       getActiveToken: "getActiveToken",
       getTokenList: "account/getTokenList",
       getTotalValue: "account/getTotalValue",
@@ -130,6 +158,29 @@ export default {
     },
     isValid: function() {
       return true;
+    },
+    availableInputTokens: function() {
+      let self = this;
+      let list = this.getTokenList
+        .map(symbol => {
+          let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+          if (token)
+            return {
+              title: symbol,
+              balance: self.getBalance[symbol],
+              priceInUsd: self.getPrice[symbol],
+              src: token ? token.logo : null
+            };
+          else return null;
+        })
+        .filter(t => t !== null)
+        .sort((a, b) => b.priceInUsd - a.priceInUsd);
+      list.unshift({ title: "ETH", src: null });
+      return list;
+    },
+    isLoadingWallet: function() {
+      if (this.getSignIn && this.getOwnedTokenList.length === 0) return true;
+      else return false;
     }
   },
   methods: {
@@ -137,6 +188,10 @@ export default {
       updatePrice: "account/updatePrice",
       updateSummary: "updateSummary"
     }),
+    onSelectDonationCurrency(value) {
+      if (!value) return;
+      this.donationCurrency = value.title;
+    },
     closeDonationModal() {
       this.hideModal("donate_modal");
     },
@@ -188,17 +243,22 @@ export default {
               1000 * 60 * 60 * 24 * 3}`
           );
           let todayLiquidity = R.last(liquidityResponse.data.result);
-          data.total_usd = todayLiquidity.open * ethToUsd;
-          data.total_eth = todayLiquidity.open;
+          if (todayLiquidity) {
+            data.total_usd = todayLiquidity.open * ethToUsd;
+            data.total_eth = todayLiquidity.open;
+          }
 
           let volumeResponse = await axios.get(
             `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
           );
           let todayVolume = R.last(volumeResponse.data.result);
-          data.volume_eth = todayVolume.amount_eth;
-          data.volume_usd = todayVolume.amount_eth * todayVolume.price_eth_usd;
-          this.market = data;
+          if (todayVolume) {
+            data.volume_eth = todayVolume.amount_eth;
+            data.volume_usd =
+              todayVolume.amount_eth * todayVolume.price_eth_usd;
+            this.market = data;
+          }
         }
       }
     },
@@ -384,5 +444,15 @@ export default {
 #token-info-modal .modal-header a,
 #donate_modal .modal-header a {
   padding-top: 10px;
+}
+.select-donation-currency {
+  padding-top: 20px;
+  width: 90%;
+  max-width: 650px;
+  margin: 0 auto;
+}
+.select-donation-currency label {
+  text-align: left;
+  width: 100%;
 }
 </style>

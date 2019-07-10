@@ -114,7 +114,7 @@ export default {
         }
       }
     });
-    this.changeTimeRange("1M");
+    this.changeTimeRange("1Y");
 
     this.chart.subscribeCrosshairMove(param => {
       if (param.time) {
