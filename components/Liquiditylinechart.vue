@@ -287,5 +287,27 @@ export default {
   border: none;
   background: #773794;
 }
+
+@media screen and (max-width: 500px) {
+  #serie-legend {
+    text-align: left;
+    font-weight: bold;
+    color: #b14ae2;
+    font-size: 11px;
+    padding: 0px;
+    padding: 5px;
+  }
+  #chart-header-bar {
+    padding-right: 15%;
+  }
+  .timerange-button-group .resolution-btn {
+    margin: 1px;
+    font-size: 10px;
+    padding: 5px 5px;
+  }
+  #chart-footer-bar {
+    padding-right: 20%;
+  }
+}
 </style>
 

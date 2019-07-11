@@ -7,8 +7,8 @@ export default {
       'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
     ]
   },
-  // uniswapDexServer: 'https://dev.uniswapdex.com:8889/',
-  uniswapDexServer: 'https://uniswapdex.com:8889/',
+  uniswapDexServer: 'https://dev.uniswapdex.com:8889/',
+  // uniswapDexServer: 'https://uniswapdex.com:8889/',
   // uniswapDexServer: 'http://localhost:8888/',
   backupInterval: 10 * 60 * 1000,
   version: '1.0.0',

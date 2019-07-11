@@ -919,7 +919,7 @@ export default {
   font-size: 12px;
   padding-top: 5px;
 }
-@media screen and (max-width: 450px) {
+@media screen and (max-width: 500px) {
   .exchangelist-title .title-price {
     left: 0px;
     position: relative;

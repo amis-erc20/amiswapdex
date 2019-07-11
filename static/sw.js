@@ -6,6 +6,14 @@ workbox.precaching.precacheAndRoute([
     "revision": "cf8fce83018fca0212addbe1581b6ace"
   },
   {
+    "url": "/_nuxt/0c40540aa0e0da5c7825.js",
+    "revision": "fb60e0319751c52985e8206202787270"
+  },
+  {
+    "url": "/_nuxt/1223108751187c996c9f.js",
+    "revision": "819d2c4c676240f1c4e9d912cdae5e9e"
+  },
+  {
     "url": "/_nuxt/18323c5c2223cbbd78b5.js",
     "revision": "aa75b0eb765604f7a185108676ec20de"
   },
@@ -18,10 +26,6 @@ workbox.precaching.precacheAndRoute([
     "revision": "9e78499581d3261be706d96ae75cee54"
   },
   {
-    "url": "/_nuxt/26b7e930309b911c5f0a.js",
-    "revision": "33316532e4c4042cb4a2fc5ca44cc9ba"
-  },
-  {
     "url": "/_nuxt/318c0092c1370e843eb7.js",
     "revision": "1e52af8d4cfa55ba3ffc6a1ed9c611ee"
   },
@@ -30,16 +34,16 @@ workbox.precaching.precacheAndRoute([
     "revision": "791f0aa50cf9fd464131c73f8a40b8f6"
   },
   {
+    "url": "/_nuxt/41e7883ccd018d9948bb.js",
+    "revision": "dce50f8d79e9350f5574cd101afd46a9"
+  },
+  {
     "url": "/_nuxt/4e20fbaf58e4fb34c1be.js",
     "revision": "d3bf479d8328e0a55cb084ca079b2570"
   },
   {
     "url": "/_nuxt/53efc036f29a339e9879.js",
     "revision": "151e8321a1a038093fec7b2b70707877"
-  },
-  {
-    "url": "/_nuxt/5946e6b8768c69e003d9.js",
-    "revision": "e52603c6c1d4384ab78f0eba46283643"
   },
   {
     "url": "/_nuxt/6289ca827fbbc38e614f.js",
@@ -74,10 +78,6 @@ workbox.precaching.precacheAndRoute([
     "revision": "716c4e68555ef78e060383908c03d863"
   },
   {
-    "url": "/_nuxt/c16ed9ae3319f8e46642.js",
-    "revision": "00f2cdfdd4b2c4220a4ab171bb2e9436"
-  },
-  {
     "url": "/_nuxt/d40ed9ce93684ee442f7.js",
     "revision": "36f7442cf224eb92dd32d054dd143d94"
   },
@@ -90,8 +90,8 @@ workbox.precaching.precacheAndRoute([
     "revision": "4637dc9623fc5c071984d626192f6ca6"
   },
   {
-    "url": "/_nuxt/fd71d042f160be0bc7c5.js",
-    "revision": "a18ec7d5e3dafe2191b80c59bfeaf5a2"
+    "url": "/_nuxt/fed660a03cb2241e779c.js",
+    "revision": "4ee64540557b871217f36081bb92526e"
   }
 ], {
   "cacheId": "uniswapdex",

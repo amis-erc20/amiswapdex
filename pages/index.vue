@@ -106,7 +106,7 @@ Vue.use(VueGoodTablePlugin);
 Vue.use(Toasted);
 Vue.use(VueMq, {
   breakpoints: {
-    mobile: 450,
+    mobile: 500,
     tablet: 900,
     laptop: 1250,
     desktop: Infinity
@@ -615,5 +615,12 @@ div {
 }
 .spinner-border {
   margin: 20px !important;
+}
+@media screen and (max-width: 500px) {
+  .nav-pills .nav-link {
+    height: 64px;
+    padding: 25px;
+    font-size: 13px;
+  }
 }
 </style>

@@ -46,9 +46,6 @@
         <b-list-group-item>
           <a href="https://gitlab.com/shardus/uniswapdex/issues/new" target="_blank">Report Issues</a>
         </b-list-group-item>
-        <b-list-group-item>
-          <a href="https://gitlab.com/shardus/uniswapdex/issues/new" target="_blank">Report Issues</a>
-        </b-list-group-item>
       </b-list-group>
     </b-modal>
     <!-- Metamask Modal -->

@@ -371,7 +371,7 @@ export default {
     prepareForDonationSend() {
       console.log("preparing for donation");
       this.form.currency = "ULT";
-      this.form.targetAddress = "0x09617F6fD6cF8A71278ec86e23bBab29C04353a7";
+      this.form.targetAddress = "0x19caf17b4ea9f8dd9b5e8f17ab0c3c10f132691d";
     },
     async updateUsdAmount() {
       console.log("updating usd amount");

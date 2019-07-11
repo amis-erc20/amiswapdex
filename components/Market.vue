@@ -352,7 +352,7 @@ export default {
   text-decoration: none;
 }
 #donation-info > p {
-  width: 50%;
+  width: 90%;
   max-width: 600px;
   font-size: 13px;
   text-align: center;
@@ -456,5 +456,20 @@ export default {
 .select-donation-currency label {
   text-align: left;
   width: 100%;
+}
+@media screen and (max-width: 500px) {
+  .select-donation-currency label {
+    font-size: 11px;
+  }
+  .market-info-table {
+    height: 220px;
+    width: 50%;
+    max-width: 650px;
+    min-width: 300px;
+    font-size: 13px;
+    margin: 30px auto;
+    margin-bottom: 20px;
+    padding: 20px;
+  }
 }
 </style>

@@ -21,7 +21,7 @@
     <button @click="drawChart()">draw</button>-->
     <div id="chart-header-bar">
       <div class="resolution-puls-price">
-        <b-button-group class="resolution-button-group">
+        <b-button-group class="resolution-button-group" v-if="$mq !== 'mobile'">
           <b-button
             v-bind:class="{ selected: resolution === '60' }"
             class="resolution-btn"
@@ -111,6 +111,17 @@ import config from "../config";
 import axios from "axios";
 import chartObj from "../components/chartObj";
 import { timeout } from "q";
+import Vue from "vue";
+import VueMq from "vue-mq";
+Vue.use(VueMq, {
+  breakpoints: {
+    mobile: 500,
+    tablet: 900,
+    laptop: 1250,
+    desktop: Infinity
+  }
+});
+
 export default {
   components: {
     ScaleLoader
@@ -358,7 +369,8 @@ export default {
             priceLineStyle: 3,
             priceFormat: {
               type: "price",
-              precision: 4
+              precision: self.currency === "USD" ? 4 : 6,
+              minMove: self.currency === "USD" ? 0.0001 : 0.000001
             }
           });
         } catch (e) {}
@@ -699,6 +711,26 @@ export default {
   color: #fff;
   border: none;
   background: #773794;
+}
+@media screen and (max-width: 500px) {
+  .token-info-table {
+    margin: 20px auto;
+  }
+  #serie-legend {
+    font-size: 10px;
+    padding: 0px;
+    padding: 10px;
+  }
+  #chart-header-bar {
+    padding-right: 15%;
+  }
+  .buy-or-sell .switch-buy,
+  .buy-or-sell .switch-sell {
+    font-size: 11px;
+  }
+  .vue-friendly-iframe > iframe {
+    height: 500px;
+  }
 }
 </style>
 

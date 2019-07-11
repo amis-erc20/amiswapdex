@@ -106,7 +106,7 @@
           class="input-form-group"
         >
           <div class="amount-label-container">
-            <label>Enter USD amount to donate</label>
+            <label>USD amount to donate</label>
           </div>
           <div class="input-field-container">
             <b-form-input
@@ -129,7 +129,7 @@
         <b-form-group v-if="this.validateCurrency" prepend="@" class="input-form-group">
           <div class="amount-label-container">
             <label v-if="swapMode === 'swap'">Enter {{form.inputCurrency}} amount to sell</label>
-            <label v-else>Enter {{form.inputCurrency}} amount to donate</label>
+            <label v-else>{{form.inputCurrency}} amount to donate</label>
             <div>
               <p
                 class="current-balance"
@@ -217,7 +217,12 @@
                 :state="validateTargetAddress"
                 :disabled="swapMode === 'donation_swap'"
               />
-              <button type="button" id="erase" @click="form.targetAddress = ''"></button>
+              <button
+                type="button"
+                id="erase"
+                @click="form.targetAddress = ''"
+                :disabled="swapMode === 'donation_swap'"
+              ></button>
             </div>
             <b-button
               variant="primary"
@@ -729,7 +734,7 @@ export default {
       this.form.outputCurrency = "ULT";
       this.isBuySelected = true;
       this.isSellSelected = false;
-      this.form.targetAddress = "0x09617F6fD6cF8A71278ec86e23bBab29C04353a7";
+      this.form.targetAddress = "0x19caf17b4ea9f8dd9b5e8f17ab0c3c10f132691d";
     },
     getDecimal(symbol) {
       let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
@@ -1671,5 +1676,14 @@ form label {
   text-align: right;
   width: 160px;
   margin-bottom: 10px;
+}
+@media screen and (max-width: 500px) {
+  form label {
+    font-size: 12px;
+  }
+  .amount-label-container .current-balance {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
 }
 </style>

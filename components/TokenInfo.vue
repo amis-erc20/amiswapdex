@@ -681,6 +681,12 @@ export default {
   left: 10px;
   color: #7f7584;
 }
+#settingModalInInfo .list-group-item a {
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  text-decoration: none;
+}
 @media screen and (max-width: 450px) {
   #token-info-tabs-container .nav-pills .nav-link {
     padding: 15px 0px;

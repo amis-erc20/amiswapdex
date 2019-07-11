@@ -376,4 +376,18 @@ iframe {
   border-left: 0px !important;
   border-right: 0px !important;
 }
+@media screen and (max-width: 500px) {
+  .token-info-table {
+    margin: 20px auto;
+  }
+  .vue-friendly-iframe > iframe {
+    height: 600px;
+  }
+  .custom-th-class {
+    color: #b14ae2 !important;
+    font-size: 12px;
+    text-align: center;
+    left: 10px;
+  }
+}
 </style>
