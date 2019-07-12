@@ -550,7 +550,7 @@ export default {
           bars[0].low = bars[0].low * bars[0].price_eth_usd;
           bars[0].volume = bars[0].volume * bars[0].price_eth_usd;
         }
-        bars[bars.length - 1].close = bars[bars.length - 1].open;
+        // bars[bars.length - 1].close = bars[bars.length - 1].open;
         // console.log("Chart data received from server...");
         return bars;
       } else {
