@@ -167,12 +167,9 @@
       @hidden="onHideModal"
     >
       <b-form @submit="onListToken">
-        <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
+        <b-alert v-if="errorMessage.length > 0" show fade variant="danger" v-html="errorMessage"></b-alert>
+        <!-- <b-alert v-if="errorMessage.length > 0" show fade variant="danger" v-html="errorMessage" >{{errorMessage}}</b-alert> -->
         <b-alert v-if="infoMessage.length > 0" show fade variant="info">{{infoMessage}}</b-alert>
-        <!-- <b-form-group id="exampleInputGroup1">
-          <label>Token Address</label>
-          <b-form-input type="text" v-model="form.tokenAddress"/>
-        </b-form-group>-->
         <b-form-group id="exampleInputGroup1">
           <label>Select Your Token</label>
           <v-select
@@ -322,6 +319,7 @@ export default {
       getTokenList: "account/getTokenList",
       getOwnedTokenList: "account/getOwnedTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getBadTokenList: "account/getBadTokenList",
       getAuthRedirectUrl: "getAuthRedirectUrl",
       getActiveTab: "getActiveTab",
       getTransactionList: "transaction/getTransactionList",
@@ -432,7 +430,13 @@ export default {
               priceInUsd: self.getPrice[symbol],
               src: token ? token.logo : null
             };
-          else return null;
+          else
+            return {
+              title: symbol,
+              balance: self.getBalance[symbol],
+              priceInUsd: 0,
+              src: null
+            };
         })
         .filter(t => t !== null)
         .filter(t => t.balance > 0 && t.title !== self.form.outputCurrency)
@@ -527,6 +531,20 @@ export default {
         return;
       }
       let tokenAddress = this.form.tokenAddress.toLowerCase();
+      let badToken = this.getBadTokenList.find(
+        t => t.tokenAddress.toLowerCase() === tokenAddress.toLowerCase()
+      );
+      if (badToken) {
+        console.log(`BAD TOKEN: ${badToken.tokenAddress}`);
+        this.resetMessages();
+        this.errorMessage = ` Warning not all tokens will work with Uniswap. Read
+          <a
+            href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
+          >this</a> and make sure that your token contract is compatible with Uniswap.`;
+        this.form.tokenAddress = "";
+        this.loading = false;
+        return;
+      }
       let exchangeAddress = await getExchangeAddress(tokenAddress);
       console.log(`Exchange address: ${exchangeAddress}`);
       if (!exchangeAddress) {

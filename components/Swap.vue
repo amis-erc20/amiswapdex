@@ -238,6 +238,12 @@
             :state="validateTargetAddress"
           >Invalid Receiver Address</b-form-invalid-feedback>
         </b-form-group>
+        <p id="bad-token-message" v-if="isBadToken">
+          Warning not all tokens will work with Uniswap. Read
+          <a
+            href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
+          >this</a> and make sure that your token contract is compatible with Uniswap.
+        </p>
         <b-form-group v-if="form.inputCurrency !== null && showAdvanced">
           <div class="amount-label-container">
             <label for="range-1">Gas Price: {{ gasPrice }} GWEI</label>
@@ -455,6 +461,7 @@ export default {
       getTokenList: "account/getTokenList",
       getPrice: "account/getPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getBadTokenList: "account/getBadTokenList",
       getAvailableTokenAddresses: "account/getAvailableTokenAddresses",
       getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses",
       getActiveToken: "getActiveToken",
@@ -469,6 +476,21 @@ export default {
       if (this.getActiveToken === "ETH") return true;
       if (hasTokenUniswap(this.getActiveToken)) return true;
       else return false;
+    },
+    isBadToken: function() {
+      let self = this;
+      let token = this.getAvailableTokenList.find(
+        t => t.symbol === self.getActiveToken
+      );
+      if (!token) return true;
+      let badToken = this.getBadTokenList.find(
+        t => t.tokenAddress.toLowerCase() === token.tokenAddress.toLowerCase()
+      );
+      if (badToken) {
+        console.log(`BAD TOKEN: ${badToken.tokenAddress}`);
+        return badToken;
+      }
+      return false;
     },
     availableTokens: function() {
       let self = this;
@@ -618,7 +640,8 @@ export default {
         !this.validateBalance ||
         !this.validateSlippage ||
         !this.validateGasLimit ||
-        !this.validateUsdAmount
+        !this.validateUsdAmount ||
+        this.isBadToken
       );
     },
     validateTargetAddress() {
@@ -997,8 +1020,8 @@ export default {
         }
       } else if (this.lastEditedField === "output") {
         if (!this.validateOutputAmount) {
-          // this.form.inputValue = "";
-          // return;
+          this.form.inputValue = "";
+          return;
         }
         if (this.swapType === "TOKEN_TO_ETH") {
           let exchangeContract = exchangeContracts[this.form.inputCurrency];
@@ -1676,6 +1699,12 @@ form label {
   text-align: right;
   width: 160px;
   margin-bottom: 10px;
+}
+#bad-token-message {
+  font-size: 13px;
+  text-align: left;
+  line-height: 1.5;
+  color: #ff5722;
 }
 @media screen and (max-width: 500px) {
   form label {

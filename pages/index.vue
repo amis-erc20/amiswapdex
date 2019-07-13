@@ -154,7 +154,8 @@ import {
   getWeb3,
   getBalance,
   getTokenBalance,
-  getAllListedToken
+  getAllListedToken,
+  getAllBadToken
 } from "../assets/js/utils";
 import { setTimeout } from "timers";
 import config from "../config";
@@ -209,6 +210,7 @@ export default {
       updateServerStatus: "updateServerStatus",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
+      setBadTokenList: "account/setBadTokenList",
       setOwnedTokenList: "account/setOwnedTokenList",
       updatePrice: "account/updatePrice",
       updateEthPrice: "account/updateEthPrice",
@@ -474,6 +476,9 @@ export default {
   },
   mounted: async function() {
     let self = this;
+    getAllBadToken().then(tokens => {
+      self.setBadTokenList(tokens)
+    })
     setTimeout(() => {
       if (isIos() && !isInStandaloneMode()) {
         let isShown = localStorage.getItem("isInstallMessageShown");

@@ -130,7 +130,12 @@
             <button type="button" id="erase" @click="gasLimit = ''"></button>
           </div>
         </b-form-group>
-
+        <p id="bad-token-message" v-if="isBadToken">
+          Warning not all tokens will work with Uniswap. Read
+          <a
+            href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
+          >this</a> and make sure that your token contract is compatible with Uniswap.
+        </p>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button type="submit" variant="primary" :disabled="shouldDisableAddButton">Add Liquidity</b-button>
@@ -234,7 +239,12 @@
             <button type="button" id="erase" @click="gasLimit = ''"></button>
           </div>
         </b-form-group>
-
+        <p id="bad-token-message" v-if="isBadToken">
+          Warning not all tokens will work with Uniswap. Read
+          <a
+            href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
+          >this</a> and make sure that your token contract is compatible with Uniswap.
+        </p>
         <div class="submit-button-group">
           <b-button type="reset" variant="outline-dark">Reset</b-button>
           <b-button
@@ -388,6 +398,7 @@ export default {
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getBadTokenList: "account/getBadTokenList",
       getAvailableTokenAddresses: "account/getAvailableTokenAddresses",
       getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses"
     }),
@@ -483,6 +494,21 @@ export default {
       }
       return true;
     },
+    isBadToken: function() {
+      let self = this;
+      let token = this.getAvailableTokenList.find(
+        t => t.symbol === self.getActiveToken
+      );
+      if (!token) return true;
+      let badToken = this.getBadTokenList.find(
+        t => t.tokenAddress.toLowerCase() === token.tokenAddress.toLowerCase()
+      );
+      if (badToken) {
+        console.log(`BAD TOKEN: ${badToken.tokenAddress}`);
+        return badToken;
+      }
+      return false;
+    },
     shouldDisableAddButton() {
       return (
         this.loading ||
@@ -491,14 +517,16 @@ export default {
         !this.validateOutputAmount ||
         !this.validateETHBalance ||
         !this.validateSlippage ||
-        !this.validateGasLimit
+        !this.validateGasLimit ||
+        this.isBadToken
       );
     },
     shouldDisableRemoveButton() {
       return (
         this.loading ||
         !this.validateinputValue ||
-        this.form.inputValue > this.liquidityBalance
+        this.form.inputValue > this.liquidityBalance ||
+        this.isBadToken
       );
     },
     shouldDisableCreateExchangeButton() {

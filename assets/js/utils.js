@@ -1023,6 +1023,11 @@ export const getAllListedToken = async () => {
   })
   return tokens
 }
+export const getAllBadToken = async () => {
+  let response = await axios.get(`${CONFIG.uniswapDexServer}api/badtoken`)
+  let tokens = response.data.result
+  return tokens
+}
 export const getTokenHoldingByAnAccount = async (address) => {
   let response = await axios.get(`${CONFIG.uniswapDexServer}api/tokenholding?accountAddress=${address}`)
   let tokens = response.data.result

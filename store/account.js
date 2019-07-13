@@ -7,6 +7,7 @@ export const state = () => ({
   tokenList: [],
   ownedTokenList: [],
   availableTokenList: [],
+  badTokenList: [],
   refresher: false
 })
 
@@ -33,17 +34,18 @@ export const getters = {
     })
     return exchangeAddressess
   },
-  getRefresher: state => state.refresher
+  getRefresher: state => state.refresher,
+  getBadTokenList: state => state.badTokenList
 }
 
 export const mutations = {
-  addAccount (state, newAccount) {
+  addAccount(state, newAccount) {
     state.account = newAccount
   },
-  removeAccount (state) {
+  removeAccount(state) {
     state.account = null
   },
-  addToken (state, newToken) {
+  addToken(state, newToken) {
     if (state.tokenList.indexOf(newToken.symbol) === -1) {
       state.tokenList.push(newToken.symbol)
     }
@@ -55,10 +57,10 @@ export const mutations = {
       state.totalValue += (state.balance[key]) * state.price[key] || 0.0
     }
   },
-  resetTokenList (state) {
+  resetTokenList(state) {
     state.tokenList = []
   },
-  updateBalance (state, payload) {
+  updateBalance(state, payload) {
     if (state.account === null) return
 
     let {
@@ -75,66 +77,72 @@ export const mutations = {
       state.totalValue += (state.balance[key]) * (state.price[key] || 0.0)
     }
   },
-  resetAllBalances (state) {
+  resetAllBalances(state) {
     for (var tokenName in state.balance) {
       state.balance[tokenName] = 0
     }
     state.totalValue = 0
   },
-  updatePrice (state, payload) {
+  updatePrice(state, payload) {
     let {
       symbol,
       price
     } = payload
     state.price[symbol] = price
   },
-  updateEthPrice (state, payload) {
+  updateEthPrice(state, payload) {
     state.ethPrice = payload
   },
-  setAvailableTokenList (state, payload) {
+  setAvailableTokenList(state, payload) {
     state.availableTokenList = payload
   },
-  setRefresher (state, payload) {
+  setRefresher(state, payload) {
     state.refresher = payload
   },
-  setOwnedTokenList (state, payload) {
+  setOwnedTokenList(state, payload) {
     state.ownedTokenList = payload
+  },
+  setBadTokenList(state, payload) {
+    state.badTokenList = payload
   }
 }
 
 export const actions = {
-  async addAccount (store, payload) {
+  async addAccount(store, payload) {
     store.commit('addAccount', payload)
   },
-  async removeAccount (store) {
+  async removeAccount(store) {
     store.commit('removeAccount')
   },
-  addToken (store, payload) {
+  addToken(store, payload) {
     store.commit('addToken', payload)
     // store.commit('updateBalance', payload)
   },
-  resetTokenList (store) {
+  resetTokenList(store) {
     store.commit('resetTokenList')
   },
-  async setAvailableTokenList (store, payload) {
+  async setAvailableTokenList(store, payload) {
     store.commit('setAvailableTokenList', payload)
   },
-  async updateBalance (store, payload) {
+  async updateBalance(store, payload) {
     store.commit('updateBalance', payload)
   },
-  async resetAllBalances (store) {
+  async resetAllBalances(store) {
     store.commit('resetAllBalances')
   },
-  async updatePrice (store, payload) {
+  async updatePrice(store, payload) {
     store.commit('updatePrice', payload)
   },
-  async updateEthPrice (store, payload) {
+  async updateEthPrice(store, payload) {
     store.commit('updateEthPrice', payload)
   },
-  async setRefresher (store, payload) {
+  async setRefresher(store, payload) {
     store.commit('setRefresher', payload)
   },
-  async setOwnedTokenList (store, payload) {
+  async setOwnedTokenList(store, payload) {
     store.commit('setOwnedTokenList', payload)
+  },
+  async setBadTokenList(store, payload) {
+    store.commit('setBadTokenList', payload)
   }
 }
