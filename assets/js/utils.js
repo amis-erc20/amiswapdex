@@ -631,7 +631,9 @@ export const metamaskAddLiquidity = async function (
         tx.deadline)
       .send({
         from: myAddress,
-        value: tx.ethAmount.toFixed(0)
+        value: tx.ethAmount.toFixed(0),
+        gasLimit: tx.gasLimit,
+        gasPrice: tx.gasPrice
       }, (err, data) => {
         if (err) {
           console.log(err)
@@ -713,7 +715,9 @@ export const metamaskRemoveLiquidity = async function (
       tx.tokenWithdrawn.multipliedBy(1 - ALLOWED_SLIPPAGE).toFixed(0),
       tx.deadline
     ).send({
-      from: myAddress
+      from: myAddress,
+      gasLimit: tx.gasLimit,
+      gasPrice: tx.gasPrice
     }, (err, data) => {
       if (err) {
         console.log(e)
