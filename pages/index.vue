@@ -477,8 +477,8 @@ export default {
   mounted: async function() {
     let self = this;
     getAllBadToken().then(tokens => {
-      self.setBadTokenList(tokens)
-    })
+      self.setBadTokenList(tokens);
+    });
     setTimeout(() => {
       if (isIos() && !isInStandaloneMode()) {
         let isShown = localStorage.getItem("isInstallMessageShown");

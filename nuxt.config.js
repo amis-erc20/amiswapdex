@@ -27,10 +27,7 @@ module.exports = {
       type: 'image/x-icon',
       href: '/favicon.ico'
     }],
-    script: [
-      // { src: 'http://localhost:8888/static/charting_library/charting_library.min.js' }
-      // { src: '/charting_library/thant.js' }
-    ]
+    script: []
   },
 
   /*
@@ -66,7 +63,7 @@ module.exports = {
     short_name: 'UniDEX',
     lang: 'en',
     display: 'standalone',
-    start_url: '/welcome?utm_source=a2hs'
+    start_url: '/'
     // icons: [
     // 	{
     // 		src: '/192px.png',
@@ -94,9 +91,34 @@ module.exports = {
     /*
      ** You can extend webpack config here
      */
+    // loaders: {
+    //   vue: {
+    //     transformAssetUrls: {
+    //       video: 'src',
+    //       source: 'src',
+    //       object: 'src',
+    //       embed: 'src'
+    //     },
+    //     prettify: true
+    //   }
+    // },
+    bable: {
+      babelrc: false,
+      cacheDirectory: undefined,
+      presets: ['@nuxt/babel-preset-app'],
+      minified: false
+    },
     html: {
       minify: {
-        minifyJS: false
+        collapseBooleanAttributes: false,
+        decodeEntities: false,
+        minifyCSS: false,
+        minifyJS: false,
+        processConditionalComments: false,
+        removeEmptyAttributes: false,
+        removeRedundantAttributes: false,
+        trimCustomFragments: false,
+        useShortDoctype: false
       }
     }
     // extend(config, ctx) {
@@ -110,5 +132,12 @@ module.exports = {
     //   })
     // }
     // }
-  }
+  },
+  // dev: true,
+  optimization: {
+    minimize: false
+  },
+  // generate: {
+  //   minify: false
+  // }
 }

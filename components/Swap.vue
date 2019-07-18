@@ -55,7 +55,7 @@
           <v-select
             :options="availableInputTokens"
             label="title"
-            placeholder="Please select a curreny"
+            placeholder="Please select a currency"
             @input="onSelectInputCurrency"
             :disabled="isSellSelected"
             :value="form.inputCurrency"

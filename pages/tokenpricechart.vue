@@ -19,7 +19,7 @@
     <!-- <button @click="removeVolumeSerie()">remove volume</button>
     <button @click="removeCandleSerie()">remove</button>
     <button @click="drawChart()">draw</button>-->
-    <div id="chart-header-bar">
+    <div id="chart-header-bar" v-show="!loading">
       <div class="resolution-puls-price">
         <b-button-group class="resolution-button-group" v-if="$mq !== 'mobile'">
           <b-button
@@ -226,9 +226,9 @@ export default {
       console.log("RELOADING CHART....");
       this.errorMessage = "";
       this.loading = true;
-      setTimeout(this.removeVolumeSerie, 1000);
-      setTimeout(this.removeCandleSerie, 2000);
-      setTimeout(this.drawChart, 3000);
+      setTimeout(this.removeVolumeSerie, 200);
+      setTimeout(this.removeCandleSerie, 600);
+      setTimeout(this.drawChart, 1000);
     },
     removeCandleSerie() {
       try {
@@ -551,7 +551,6 @@ export default {
           bars[0].volume = bars[0].volume * bars[0].price_eth_usd;
         }
         // bars[bars.length - 1].close = bars[bars.length - 1].open;
-        // console.log("Chart data received from server...");
         return bars;
       } else {
         return [];

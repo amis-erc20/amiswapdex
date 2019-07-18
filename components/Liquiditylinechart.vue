@@ -5,7 +5,7 @@
         <div id="serie-legend">LIQUIDITY / ETH, 1D, UniswapDEX</div>
       </div>
       <div>
-        <div id="serie-legend">Volume: {{ volume.toFixed(4)}}</div>
+        <div id="serie-legend">LIQUIDITY: {{ volume.toFixed(4)}}</div>
       </div>
     </div>
     <div id="liquidity-line-chart"></div>

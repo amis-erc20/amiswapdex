@@ -308,7 +308,9 @@ export const metamaskCreateNewExchange = async function (
   try {
     let factoryContract = new web3.eth.Contract(factoryABI, factoryAddress)
     let txId = await factoryContract.methods.createExchange(tokenAddress).send({
-      from: myAddress
+      from: myAddress,
+      gasPrice: parseInt(6 * Math.pow(10, 9)),
+      gasLimit: parseInt(300000)
     })
     return txId
   } catch (e) {
@@ -384,7 +386,9 @@ export const unlockTokenMetamask = async (tx, tokenSymbol, data) => {
 
   return new Promise(resolve => {
     contract.methods.approve(exchangeAddress, amount).send({
-      from: tx.from
+      from: tx.from,
+      gasPrice: tx.gasPrice,
+      gasLimit: tx.gasLimit
     }).on('transactionHash', function (hash) {
       console.log('Tx hash: ', hash)
       resolve(hash)
