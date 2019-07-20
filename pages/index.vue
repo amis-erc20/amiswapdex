@@ -127,7 +127,6 @@ import {
 
 Vue.use(VueQriously);
 Vue.use(BootstrapVue);
-// Vue.use(ToastPlugin);
 
 library.add(faLongArrowAltRight);
 library.add(faLongArrowAltLeft);
@@ -428,10 +427,9 @@ export default {
     localStorage.removeItem("chartInfo");
     this.setAvailableTokenList(availableTokens);
     await initContracts(web3, availableTokens);
-    this.updateActiveTab("market");
     this.refreshServerStatus();
-    await this.refreshTokenList(web3);
-    await this.refreshTokenPrices();
+    this.refreshTokenList(web3);
+    this.refreshTokenPrices();
 
     if (self.getSignIn) {
       let accountType = self.getAccount.type;

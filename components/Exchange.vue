@@ -531,6 +531,11 @@ export default {
         return;
       }
       let tokenAddress = this.form.tokenAddress.toLowerCase();
+      if (!tokenAddress) {
+        this.loading = false;
+        this.errorMessage = "Invalid token address";
+        return;
+      }
       let badToken = this.getBadTokenList.find(
         t => t.tokenAddress.toLowerCase() === tokenAddress.toLowerCase()
       );

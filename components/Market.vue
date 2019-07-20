@@ -4,31 +4,44 @@
       <div class="market-info-table">
         <b-row class="count">
           <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
-          <b-col class="value">{{ market.count1ETH}}</b-col>
+          <b-col class="value">{{ market.count1 || '...' }}</b-col>
         </b-row>
         <b-row class="count-all">
           <b-col class="description" cols="8"></b-col>
-          <b-col class="value">{{ market.count}} Total</b-col>
+          <b-col v-if="market.count" class="value">{{ market.count }} Total</b-col>
         </b-row>
 
         <b-row class="volume-usd">
           <b-col class="description">24H Market Volume</b-col>
-
-          <b-col class="value">{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
+          <b-col
+            v-if="market.volume_eth"
+            class="value"
+          >{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
+          <b-col v-else class="value">...</b-col>
         </b-row>
         <b-row class="volume-eth">
           <b-col class="description"></b-col>
-          <b-col class="value">{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
+          <b-col
+            v-if="market.volume_usd"
+            class="value"
+          >{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
         </b-row>
 
         <b-row class="total-usd">
           <b-col class="description">Total Market Liquidity</b-col>
-          <b-col class="value">{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
+          <b-col
+            v-if="market.total_eth"
+            class="value"
+          >{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
+          <b-col v-else class="value">...</b-col>
         </b-row>
         <b-row class="total-eth">
           <b-col class="description"></b-col>
 
-          <b-col class="value">{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
+          <b-col
+            v-if="market.total_usd"
+            class="value"
+          >{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
         </b-row>
       </div>
       <Tokenlinechart />
@@ -59,9 +72,6 @@
           <Loading v-if="isLoadingWallet" />
 
           <div v-if="getSignIn && !isLoadingWallet" class="select-donation-currency">
-            <!-- <p>{{isLoadingWallet}}</p>
-            <p>{{getOwnedTokenList}}</p>-->
-
             <label>Donate with</label>
             <v-select
               :options="availableInputTokens"
@@ -106,9 +116,9 @@
       </div>
     </div>
 
-    <div v-else class="loading-icon">
+    <!-- <div v-else class="loading-icon">
       <b-spinner label="Spinning"></b-spinner>
-    </div>
+    </div>-->
   </div>
 </template>
 <script>
@@ -127,7 +137,14 @@ import { getETHToUSDPrice, getTokenToUSDPrice } from "../assets/js/utils";
 export default {
   data: function() {
     return {
-      market: null,
+      market: {
+        count: 0,
+        count1: 0,
+        total_eth: 0,
+        total_usd: 0,
+        volume_eth: 0,
+        volume_usd: 0
+      },
       donationCurrency: "",
       loadingWallet: false
     };
@@ -236,10 +253,11 @@ export default {
       if (this.getActiveTab === "market" || force === true) {
         let data = {};
         let res = await axios.get(`${config.uniswapDexServer}api/marketdata`);
+        console.log(res.data.result);
         if (res.data.result) {
           let ethToUsd = await getETHToUSDPrice();
           data.count = res.data.result.count;
-          data.count1ETH = res.data.result.count1;
+          data.count1 = res.data.result.count1;
           let liquidityResponse = await axios.get(
             `${config.uniswapDexServer}api/histodaymarket?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
@@ -268,7 +286,7 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    await this.updateMarketInfo(true);
+    this.updateMarketInfo(true);
     if (this.getConnection) {
       await this.getSummaryFromServer();
       await this.updateSummary(this.summary);

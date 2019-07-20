@@ -3,7 +3,7 @@ export const state = () => {
   return {
     signIn: false,
     activeToken: 'ETH',
-    activeTab: 'exchange',
+    activeTab: 'market',
     isOnline: true,
     serverStatus: true,
     backupStatus: null,
@@ -50,86 +50,86 @@ export const getters = {
 }
 
 export const actions = {
-  async initialiseWeb3 (store, action) {
+  async initialiseWeb3(store, action) {
     web3 = action.payload
   },
-  updateActiveToken (store, payload) {
+  updateActiveToken(store, payload) {
     store.commit('updateActiveToken', payload)
   },
-  updateCurrentView (store, payload) {
+  updateCurrentView(store, payload) {
     store.commit('updateCurrentView', payload)
   },
-  updateAuthStatus (store, payload) {
+  updateAuthStatus(store, payload) {
     store.commit('updateAuthStatus', payload)
   },
-  updateConnection (store, payload) {
+  updateConnection(store, payload) {
     store.commit('updateConnection', payload)
   },
-  updateServerStatus (store, payload) {
+  updateServerStatus(store, payload) {
     store.commit('updateServerStatus', payload)
   },
-  updateBackupStatus (store, payload) {
+  updateBackupStatus(store, payload) {
     store.commit('updateBackupStatus', payload)
   },
-  updateActiveTab (store, payload) {
+  updateActiveTab(store, payload) {
     store.commit('updateActiveTab', payload)
   },
-  updateCredentials (store, payload) {
+  updateCredentials(store, payload) {
     store.commit('updateCredentials', payload)
   },
-  updateAuthRedirectUrl (store, payload) {
+  updateAuthRedirectUrl(store, payload) {
     store.commit('updateAuthRedirectUrl', payload)
   },
-  updateChartInfo (store, payload) {
+  updateChartInfo(store, payload) {
     store.commit('updateChartInfo', payload)
   },
-  adminLogIn (store) {
+  adminLogIn(store) {
     store.commit('adminLogIn')
   },
-  updateSummary (store, payload) {
+  updateSummary(store, payload) {
     store.commit('updateSummary', payload)
   }
 }
 
 export const mutations = {
-  updateAuthStatus (state, payload) {
+  updateAuthStatus(state, payload) {
     state.signIn = payload
   },
-  updateActiveToken (state, payload) {
+  updateActiveToken(state, payload) {
     state.activeToken = payload
   },
-  updateCurrentView (state, payload) {
+  updateCurrentView(state, payload) {
     state.currentView = payload
   },
-  updateConnection (state, payload) {
+  updateConnection(state, payload) {
     state.isOnline = payload
   },
-  updateServerStatus (state, payload) {
+  updateServerStatus(state, payload) {
     state.serverStatus = payload
   },
-  updateBackupStatus (state, payload) {
+  updateBackupStatus(state, payload) {
     state.backupStatus = payload
   },
-  updateActiveTab (state, payload) {
+  updateActiveTab(state, payload) {
     state.activeTab = payload
   },
-  updateChartInfo (state, payload) {
+  updateChartInfo(state, payload) {
     state.chartInfo = payload
     // console.log(payload)
     localStorage.setItem('chartInfo', JSON.stringify(payload))
   },
-  updateCredentials (state, payload) {
+  updateCredentials(state, payload) {
     state.credentials = payload
   },
-  adminLogIn (state) {
+  adminLogIn(state) {
     state.adminLogIn = true
   },
-  updateAuthRedirectUrl (state, payload) {
+  updateAuthRedirectUrl(state, payload) {
     if (payload.url) state.authRedirectUrl.url = payload.url
     if (payload.token) state.authRedirectUrl.token = payload.token || null
     if (payload.tokenSubTab) state.authRedirectUrl.tokenSubTab = payload.tokenSubTab || 'info'
   },
-  updateSummary (state, payload) {
+  updateSummary(state, payload) {
     state.summary = payload
   }
 }
