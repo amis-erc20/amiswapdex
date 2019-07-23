@@ -30,14 +30,14 @@
       <b-form @submit="onLocalSignIn " v-if="downloadMethod === 'local' && !loading">
         <b-form-group>
           <label for>Email</label>
-          <b-form-input type="email" v-model="form.email" required/>
+          <b-form-input type="email" v-model="form.email" required />
         </b-form-group>
         <b-form-group>
           <label for>Password</label>
-          <b-form-input type="password" v-model="form.password1" required/>
+          <b-form-input type="password" v-model="form.password1" required />
         </b-form-group>
         <b-form-group>
-          <input type="checkbox" v-model="isAccepted">
+          <input type="checkbox" v-model="isAccepted" />
           <span
             id="metamask-agree-text"
             @click="isAccepted = !isAccepted"
@@ -60,15 +60,15 @@
       <b-form @submit="onRemoteSignIn " v-if="downloadMethod === 'remote' && !loading">
         <b-form-group>
           <label for>Email</label>
-          <b-form-input type="email" v-model="form.email" required/>
+          <b-form-input type="email" v-model="form.email" required />
         </b-form-group>
         <b-form-group>
           <label for>Password</label>
-          <b-form-input type="password" v-model="form.password1" required/>
+          <b-form-input type="password" v-model="form.password1" required />
         </b-form-group>
 
         <b-form-group>
-          <input type="checkbox" v-model="isAccepted">
+          <input type="checkbox" v-model="isAccepted" />
           <span
             id="metamask-agree-text"
             @click="isAccepted = !isAccepted"
@@ -91,11 +91,11 @@
       <b-form @submit="onUploadSignIn " v-if="downloadMethod === 'upload' && !loading">
         <b-form-group>
           <label for>Email</label>
-          <b-form-input type="email" v-model="form.email" required/>
+          <b-form-input type="email" v-model="form.email" required />
         </b-form-group>
         <b-form-group>
           <label for>Password</label>
-          <b-form-input type="password" v-model="form.password1" required/>
+          <b-form-input type="password" v-model="form.password1" required />
         </b-form-group>
         <b-form-group>
           <b-form-file
@@ -112,7 +112,7 @@
         </b-form-group>
 
         <b-form-group>
-          <input type="checkbox" v-model="isAccepted">
+          <input type="checkbox" v-model="isAccepted" />
           <span
             id="metamask-agree-text"
             @click="isAccepted = !isAccepted"
@@ -167,7 +167,7 @@
             <h4>Term of Services</h4>
           </div>
         </template>
-        <Tos/>
+        <Tos />
       </b-modal>
     </div>
   </div>
@@ -374,14 +374,6 @@ export default {
         }
         this.updateCredentials({ Ep, De, Ns: this.Ns, E, Ps });
         this.loadWallet(account.address);
-        // let { url, token } = this.getAuthRedirectUrl;
-        // if (url === "/tokendetail" && token !== null) {
-        //   this.updateActiveToken(token);
-        //   this.redirect("/tokendetail");
-        //   this.updateAuthRedirectUrl({ url: "/", token: null });
-        // } else {
-        //   this.redirect("/");
-        // }
       } catch (e) {
         console.log(e);
         console.log(`Incorrect Password`);
@@ -518,7 +510,7 @@ export default {
 <style>
 #signin-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   overflow: hidden;
   margin: 0 auto;
   display: flex;
@@ -548,7 +540,7 @@ export default {
 .alert {
   font-size: 12px;
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 10px auto;
 }
 #signin-btn {

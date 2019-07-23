@@ -37,7 +37,7 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 20px auto;
   padding: 20px;
   font-size: 13px;

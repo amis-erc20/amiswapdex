@@ -253,7 +253,8 @@ export default {
       getActiveTab: "getActiveTab",
       getTransactionList: "transaction/getTransactionList",
       getTokenTransactionList: "transaction/getTokenTransactionList",
-      getActiveToken: "getActiveToken"
+      getActiveToken: "getActiveToken",
+      getActiveTokenAddress: "getActiveTokenAddress"
     }),
     activeTokenSubTab: function() {
       let redirectUrl = this.getAuthRedirectUrl;
@@ -262,7 +263,10 @@ export default {
     activeTokenLogo() {
       let self = this;
       const token = this.getAvailableTokenList.find(
-        t => t.symbol === self.getActiveToken
+        t =>
+          t.symbol === self.getActiveToken &&
+          t.tokenAddress.toLowerCase() ===
+            self.getActiveTokenAddress.toLowerCase()
       );
       if (token) return token.logo;
       else if (this.getActiveToken === "ETH") return null;

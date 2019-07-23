@@ -300,7 +300,7 @@ export default {
 .market-info-table {
   height: 220px;
   width: 50%;
-  max-width: 650px;
+  max-width: 700px;
   min-width: 300px;
   font-size: 15px;
   margin: 60px auto;
@@ -468,7 +468,7 @@ export default {
 .select-donation-currency {
   padding-top: 20px;
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
 }
 .select-donation-currency label {
@@ -482,7 +482,7 @@ export default {
   .market-info-table {
     height: 220px;
     width: 50%;
-    max-width: 650px;
+    max-width: 700px;
     min-width: 300px;
     font-size: 13px;
     margin: 30px auto;

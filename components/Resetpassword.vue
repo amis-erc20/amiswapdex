@@ -369,7 +369,7 @@ export default {
 <style>
 #reset-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   max-height: 500px;
   overflow: hidden;
   width: 90vw;

@@ -465,6 +465,7 @@ export default {
       getAvailableTokenAddresses: "account/getAvailableTokenAddresses",
       getAvailableExchangeAddresses: "account/getAvailableExchangeAddresses",
       getActiveToken: "getActiveToken",
+      getActiveTokenAddress: "getActiveTokenAddress",
       getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
@@ -527,7 +528,8 @@ export default {
               title: symbol,
               balance: self.getBalance[symbol],
               priceInUsd: self.getPrice[symbol],
-              src: token ? token.logo : null
+              src: token ? token.logo : null,
+              tokenAddress: token ? token.tokenAddress : null
             };
           else return null;
         })
@@ -648,10 +650,14 @@ export default {
       return isValidAddress(this.form.targetAddress);
     },
     validateInputLiquidity() {
+      let self = this;
       if (this.form.inputCurrency === "ETH") return true;
       if (this.form.inputCurrency === null) return true;
       let token = this.getAvailableTokenList.find(
-        t => t.symbol === this.form.inputCurrency
+        t =>
+          t.symbol === this.form.inputCurrency &&
+          t.tokenAddress.toLowerCase() ===
+            self.getActiveTokenAddress.toLowerCase()
       );
       if (!token) return false;
       let summary = this.getSummary.find(s => s.token_id === token.id);
@@ -660,10 +666,14 @@ export default {
       else return false;
     },
     validateOutputLiquidity() {
+      let self = this;
       if (this.form.outputCurrency === "ETH") return true;
       if (this.form.outputCurrency === null) return true;
       let token = this.getAvailableTokenList.find(
-        t => t.symbol === this.form.outputCurrency
+        t =>
+          t.symbol === this.form.outputCurrency &&
+          t.tokenAddress.toLowerCase() ===
+            self.getActiveTokenAddress.toLowerCase()
       );
       if (!token) return false;
       let summary = this.getSummary.find(s => s.token_id === token.id);
@@ -748,7 +758,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateActiveToken: "updateActiveToken"
+      updateActiveToken: "updateActiveToken",
+      updateActiveTokenAddress: "updateActiveTokenAddress"
     }),
     prepareForDonationSwap() {
       console.log("preparing for donation");
@@ -781,11 +792,13 @@ export default {
     onSelectInputCurrency(value) {
       if (!value) return;
       this.form.inputCurrency = value.title;
+      if (value.tokenAddress) this.form.inputTokenAddress = value.tokenAddress;
       this.onCurrencyChange();
     },
     onSelectOutputCurrency(value) {
       if (!value) return;
       this.form.outputCurrency = value.title;
+      if (value.tokenAddress) this.form.outputTokenAddress = value.tokenAddress;
       this.onCurrencyChange();
     },
     showSuccessToast(txHash) {
@@ -1232,6 +1245,7 @@ export default {
         }
         if (this.txHash) {
           this.updateActiveToken(this.form.outputCurrency);
+          this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
           this.onReset();
           this.loading = false;
           // this.showModal("success_modal_ref");
@@ -1297,6 +1311,7 @@ export default {
               return;
             }
             this.updateActiveToken(this.form.outputCurrency);
+            this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
             this.onReset();
             this.loading = false;
             this.showSuccessToast(this.txHash);
@@ -1362,6 +1377,7 @@ export default {
               this.web3
             );
             this.updateActiveToken(this.form.outputCurrency);
+            this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
             this.onReset();
             this.loading = false;
             // this.showModal("success_modal_ref");
@@ -1421,6 +1437,7 @@ export default {
               this.web3
             );
             this.updateActiveToken(this.form.outputCurrency);
+            this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
             this.onReset();
             this.loading = false;
             // this.showModal("success_modal_ref");
@@ -1556,7 +1573,7 @@ export default {
 #uniswap-convert-section {
   padding-top: 20px;
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
 }
 .submit-button-group {

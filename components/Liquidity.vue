@@ -52,10 +52,6 @@
           >{{ inputErrorMessage }}</b-form-invalid-feedback>
         </b-form-group>
 
-        <!-- <b-button variant="primary" id="pool-swap-button">
-          <font-awesome-icon icon="plus" size="2x" color="#fff"/>
-        </b-button>-->
-
         <b-form-group id="exampleInputGroup1" class="input-form-group">
           <div class="amount-label-container">
             <label>Deposit {{activeToken}}</label>
@@ -1181,7 +1177,7 @@ export default {
 #uniswap-liquidity-section {
   padding-top: 20px;
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
 }
 .submit-button-group {

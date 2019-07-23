@@ -3,6 +3,7 @@ export const state = () => {
   return {
     signIn: false,
     activeToken: 'ETH',
+    activeTokenAddress: '',
     activeTab: 'market',
     isOnline: true,
     serverStatus: true,
@@ -28,6 +29,7 @@ export const state = () => {
 export const getters = {
   getWeb3: () => web3,
   getActiveToken: state => state.activeToken,
+  getActiveTokenAddress: state => state.activeTokenAddress,
   getAdminLogin: state => state.adminLogIn,
   getActiveTab: state => state.activeTab,
   getSignIn: state => state.signIn,
@@ -55,6 +57,9 @@ export const actions = {
   },
   updateActiveToken(store, payload) {
     store.commit('updateActiveToken', payload)
+  },
+  updateActiveTokenAddress(store, payload) {
+    store.commit('updateActiveTokenAddress', payload)
   },
   updateCurrentView(store, payload) {
     store.commit('updateCurrentView', payload)
@@ -97,6 +102,9 @@ export const mutations = {
   },
   updateActiveToken(state, payload) {
     state.activeToken = payload
+  },
+  updateActiveTokenAddress(state, payload) {
+    state.activeTokenAddress = payload
   },
   updateCurrentView(state, payload) {
     state.currentView = payload

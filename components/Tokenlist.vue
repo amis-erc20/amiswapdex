@@ -18,9 +18,9 @@
           v-for="token in tokenList"
           :key="token.name"
           button
-          v-on:click="changeTokenTab($event, token.name)"
+          v-on:click="changeTokenTab($event, token.name, token.tokenAddress)"
         >
-          <token :token="token"/>
+          <token :token="token" />
         </b-list-group-item>
       </b-list-group>
     </b-card>
@@ -72,7 +72,8 @@ export default {
           fullname: token ? token.name : "-",
           balance: self.getBalance[symbol],
           priceInUsd: self.getPrice[symbol],
-          src: token ? token.logo : null
+          src: token ? token.logo : null,
+          tokenAddress: token ? token.tokenAddress : null
         };
       });
       let ethToken = list.slice(0, 1);
@@ -95,11 +96,13 @@ export default {
     ...mapActions({
       updateTransactionList: "transaction/updateTransactionList",
       updateActiveToken: "updateActiveToken",
+      updateActiveTokenAddress: "updateActiveTokenAddress",
       updateCurrentView: "updateCurrentView",
       updateChartInfo: "updateChartInfo"
     }),
-    changeTokenTab: function(event, tokenName) {
+    changeTokenTab: function(event, tokenName, tokenAddress) {
       this.updateActiveToken(tokenName);
+      this.updateActiveTokenAddress(tokenAddress);
       this.showTokenInfoModal = true;
       this.updateCurrentView("tokeninfo");
 
@@ -111,15 +114,7 @@ export default {
           tokenAddress: token.tokenAddress,
           tokenName: tokenName
         });
-      } 
-      // else {
-      //   this.updateChartInfo({
-      //     currency: "ETH",
-      //     showChart: true,
-      //     tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      //     tokenName: "USDC"
-      //   });
-      // }
+      }
     },
     closeTokenInfo() {
       this.showTokenInfoModal = false;
@@ -144,7 +139,7 @@ export default {
 }
 .tokenlist-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 30px auto;
   margin-bottom: 0px;
 }

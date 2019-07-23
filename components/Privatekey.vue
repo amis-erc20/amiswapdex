@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="signin-section">
-      <no-connection/>
+      <no-connection />
       <h6>Please provide your private key to access your wallet</h6>
       <scale-loader :loading="loading" :color="`red`" :height="`15px`" :width="`5px`"></scale-loader>
       <b-alert
@@ -14,11 +14,11 @@
       <!-- PRIVATE KEY SIGN IN -->
       <b-form @submit="onSubmitPrivateKey">
         <b-form-group>
-          <b-form-input type="text" v-model="form.privateKey" placeholder="Private Key" required/>
+          <b-form-input type="text" v-model="form.privateKey" placeholder="Private Key" required />
         </b-form-group>
 
         <b-form-group>
-          <input type="checkbox" v-model="isAccepted">
+          <input type="checkbox" v-model="isAccepted" />
           <span
             id="metamask-agree-text"
             @click="isAccepted = !isAccepted"
@@ -51,7 +51,7 @@
             <h4>Term of Services</h4>
           </div>
         </template>
-        <Tos/>
+        <Tos />
       </b-modal>
     </div>
   </div>
@@ -170,14 +170,6 @@ export default {
         this.addAccount(account);
         this.updateAuthStatus(true);
         this.loadWallet(account.address);
-        // let { url, token } = this.getAuthRedirectUrl;
-        // if (url === "/tokendetail" && token !== null) {
-        //   this.updateActiveToken(token);
-        //   this.redirect("/tokendetail");
-        //   this.updateAuthRedirectUrl({ url: "/", token: null });
-        // } else {
-        //   this.redirect("/");
-        // }
       } catch (e) {
         console.log(e);
         console.log(`Invalid Private Key`);
@@ -229,7 +221,7 @@ export default {
 .alert {
   font-size: 12px;
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
 }
 #signin-btn {
   width: 100%;

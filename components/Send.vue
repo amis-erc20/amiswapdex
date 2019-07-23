@@ -358,7 +358,6 @@ export default {
       this.$router.push("/tokendetail");
     },
     async onUsdInputChange() {
-      console.log("Updating token amount...");
       let usdAmount = this.form.inputValueUsd;
       if (!this.validateUsdAmount) {
         return;
@@ -369,12 +368,10 @@ export default {
       );
     },
     prepareForDonationSend() {
-      console.log("preparing for donation");
       this.form.currency = "ULT";
       this.form.targetAddress = "0x19caf17b4ea9f8dd9b5e8f17ab0c3c10f132691d";
     },
     async updateUsdAmount() {
-      console.log("updating usd amount");
       let inputAmount = this.form.amount;
       if (!this.validateAmount) {
         return;
@@ -438,7 +435,6 @@ export default {
       let txHash;
       // If user sign in with metamask
       this.form.targetAddress = this.form.targetAddress.trim().toLowerCase();
-
       if (this.getAccount.type === "metamask") {
         try {
           if (this.form.currency === "ETH") {
@@ -453,7 +449,6 @@ export default {
             let token = this.getOwnedTokenList.find(
               t => t.symbol === self.form.currency
             );
-            console.log(token);
             this.txHash = await metamaskSendToken({
               from: this.getAccount.address,
               to: this.form.targetAddress,
@@ -471,7 +466,6 @@ export default {
             this.updateActiveToken(this.form.currency);
             this.onReset();
             this.loading = false;
-            // this.showModal("success_modal_ref");
             this.showSuccessToast(this.txHash);
           } else {
             this.onReset();
@@ -502,7 +496,6 @@ export default {
             let token = this.getOwnedTokenList.find(
               t => t.symbol === self.form.currency
             );
-            console.log(token);
             txHash = await sendToken(
               {
                 from: this.getAccount.address,
@@ -595,7 +588,7 @@ export default {
 .send-section {
   color: #333;
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 20px auto;
   text-align: center;
   padding-top: 20px;

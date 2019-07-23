@@ -38,6 +38,10 @@
         <b-col>Liquidity</b-col>
         <b-col>${{ numberWithCommas(selectedToken.liquidity.toFixed(0)) }}</b-col>
       </b-row>
+      <b-row>
+        <b-col>ROIR</b-col>
+        <b-col>{{ numberWithCommas(selectedToken.roir.toFixed(2)) }}%</b-col>
+      </b-row>
       <b-row v-if="getActiveToken !== 'ETH'">
         <b-col>Token Address</b-col>
         <b-col cols="8">
@@ -162,6 +166,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
+      getActiveTokenAddress: "getActiveTokenAddress",
       getSummary: "getSummary",
       getChartInfo: "getChartInfo",
       getAvailableTokenList: "account/getAvailableTokenList",
@@ -172,10 +177,18 @@ export default {
     selectedToken: function() {
       let self = this;
       let selectedTokenSymbol;
-      if (this.getActiveToken === "ETH") selectedTokenSymbol = "WETH";
-      else selectedTokenSymbol = this.getActiveToken;
+      let selectedTokenAddress;
+      if (this.getActiveToken === "ETH") {
+        selectedTokenSymbol = "WETH";
+        selectedTokenAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+      } else {
+        selectedTokenSymbol = this.getActiveToken;
+        selectedTokenAddress = this.getActiveTokenAddress.toLowerCase();
+      }
       let token = this.getAvailableTokenList.find(
-        t => t.symbol === selectedTokenSymbol
+        t =>
+          t.symbol === selectedTokenSymbol &&
+          t.tokenAddress.toLowerCase() === selectedTokenAddress.toLowerCase()
       );
       let foundSummary;
       if (token)
@@ -185,6 +198,7 @@ export default {
           name: this.getActiveToken,
           symbol: this.getActiveToken,
           liquidity: 0,
+          roir: 0,
           volume: 0,
           price: 0,
           src: "/_nuxt/assets/default-token.png",
@@ -201,6 +215,7 @@ export default {
           name: this.getActiveToken,
           symbol: this.getActiveToken,
           liquidity: 0,
+          roir: 0,
           volume: 0,
           price: 0,
           src: "/_nuxt/assets/default-token.png",
@@ -215,6 +230,7 @@ export default {
           symbol: token.symbol,
           tokenAddress: token.tokenAddress,
           liquidity: foundSummary.liquidity * this.ethToUsd,
+          roir: foundSummary.volume_eth_1W / foundSummary.liquidity,
           volume: foundSummary.volume_eth_1D * this.ethToUsd,
           price: foundSummary.price_last_1H * this.ethToUsd,
           src: token.logo,
@@ -302,7 +318,7 @@ export default {
 .token-info-section {
   text-align: center;
   width: 90%;
-  /* max-width: 650px; */
+  /* max-width: 700px; */
   margin: 0 auto;
   margin-top: 30px;
   overflow: scroll;

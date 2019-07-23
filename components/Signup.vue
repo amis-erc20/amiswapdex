@@ -351,7 +351,7 @@ export default {
 <style>
 #token_info_modal #signup-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 45px auto;
   display: flex;
   flex-direction: column;
@@ -369,7 +369,7 @@ export default {
 }
 #signup-section form {
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 20px auto;
 }
 #signup-section p {

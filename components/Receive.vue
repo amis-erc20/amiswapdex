@@ -149,7 +149,7 @@ export default {
 .receive-section {
   text-align: center;
   width: 90%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
   padding-top: 55px;
   /* height: calc(100vh - 64px); */

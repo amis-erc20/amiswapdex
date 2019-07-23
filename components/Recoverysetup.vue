@@ -522,7 +522,7 @@ export default {
 }
 #recovery-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   min-height: 100vh;
   width: 90vw;
   margin: 20px auto;

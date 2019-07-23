@@ -90,7 +90,7 @@ export default {
 <style>
 .transactionlist-section {
   box-shadow: 0px 4px 3px #eee;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
 }
 .transactionlist-section .card-header {

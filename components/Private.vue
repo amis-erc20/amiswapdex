@@ -86,7 +86,7 @@ export default {
 .private-key-section {
     text-align: center;
     width: 90%;
-    max-width: 650px;
+    max-width: 700px;
     margin: 0 auto;
     padding-top: 20px;
     height: calc(100vh - 164px);

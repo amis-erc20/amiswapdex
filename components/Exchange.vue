@@ -89,7 +89,20 @@
             size="1x"
           />
         </div>
-        <div class="title-liquidity" @click="changeOrder(`liquidity`)">
+        <div class="title-roir" @click="changeOrder(`roir`)" v-if="$mq !== 'mobile'">
+          ROIR
+          <font-awesome-icon
+            v-if="orderBy[0] === 'roir' && orderBy[1] === 'desc'"
+            icon="long-arrow-alt-right"
+            size="1x"
+          />
+          <font-awesome-icon
+            v-if="orderBy[0] === 'roir' && orderBy[1] === 'asc'"
+            icon="long-arrow-alt-left"
+            size="1x"
+          />
+        </div>
+        <div class="title-roir" @click="changeOrder(`liquidity`)">
           Liquidity
           <font-awesome-icon
             v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
@@ -102,11 +115,12 @@
             size="1x"
           />
         </div>
+        <div class="title-action">Action</div>
       </div>
       <b-card style="border-top: 0px; background: red">
         <b-list-group flush>
-          <b-list-group-item v-for="token in tokenList" :key="token.tokenAddress">
-            <div class="token" @click="onSelectToken(token.name)">
+          <b-list-group-item v-for="token in tokenList" :key="token.name + token.tokenAddress">
+            <div class="token" @click="onSelectToken(token.name, token.tokenAddress)">
               <div class="token-order-container">
                 <p class="token-order">{{ token.order }}.</p>
               </div>
@@ -118,6 +132,7 @@
                 <div>
                   <p class="exchange-token-symbol">{{token.name}}</p>
                   <p class="exchange-token-fullname">{{token.fullname}}</p>
+                  <!-- <p class="exchange-token-fullname">{{token.tokenAddress}}</p> -->
                 </div>
               </div>
               <div class="token-price-container">
@@ -142,8 +157,20 @@
               <div class="token-volume-container" v-if="$mq !== 'mobile'">
                 <p class="token-volume">${{ numberWithCommas(token.volume.toFixed(0)) }}</p>
               </div>
+              <div class="token-volume-container" v-if="$mq !== 'mobile'">
+                <p class="token-volume">{{ numberWithCommas(token.roir.toFixed(2)) }}%</p>
+              </div>
               <div class="token-liquidity-container">
                 <p class="token-liquidity-usd">${{ numberWithCommas(token.liquidity.toFixed(0)) }}</p>
+              </div>
+              <div class="swap-button-container">
+                <b-button
+                  class="swap-button-exchange-list"
+                  variant="outline-primary"
+                  @click.stop="onSelectToken(token.name, token.tokenAddress, true)"
+                >
+                  <font-awesome-icon icon="exchange-alt" size="1x" />Swap
+                </b-button>
               </div>
             </div>
           </b-list-group-item>
@@ -337,31 +364,48 @@ export default {
     tokenList: function() {
       let self = this;
       let ethToUsd = this.ethToUsd;
+      let count = R.countBy(R.toLower)(
+        this.getAvailableTokenList.map(token => token.symbol)
+      );
+      let sameSymbolTokens = [];
+      for (let item in count) {
+        if (count[item] > 1) {
+          let obj = {};
+          obj[item] = count[item];
+          sameSymbolTokens.push(obj);
+        }
+      }
+      // console.log(sameSymbolTokens);
       let unsortedList = this.getAvailableTokenList
         .map(token => {
           let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
-          if (!summaryInfo)
+          if (!summaryInfo) {
             return {
               name: token.symbol,
               fullname: token.name,
+              tokenAddress: token.tokenAddress,
               liquidity: 0,
               volume: 0,
               price: 0,
               src: token.logo,
               order: "-",
-              change: 0
+              change: 0,
+              roir: 0
             };
-          return {
-            name: token.symbol,
-            fullname: token.name,
-            tokenAddress: token.tokenAddress,
-            liquidity: summaryInfo.liquidity * ethToUsd,
-            volume: summaryInfo.volume_eth_1D * ethToUsd,
-            price: summaryInfo.price_last_1H * ethToUsd,
-            src: token.logo,
-            order: summaryInfo.order || "-",
-            change: summaryInfo.price_change_24h || 0
-          };
+          } else {
+            return {
+              name: token.symbol,
+              fullname: token.name,
+              tokenAddress: token.tokenAddress,
+              liquidity: summaryInfo.liquidity * ethToUsd,
+              volume: summaryInfo.volume_eth_1D * ethToUsd,
+              price: summaryInfo.price_last_1H * ethToUsd,
+              src: token.logo,
+              order: summaryInfo.order || "-",
+              change: summaryInfo.price_change_24h || 0,
+              roir: summaryInfo.volume_eth_1W / summaryInfo.liquidity
+            };
+          }
         })
         .filter(token => {
           if (!this.hideLowLiquidityToken) {
@@ -461,6 +505,7 @@ export default {
       updateActiveTab: "updateActiveTab",
       updateCurrentView: "updateCurrentView",
       updateActiveToken: "updateActiveToken",
+      updateActiveTokenAddress: "updateActiveTokenAddress",
       addAccount: "account/addAccount",
       addToken: "account/addToken",
       setRefresher: "account/setRefresher",
@@ -623,16 +668,29 @@ export default {
       this.infoMessage = "";
       this.errorMessage = "";
     },
-    onSelectToken(name) {
+    onSelectToken(name, address, selectSwapTab = false) {
+      if (selectSwapTab) {
+        this.updateAuthRedirectUrl({
+          url: "/",
+          token: this.getActiveToken,
+          tokenSubTab: "swap"
+        });
+      } else {
+        this.updateAuthRedirectUrl({
+          url: "/",
+          token: this.getActiveToken,
+          tokenSubTab: "info"
+        });
+      }
       this.showTokenInfoModal = true;
       this.updateActiveToken(name);
-      this.updateCurrentView("tokeninfo");
+      this.updateActiveTokenAddress(address || "");
 
-      let token = this.getAvailableTokenList.find(t => t.symbol === name);
+      this.updateCurrentView("tokeninfo");
       this.updateChartInfo({
         currency: "USD",
         showChart: true,
-        tokenAddress: token.tokenAddress,
+        tokenAddress: address,
         tokenName: name
       });
     },
@@ -694,6 +752,7 @@ export default {
               redirectTokenAddress.toLowerCase()
           );
           self.updateActiveToken(token.symbol);
+          self.updateActiveTokenAddress(token.tokenAddress || "");
           self.updateActiveTab("exchange");
           this.showTokenInfoModal = true;
           self.redirecting = false;
@@ -715,7 +774,7 @@ export default {
 #exchange-container {
   min-height: 100vh;
   width: 95%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 40px auto;
   margin-top: 10px;
 }
@@ -765,7 +824,11 @@ export default {
   position: relative;
 }
 .exchangelist-title .title-price {
-  left: 40px;
+  left: 20px;
+  position: relative;
+}
+.exchangelist-title .title-roir {
+  left: 10px;
   position: relative;
 }
 .exchangelist-title .title-name {
@@ -802,7 +865,10 @@ export default {
 }
 .exchangelist-section .token:hover {
   cursor: pointer;
+  /* border-bottom: 2px solid purple;
+  box-sizing: border-box; */
   box-shadow: 0px 2px 5px #bcc0c1;
+  -webkit-transform: scale(1.03);
   transform: scale(1.03);
 }
 .exchangelist-section .token .token-name {
@@ -941,6 +1007,17 @@ export default {
   font-weight: normal;
   font-size: 12px;
   padding-top: 5px;
+}
+.btn.swap-button-exchange-list {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 5px 10px;
+}
+.btn.swap-button-exchange-list svg {
+  margin-right: 5px;
+}
+.swap-button-container {
+  padding-top: 10px;
 }
 @media screen and (max-width: 500px) {
   .exchangelist-title .title-price {

@@ -5,7 +5,7 @@
       <p v-if="loading" class="status-message">{{statusMessage}}</p>
       <b-alert v-if="errorMessage.length > 0" show fade variant="danger">{{errorMessage}}</b-alert>
 
-      <img src="../assets/metamask.png" alt="metamask logo">
+      <img src="../assets/metamask.png" alt="metamask logo" />
 
       <!-- ACCESS METAMASK -->
       <b-form @submit="onAccessMetamask" v-if="shouldRender && !loading">
@@ -15,7 +15,7 @@
             v-model="isAccepted"
             name="accept-checkbox"
           >I accept the terms and use to access my wallet</b-form-checkbox>-->
-          <input type="checkbox" v-model="isAccepted">
+          <input type="checkbox" v-model="isAccepted" />
           <span
             id="metamask-agree-text"
             @click="isAccepted = !isAccepted"
@@ -49,7 +49,7 @@
             <h4>Term of Services</h4>
           </div>
         </template>
-        <Tos/>
+        <Tos />
       </b-modal>
     </div>
   </div>
@@ -196,14 +196,6 @@ export default {
       this.updateAuthStatus(true);
       this.addAccount(account);
       this.loadWallet(metamaskAddress);
-      // let { url, token } = this.getAuthRedirectUrl;
-      // if (url === "/tokendetail" && token !== null) {
-      //   this.updateActiveToken(token);
-      //   this.redirect("/tokendetail");
-      //   this.updateAuthRedirectUrl({ url: "/", token: null });
-      // } else {
-      //   this.redirect("/");
-      // }
     },
     async loadWallet(address) {
       let self = this;
@@ -234,7 +226,7 @@ export default {
 <style>
 #metamask-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
