@@ -34,91 +34,102 @@
           switch
         >Hide tokens with liquidity less than 1 ETH</b-form-checkbox>
       </div>
-      <div v-if="tokenList.length > 0" class="exchangelist-title">
-        <div class="title-order">No</div>
-        <div class="title-name" @click="changeOrder(`name`)">
-          Name
-          <font-awesome-icon
-            v-if="orderBy[0] === 'name' && orderBy[1] === 'asc'"
-            icon="long-arrow-alt-right"
-            size="1x"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'name' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-left"
-            size="1x"
-          />
-        </div>
-        <div class="title-price" @click="changeOrder(`price`)">
-          Price
-          <font-awesome-icon
-            v-if="orderBy[0] === 'price' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-right"
-            size="1x"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'price' && orderBy[1] === 'asc'"
-            icon="long-arrow-alt-left"
-            size="1x"
-          />
-        </div>
-        <div class="title-price" @click="changeOrder(`change`)" v-if="$mq !== 'mobile'">
-          24H Change
-          <font-awesome-icon
-            v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-right"
-            size="1x"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'change' && orderBy[1] === 'asc'"
-            icon="long-arrow-alt-left"
-            size="1x"
-          />
-        </div>
+      <div class="exchangelist-title-container" ref="exchangelist-title-container">
+        <div v-if="tokenList.length > 0" class="exchangelist-title">
+          <div class="title-order">No</div>
+          <div class="title-name" @click="changeOrder(`name`)">
+            Name
+            <font-awesome-icon
+              v-if="orderBy[0] === 'name' && orderBy[1] === 'asc'"
+              icon="long-arrow-alt-right"
+              size="1x"
+            />
+            <font-awesome-icon
+              v-if="orderBy[0] === 'name' && orderBy[1] === 'desc'"
+              icon="long-arrow-alt-left"
+              size="1x"
+            />
+          </div>
+          <div class="title-price" @click="changeOrder(`price`)">
+            Price
+            <font-awesome-icon
+              v-if="orderBy[0] === 'price' && orderBy[1] === 'desc'"
+              icon="long-arrow-alt-right"
+              size="1x"
+            />
+            <font-awesome-icon
+              v-if="orderBy[0] === 'price' && orderBy[1] === 'asc'"
+              icon="long-arrow-alt-left"
+              size="1x"
+            />
+          </div>
+          <!-- <div class="title-price" @click="changeOrder(`change`)" v-if="$mq !== 'mobile'"> -->
+          <div class="title-price" @click="changeOrder(`change`)">
+            24H Change
+            <font-awesome-icon
+              v-if="orderBy[0] === 'change' && orderBy[1] === 'desc'"
+              icon="long-arrow-alt-right"
+              size="1x"
+            />
+            <font-awesome-icon
+              v-if="orderBy[0] === 'change' && orderBy[1] === 'asc'"
+              icon="long-arrow-alt-left"
+              size="1x"
+            />
+          </div>
 
-        <div class="title-volume" @click="changeOrder(`volume`)" v-if="$mq !== 'mobile'">
-          24H Volume
-          <font-awesome-icon
-            v-if="orderBy[0] === 'volume' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-right"
-            size="1x"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'volume' && orderBy[1] === 'asc'"
-            icon="long-arrow-alt-left"
-            size="1x"
-          />
+          <!-- <div class="title-volume" @click="changeOrder(`volume`)" v-if="$mq !== 'mobile'"> -->
+          <div class="title-volume" @click="changeOrder(`volume`)">
+            24H Volume
+            <font-awesome-icon
+              v-if="orderBy[0] === 'volume' && orderBy[1] === 'desc'"
+              icon="long-arrow-alt-right"
+              size="1x"
+            />
+            <font-awesome-icon
+              v-if="orderBy[0] === 'volume' && orderBy[1] === 'asc'"
+              icon="long-arrow-alt-left"
+              size="1x"
+            />
+          </div>
+          <!-- <div class="title-roir" @click="changeOrder(`roir`)" v-if="$mq !== 'mobile'"> -->
+          <div class="title-roir" @click="changeOrder(`roir`)">
+            ROIR
+            <b-button ref="roir-explain-btn" id="roir-explain-btn" variant="outline-success">?</b-button>
+            <b-tooltip target="#roir-explain-btn" placement="top" triggers="hover focus">
+              <div
+                class="roir-exlplain-text"
+              >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by the current liquidity and multiplied by 100 to show as a percent.</div>
+            </b-tooltip>
+            <font-awesome-icon
+              v-if="orderBy[0] === 'roir' && orderBy[1] === 'desc'"
+              icon="long-arrow-alt-right"
+              size="1x"
+            />
+            <font-awesome-icon
+              v-if="orderBy[0] === 'roir' && orderBy[1] === 'asc'"
+              icon="long-arrow-alt-left"
+              size="1x"
+            />
+          </div>
+          <div class="title-roir" @click="changeOrder(`liquidity`)">
+            Liquidity
+            <font-awesome-icon
+              v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
+              icon="long-arrow-alt-right"
+              size="1x"
+            />
+            <font-awesome-icon
+              v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'asc'"
+              icon="long-arrow-alt-left"
+              size="1x"
+            />
+          </div>
+          <div class="title-action">Action</div>
         </div>
-        <div class="title-roir" @click="changeOrder(`roir`)" v-if="$mq !== 'mobile'">
-          ROIR
-          <font-awesome-icon
-            v-if="orderBy[0] === 'roir' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-right"
-            size="1x"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'roir' && orderBy[1] === 'asc'"
-            icon="long-arrow-alt-left"
-            size="1x"
-          />
-        </div>
-        <div class="title-roir" @click="changeOrder(`liquidity`)">
-          Liquidity
-          <font-awesome-icon
-            v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
-            icon="long-arrow-alt-right"
-            size="1x"
-          />
-          <font-awesome-icon
-            v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'asc'"
-            icon="long-arrow-alt-left"
-            size="1x"
-          />
-        </div>
-        <div class="title-action">Action</div>
       </div>
       <b-card style="border-top: 0px; background: red">
-        <b-list-group flush class="exchange-token-list">
+        <b-list-group flush class="exchange-token-list" v-on:scroll.passive="onScroll">
           <b-list-group-item v-for="token in tokenList" :key="token.name + token.tokenAddress">
             <div class="token" @click="onSelectToken(token.name, token.tokenAddress)">
               <div class="token-order-container">
@@ -724,6 +735,10 @@ export default {
     },
     closeTokenInfoModal() {
       this.hideModal("token_info_modal");
+    },
+    onScroll(e) {
+      const scrollX = e.target.scrollLeft;
+      this.$refs["exchangelist-title-container"].scrollLeft = scrollX;
     }
   },
   created: async function() {
@@ -783,7 +798,9 @@ export default {
   margin-bottom: 5px;
   cursor: pointer;
   position: sticky;
-  height: 40px;
+  height: 50px;
+  width: 100%;
+  min-width: 700px;
   top: 126px;
   z-index: 500;
 }
@@ -849,10 +866,12 @@ export default {
 
 .exchangelist-section .token {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   background: #fff;
   color: #333;
-  padding: 10px 5px;
+  padding: 10px 10px;
+  width: 100%;
+  min-width: 700px;
   transition: 0.5s;
 }
 .exchangelist-section .token:hover {
@@ -1011,12 +1030,25 @@ export default {
 .swap-button-container {
   padding-top: 10px;
 }
-.exchange-token-list {
-  /* overflow-x: scroll; */
+.roir-exlplain-text {
+  padding: 5px;
+  text-align: left;
 }
+#roir-explain-btn {
+  padding: 0px;
+  font-weight: normal;
+  font-size: 12px;
+  border: none;
+  background: #8b7f91;
+  color: #fff !important;
+  border-radius: 20px !important;
+  width: 18px;
+  height: 18px;
+}
+
 @media screen and (max-width: 500px) {
   .exchangelist-title .title-price {
-    left: 0px;
+    /* left: 0px; */
     position: relative;
   }
   .exchangelist-section .token .token-name {
@@ -1036,6 +1068,12 @@ export default {
     padding: 0px;
     position: relative;
     top: 20px;
+  }
+  .exchange-token-list {
+    overflow-x: scroll;
+  }
+  .exchangelist-title-container {
+    overflow-x: scroll;
   }
 }
 </style>
