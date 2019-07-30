@@ -90,7 +90,6 @@ export const getWeb3Metamask = function () {
     try {
       if (!Web3.givenProvider._metamask) {
         console.warn('Metamask web3 is overwritten by an another extension')
-        console.log(Web3.givenProvider)
         resolve(null)
       }
       // web3.currentProvider.guardaWeb3
@@ -1033,8 +1032,11 @@ export const getAllBadToken = async () => {
   return tokens
 }
 export const getTokenHoldingByAnAccount = async (address) => {
+  const start = Date.now()
   let response = await axios.get(`${CONFIG.uniswapDexServer}api/tokenholding?accountAddress=${address}`)
   let tokens = response.data.result
+  let duration = (Date.now() - start) / 1000
+  console.log(`Get account token holding within: ${duration} seconds`)
   return tokens
 }
 

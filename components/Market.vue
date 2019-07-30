@@ -1,6 +1,7 @@
 <template>
   <div class="market-section">
-    <div v-if="market">
+    <Loading v-if="redirecting" message="Redirecting" />
+    <div v-if="market && !redirecting">
       <div class="market-info-table">
         <b-row class="count">
           <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
@@ -69,7 +70,7 @@
             </div>
           </template>
 
-          <Loading v-if="isLoadingWallet" />
+          <Loading v-if="isLoadingWallet" message="Loading Wallet" />
 
           <div v-if="getSignIn && !isLoadingWallet" class="select-donation-currency">
             <label>Donate with</label>
@@ -115,10 +116,6 @@
         </p>
       </div>
     </div>
-
-    <!-- <div v-else class="loading-icon">
-      <b-spinner label="Spinning"></b-spinner>
-    </div>-->
   </div>
 </template>
 <script>
@@ -146,7 +143,8 @@ export default {
         volume_usd: 0
       },
       donationCurrency: "",
-      loadingWallet: false
+      loadingWallet: false,
+      redirecting: false
     };
   },
   components: {
@@ -205,7 +203,12 @@ export default {
   methods: {
     ...mapActions({
       updatePrice: "account/updatePrice",
-      updateSummary: "updateSummary"
+      updateSummary: "updateSummary",
+      updateActiveToken: "updateActiveToken",
+      updateCurrentView: "updateCurrentView",
+      updateChartInfo: "updateChartInfo",
+      updateActiveTokenAddress: "updateActiveTokenAddress",
+      updateActiveTab: "updateActiveTab"
     }),
     onSelectDonationCurrency(value) {
       if (!value) return;
@@ -253,7 +256,6 @@ export default {
       if (this.getActiveTab === "market" || force === true) {
         let data = {};
         let res = await axios.get(`${config.uniswapDexServer}api/marketdata`);
-        console.log(res.data.result);
         if (res.data.result) {
           let ethToUsd = await getETHToUSDPrice();
           data.count = res.data.result.count;
@@ -286,10 +288,38 @@ export default {
   },
   mounted: async function() {
     let self = this;
-    this.updateMarketInfo(true);
-    if (this.getConnection) {
-      await this.getSummaryFromServer();
-      await this.updateSummary(this.summary);
+    self.updateMarketInfo(true);
+    if (self.getConnection) {
+      await self.getSummaryFromServer();
+      await self.updateSummary(self.summary);
+    }
+    let redirectTokenAddress = self.$route.query.token;
+    if (redirectTokenAddress) {
+      self.redirecting = true;
+      setTimeout(() => {
+        try {
+          let token = self.getAvailableTokenList.find(
+            t =>
+              t.tokenAddress.toLowerCase() ===
+              redirectTokenAddress.toLowerCase()
+          );
+          self.updateActiveToken(token.symbol);
+          self.updateActiveTokenAddress(token.tokenAddress || "");
+          self.updateActiveTab("exchange");
+          self.updateCurrentView("tokeninfo");
+          self.updateChartInfo({
+            currency: "USD",
+            showChart: true,
+            tokenAddress: redirectTokenAddress,
+            tokenName: token.symbol
+          });
+          self.redirecting = false;
+        } catch (e) {
+          console.log(e);
+          alert("Invalid Token Address !");
+          self.redirecting = false;
+        }
+      }, 1500);
     }
     setInterval(self.updateMarketInfo, 60000);
   }

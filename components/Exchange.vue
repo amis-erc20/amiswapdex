@@ -1,6 +1,6 @@
 <template>
   <section id="exchange-container">
-    <Loading v-if="redirecting" />
+    <Loading v-if="redirecting" message="Redirecting" />
     <b-form>
       <b-form-group>
         <div class="search-field-container">
@@ -118,7 +118,7 @@
         <div class="title-action">Action</div>
       </div>
       <b-card style="border-top: 0px; background: red">
-        <b-list-group flush>
+        <b-list-group flush class="exchange-token-list">
           <b-list-group-item v-for="token in tokenList" :key="token.name + token.tokenAddress">
             <div class="token" @click="onSelectToken(token.name, token.tokenAddress)">
               <div class="token-order-container">
@@ -142,7 +142,8 @@
                 >${{ numberWithCommas(token.price.toFixed(4)) }}</p>
                 <p v-else class="token-price-usd">${{ numberWithCommas(token.price.toFixed(2)) }}</p>
               </div>
-              <div class="token-price-container" v-if="$mq !== 'mobile'">
+              <!-- <div class="token-price-container" v-if="$mq !== 'mobile'"> -->
+              <div class="token-price-container">
                 <p
                   v-if="token.change > 0"
                   class="token-price-usd positive-change"
@@ -154,10 +155,12 @@
                 <p v-if="token.change == 0" class="token-price-usd zero-change">0.00%</p>
               </div>
 
-              <div class="token-volume-container" v-if="$mq !== 'mobile'">
+              <!-- <div class="token-volume-container" v-if="$mq !== 'mobile'"> -->
+              <div class="token-volume-container">
                 <p class="token-volume">${{ numberWithCommas(token.volume.toFixed(0)) }}</p>
               </div>
-              <div class="token-volume-container" v-if="$mq !== 'mobile'">
+              <!-- <div class="token-volume-container" v-if="$mq !== 'mobile'"> -->
+              <div class="token-volume-container">
                 <p class="token-volume">{{ numberWithCommas(token.roir.toFixed(2)) }}%</p>
               </div>
               <div class="token-liquidity-container">
@@ -742,27 +745,15 @@ export default {
   mounted: async function() {
     let self = this;
     let redirectTokenAddress = this.$route.query.token;
-    if (redirectTokenAddress) {
-      this.redirecting = true;
-      setTimeout(() => {
+    setTimeout(() => {
+      if (redirectTokenAddress) {
         try {
-          let token = self.getAvailableTokenList.find(
-            t =>
-              t.tokenAddress.toLowerCase() ===
-              redirectTokenAddress.toLowerCase()
-          );
-          self.updateActiveToken(token.symbol);
-          self.updateActiveTokenAddress(token.tokenAddress || "");
-          self.updateActiveTab("exchange");
-          this.showTokenInfoModal = true;
-          self.redirecting = false;
+          self.showTokenInfoModal = true;
         } catch (e) {
           console.log(e);
-          alert("Invalid Token Address !");
-          self.redirecting = false;
         }
-      }, 1500);
-    }
+      }
+    }, 1000);
     let summaryUpdator = setInterval(() => {
       self.getSummaryFromServer();
     }, config.refreshInterval);
@@ -838,6 +829,7 @@ export default {
 
 .exchangelist-section .card-body {
   padding: 0px;
+  overflow-x: hidden;
 }
 
 #search-token-field {
@@ -1018,6 +1010,9 @@ export default {
 }
 .swap-button-container {
   padding-top: 10px;
+}
+.exchange-token-list {
+  /* overflow-x: scroll; */
 }
 @media screen and (max-width: 500px) {
   .exchangelist-title .title-price {

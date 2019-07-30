@@ -6,13 +6,13 @@
         <b-tabs pills card justified>
           <b-tab title="Market" :active="getActiveTab === `market`" @click="onTabChange">
             <b-card-text>
-              <Loading v-if="redirecting" />
+              <Loading v-if="redirecting" message="Redirecting" />
               <Market v-else />
             </b-card-text>
           </b-tab>
           <b-tab title="Exchange" :active="getActiveTab === `exchange`" @click="onTabChange">
             <b-card-text>
-              <Loading v-if="redirecting" />
+              <Loading v-if="redirecting" message="Redirecting" />
               <Exchange v-else />
             </b-card-text>
           </b-tab>

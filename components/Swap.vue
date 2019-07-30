@@ -2,6 +2,7 @@
   <div>
     <!-- <p>{{form}}</p> -->
     <p style="display: none">{{donationCurrency}}</p>
+    <Loading v-if="isLoadingWallet" message="Loading Wallet" />
     <div class="qr-scanner-container" v-if="scanning">
       <p class="camera-error-message">{{this.cameraErrorMessage}}</p>
       <qrcode-stream
@@ -27,7 +28,7 @@
     >{{form.outputCurrency}} has no liquidity</b-alert>
     <div
       id="uniswap-convert-section"
-      v-show="!scanning && validateInputLiquidity && validateOutputLiquidity"
+      v-show="!scanning && !isLoadingWallet && validateInputLiquidity && validateOutputLiquidity"
     >
       <div>
         <b-button-group class="buy-or-sell" v-show="swapMode === 'swap'">
@@ -381,6 +382,7 @@ import {
 import BigNumber from "bignumber.js";
 import Vue from "vue";
 import VueQrcodeReader from "vue-qrcode-reader";
+import Loading from "~/components/Loading.vue";
 const defaultCamera = {
   audio: false, // don't request microphone access
   video: {
@@ -394,6 +396,9 @@ let exchangeContracts = {};
 let tokenAddressess = {};
 let tokenContracts = {};
 export default {
+  components: {
+    Loading
+  },
   props: {
     swapMode: {
       default: "swap",
@@ -471,7 +476,9 @@ export default {
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
       getSummary: "getSummary",
-      getAllTokenPrice: "getAllTokenPrice"
+      getAllTokenPrice: "getAllTokenPrice",
+      getOwnedTokenList: "account/getOwnedTokenList",
+      getSignIn: "getSignIn"
     }),
     shouldRender: function() {
       if (this.getActiveToken === "ETH") return true;
@@ -680,6 +687,10 @@ export default {
       if (!summary) return false;
       if (summary.liquidity > 0) return true;
       else return false;
+    },
+    isLoadingWallet: function() {
+      if (this.getSignIn && this.getOwnedTokenList.length === 0) return true;
+      else return false;
     }
   },
   updated: function() {
@@ -711,7 +722,6 @@ export default {
     this.form.inputCurrency = null;
     this.web3 = await getWeb3();
     this.web3Metamask = await getWeb3Metamask();
-    console.log(this.web3Metamask);
     this.account = this.getAccount;
     for (let i = 0; i < tokenSymbols.length; i += 1) {
       try {

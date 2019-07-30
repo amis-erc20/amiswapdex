@@ -207,7 +207,7 @@ export default {
           self.updateChart();
         }
       } catch (e) {
-        console.log(e);
+        // console.log(e);
         localStorage.setItem(
           "chartInfo",
           JSON.stringify({

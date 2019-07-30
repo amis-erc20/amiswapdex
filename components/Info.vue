@@ -62,13 +62,10 @@
       </b-row>
     </div>
 
-    <!-- <Tokenpricechart /> -->
-    <!-- <vue-friendly-iframe v-if="rows.length > 0" src="/chart"></vue-friendly-iframe> -->
     <vue-friendly-iframe
       v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42"
       src="/tokenpricechart"
     ></vue-friendly-iframe>
-    <!-- <iframe v-if="rows.length" src="http://dev.uniswapdex.com/tokenpricechart" frameborder="0"></iframe> -->
 
     <h5 v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42">Latest Transactions</h5>
     <vue-good-table
@@ -85,7 +82,6 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import Tokenpricechart from "~/components/Tokenpricechart.vue";
 import axios from "axios";
 import moment from "moment";
 import config from "../config";
@@ -103,9 +99,7 @@ import {
   getEvents
 } from "../assets/js/utils";
 export default {
-  components: {
-    Tokenpricechart
-  },
+  components: {},
   data: function() {
     return {
       summary: null,
