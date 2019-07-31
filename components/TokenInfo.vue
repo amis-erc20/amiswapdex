@@ -494,7 +494,7 @@ export default {
   font-size: 13px;
 }
 #token-info-tabs-container .nav-pills .nav-link {
-  padding: 15px;
+  padding: 20px;
   height: 44px;
 }
 #token-info-tabs-container .tab-content {

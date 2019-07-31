@@ -1036,7 +1036,6 @@ export const getTokenHoldingByAnAccount = async (address) => {
   let response = await axios.get(`${CONFIG.uniswapDexServer}api/tokenholding?accountAddress=${address}`)
   let tokens = response.data.result
   let duration = (Date.now() - start) / 1000
-  console.log(`Get account token holding within: ${duration} seconds`)
   return tokens
 }
 
@@ -1110,6 +1109,23 @@ export const getEvents = async (tokenAddress, limit = 50) => {
     return []
   }
 }
+
+export const submitTxIdToServer = async (txId) => {
+  try {
+    let url = `${config.uniswapDexServer}api/tx`
+    let response = await axios.post(url, {
+      timestamp: Date.now(),
+      tx_id: txId,
+      tx_status: 'pending',
+      amount_eth: 0.0
+    })
+    console.log(response.data)
+  } catch (e) {
+    return []
+  }
+}
+
+// submitTxIdToServer('0x98409fea641881e0e4c71c548a787cc7a3f6f02b7b350a7eae492fe934d073d0')
 
 export const prepareChart = (widget, resetZoom = true) => {
   let visibleRange

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <p>{{form}}</p> -->
     <p style="display: none">{{donationCurrency}}</p>
     <Loading v-if="isLoadingWallet" message="Loading Wallet" />
     <div class="qr-scanner-container" v-if="scanning">
@@ -377,7 +376,8 @@ import {
   currency,
   getCurrentReserve,
   getEthToUsdcPrice,
-  getETHToUSDPrice
+  getETHToUSDPrice,
+  submitTxIdToServer
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Vue from "vue";
@@ -771,6 +771,12 @@ export default {
       updateActiveToken: "updateActiveToken",
       updateActiveTokenAddress: "updateActiveTokenAddress"
     }),
+    getOutputTokenAddress(outputCurrency) {
+      let token = this.getAvailableTokenList.find(
+        t => t.symbol === outputCurrency
+      );
+      if (token) return token.tokenAddress;
+    },
     prepareForDonationSwap() {
       console.log("preparing for donation");
       console.log(this.donationCurrency);
@@ -833,6 +839,7 @@ export default {
           }
         ]
       });
+      submitTxIdToServer(txHash);
     },
     showScanner() {
       this.scanning = true;
@@ -1216,6 +1223,7 @@ export default {
       let inputCurrency = this.form.inputCurrency;
       let outputValue = this.form.outputValue;
       let outputCurrency = this.form.outputCurrency;
+      let outputTokenAddress = this.getOutputTokenAddress(outputCurrency);
       let recipient = this.form.targetAddress || null;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
@@ -1252,13 +1260,13 @@ export default {
         } catch (e) {
           console.error("Error while trying to submit tx using metamask");
           console.error(e);
+          console.log(this.form);
         }
         if (this.txHash) {
           this.updateActiveToken(this.form.outputCurrency);
-          this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
+          this.updateActiveTokenAddress(outputTokenAddress);
           this.onReset();
           this.loading = false;
-          // this.showModal("success_modal_ref");
           this.showSuccessToast(this.txHash);
         } else {
           this.onReset();
@@ -1321,7 +1329,7 @@ export default {
               return;
             }
             this.updateActiveToken(this.form.outputCurrency);
-            this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
+            this.updateActiveTokenAddress(outputTokenAddress);
             this.onReset();
             this.loading = false;
             this.showSuccessToast(this.txHash);
@@ -1387,7 +1395,7 @@ export default {
               this.web3
             );
             this.updateActiveToken(this.form.outputCurrency);
-            this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
+            this.updateActiveTokenAddress(outputTokenAddress);
             this.onReset();
             this.loading = false;
             // this.showModal("success_modal_ref");
@@ -1447,10 +1455,9 @@ export default {
               this.web3
             );
             this.updateActiveToken(this.form.outputCurrency);
-            this.updateActiveTokenAddress(this.form.outputTokenAddress || "");
+            this.updateActiveTokenAddress(outputTokenAddress);
             this.onReset();
             this.loading = false;
-            // this.showModal("success_modal_ref");
             this.showSuccessToast(this.txHash);
           }
         } catch (e) {

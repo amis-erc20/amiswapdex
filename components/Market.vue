@@ -12,7 +12,7 @@
           <b-col v-if="market.count" class="value">{{ market.count }} Total</b-col>
         </b-row>
 
-        <b-row class="volume-usd">
+        <b-row class="volume-eth">
           <b-col class="description">24H Market Volume</b-col>
           <b-col
             v-if="market.volume_eth"
@@ -20,15 +20,22 @@
           >{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
           <b-col v-else class="value">...</b-col>
         </b-row>
-        <b-row class="volume-eth">
+        <b-row class="volume-usd">
           <b-col class="description"></b-col>
           <b-col
             v-if="market.volume_usd"
             class="value"
           >{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
         </b-row>
+        <b-row class="volume-uniswap-percent">
+          <b-col class="description"></b-col>
+          <b-col
+            v-if="market.volume_uniswapdex"
+            class
+          >({{ market.volume_uniswapdex.toFixed(2) }}% via uniswapDEX.com)</b-col>
+        </b-row>
 
-        <b-row class="total-usd">
+        <b-row class="total-eth">
           <b-col class="description">Total Market Liquidity</b-col>
           <b-col
             v-if="market.total_eth"
@@ -36,9 +43,8 @@
           >{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
           <b-col v-else class="value">...</b-col>
         </b-row>
-        <b-row class="total-eth">
+        <b-row class="total-usd">
           <b-col class="description"></b-col>
-
           <b-col
             v-if="market.total_usd"
             class="value"
@@ -274,11 +280,14 @@ export default {
             `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
           );
+          const volumeFromUniswapDEX = volumeResponse.data.volumeFromUniswapDEX;
           let todayVolume = R.last(volumeResponse.data.result);
           if (todayVolume) {
             data.volume_eth = todayVolume.amount_eth;
             data.volume_usd =
               todayVolume.amount_eth * todayVolume.price_eth_usd;
+            data.volume_uniswapdex =
+              (volumeFromUniswapDEX * 100) / todayVolume.amount_eth;
             this.market = data;
           }
         }
@@ -353,20 +362,23 @@ export default {
 .loading-icon {
   margin-top: 50px;
 }
-.market-info-table .row.volume-eth .value,
-.market-info-table .row.total-eth .value {
+.market-info-table .row.volume-usd .value,
+.market-info-table .row.total-usd .value {
   font-size: 13px;
   font-weight: normal;
 }
 
+.market-info-table .row.volume-eth,
 .market-info-table .row.volume-usd,
-.market-info-table .row.total-usd {
+.market-info-table .row.total-eth {
   height: 25px;
 }
-.market-info-table .row.volume-eth,
-.market-info-table .row.total-eth {
+.row.volume-uniswap-percent {
   height: 35px;
+  font-weight: normal;
+  font-size: 13px;
 }
+
 .market-info-table .row.count {
   height: 25px;
   margin-bottom: 0px;

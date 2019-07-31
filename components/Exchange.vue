@@ -112,7 +112,7 @@
               size="1x"
             />
           </div>
-          <div class="title-roir" @click="changeOrder(`liquidity`)">
+          <div class="title-liquidity" @click="changeOrder(`liquidity`)">
             Liquidity
             <font-awesome-icon
               v-if="orderBy[0] === 'liquidity' && orderBy[1] === 'desc'"
@@ -1055,7 +1055,13 @@ export default {
 
 @media screen and (max-width: 500px) {
   .exchangelist-title .title-price {
-    /* left: 0px; */
+    left: 50px;
+    position: relative;
+  }
+  .exchangelist-title .title-roir,
+  .exchangelist-title .title-volume,
+  .exchangelist-title .title-liquidity {
+    left: 30px;
     position: relative;
   }
   .exchangelist-section .token .token-name {

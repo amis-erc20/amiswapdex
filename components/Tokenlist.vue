@@ -7,16 +7,17 @@
         switch
       >Hide tokens with zero token amount</b-form-checkbox>
     </div>
-    <div class="exchangelist-title">
+    <div class="walletlist-title">
       <div class="wallet-title-name">Token</div>
       <div class="wallet-title-price">Price</div>
+      <div class="wallet-title-roir">ROIR</div>
       <div class="wallet-title-balance">Balance</div>
     </div>
     <b-card style="border-top: 0px; background: red">
       <b-list-group flush>
         <b-list-group-item
           v-for="token in tokenList"
-          :key="token.name"
+          :key="token.name + token.tokenAddresses"
           button
           v-on:click="changeTokenTab($event, token.name, token.tokenAddress)"
         >
@@ -59,23 +60,42 @@ export default {
       getTokenList: "account/getTokenList",
       getPrice: "account/getPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getOwnedTokenList: "account/getOwnedTokenList",
       getTransactionList: "transaction/getTransactionList",
       getBalance: "account/getBalance",
-      getActiveToken: "getActiveToken"
+      getActiveToken: "getActiveToken",
+      getSummary: "getSummary"
     }),
     tokenList: function() {
       let self = this;
       let list = this.getTokenList.map(symbol => {
+        // let list = this.getOwnedTokenList.map(symbol => {
+        // let symbol = t.symbol;
         let token = self.getAvailableTokenList.find(t => t.symbol === symbol);
+        let roir = null;
+        let isLiquidityAdded = false;
+        if (token) {
+          let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
+          if (summaryInfo) {
+            roir = summaryInfo.volume_eth_1W / summaryInfo.liquidity;
+          }
+          let tokenWithLiquidity = self.getOwnedTokenList.find(
+            t => t.symbol === "UNI-V1_" + symbol
+          );
+          if (tokenWithLiquidity) isLiquidityAdded = true;
+        }
         return {
           name: symbol,
           fullname: token ? token.name : "-",
           balance: self.getBalance[symbol],
           priceInUsd: self.getPrice[symbol],
           src: token ? token.logo : null,
-          tokenAddress: token ? token.tokenAddress : null
+          tokenAddress: token ? token.tokenAddress : null,
+          roir: roir,
+          isLiquidityAdded
         };
       });
+      list = list.filter(t => t.name.slice(0, 7) !== "UNI-V1_");
       let ethToken = list.slice(0, 1);
       ethToken.fullname = "Ether";
       let otherTokens = list.filter(token => {
@@ -103,8 +123,8 @@ export default {
     changeTokenTab: function(event, tokenName, tokenAddress) {
       this.updateActiveToken(tokenName);
       this.updateActiveTokenAddress(tokenAddress);
-      this.showTokenInfoModal = true;
       this.updateCurrentView("tokeninfo");
+      this.showTokenInfoModal = true;
 
       let token = this.getAvailableTokenList.find(t => t.symbol === tokenName);
       if (token) {
@@ -160,6 +180,10 @@ export default {
   left: -15px;
   position: relative;
 }
+.tokenlist-section .wallet-title-roir {
+  left: -35px;
+  position: relative;
+}
 .show-zero-balance-tokens {
   text-align: center;
   margin-bottom: 20px;
@@ -168,9 +192,28 @@ export default {
   font-weight: normal;
   padding-top: 5px;
 }
+.walletlist-title {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 15px;
+  font-size: 12px;
+  font-weight: bolder;
+  background: #d0d0d0;
+  margin-bottom: 5px;
+  cursor: pointer;
+  position: sticky;
+  height: 50px;
+  width: 100%;
+  top: 126px;
+  z-index: 500;
+}
 @media screen and (max-width: 450px) {
   .tokenlist-section .wallet-title-price {
     left: 10px;
+    position: relative;
+  }
+  .tokenlist-section .wallet-title-roir {
+    left: 0px;
     position: relative;
   }
 }

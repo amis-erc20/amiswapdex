@@ -310,6 +310,17 @@ export default {
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
+              if (token.symbol === "UNI-V1") {
+                let tokenDetail = self.getAvailableTokenList.find(
+                  t =>
+                    t.exchangeAddress.toLowerCase() ===
+                    token.tokenAddress.toLowerCase()
+                );
+                if (tokenDetail) {
+                  // console.log(tokenDetail);
+                  token.symbol = token.symbol + "_" + tokenDetail.symbol;
+                }
+              }
               self.addToken(token);
               self.updateBalance(token);
               self.tokenBalance[token.symbol] = token.balance;

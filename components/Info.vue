@@ -67,13 +67,17 @@
       src="/tokenpricechart"
     ></vue-friendly-iframe>
 
-    <h5 v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42">Latest Transactions</h5>
+    <h5
+      ref="test"
+      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42"
+    >Latest Transactions</h5>
     <vue-good-table
       :columns="columns"
       :rows="rows"
       :line-numbers="true"
       max-height="500px"
-      :fixed-header="true"
+      ref="datatable"
+      :fixed-header="$mq === 'mobile' ? false : true"
       v-if="getActiveToken !== 'ETH' && rows.length > 0 && selectedToken.exchangeAddress.length === 42"
       :row-style-class="rowStyleClassFn"
     />
@@ -81,6 +85,7 @@
 </template>
 
 <script>
+import Vue from "vue";
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import moment from "moment";
@@ -258,7 +263,6 @@ export default {
   },
   beforeUpdate: function() {
     if (this.getActiveToken === null) this.chartCurrency = "ETH";
-
     if (this.getActiveToken === null) {
       this.rows = [];
     } else if (this.getActiveToken !== null && this.rows.length === 0) {

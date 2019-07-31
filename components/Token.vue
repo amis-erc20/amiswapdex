@@ -23,12 +23,20 @@
         <p class="token-price-in-usd">-</p>
       </div>
     </b-col>
+    <b-col class="token-roir-container">
+      <div>
+        <p
+          v-bind:class="{ 'token-roir': true, 'token-has-liquidity': token.isLiquidityAdded }"
+          v-if="token.roir"
+        >{{ token.roir.toFixed(2) }}%</p>
+        <p class="token-roir" v-else>-</p>
+      </div>
+    </b-col>
     <b-col class="token-amount-container">
       <div v-if="token.balance !== `NaN`">
         <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
         <p class="token-amount-usd" v-else>-</p>
         <p class="token-amount">{{getBalance[token.name].toFixed(4)}} {{token.name}}</p>
-        <!-- <p class="token-amount">{{token.balance.toFixed(4)}} {{token.name}}</p> -->
       </div>
       <p class="token-amount" v-else>loading...</p>
     </b-col>
@@ -114,6 +122,12 @@ export default {
   position: relative;
   text-align: right;
 }
+.tokenlist-section .token .token-roir-container {
+  width: 100px;
+  left: -90px;
+  position: relative;
+  text-align: right;
+}
 .tokenlist-section .token .token-price-in-usd {
   font-size: 13px;
   margin: 0;
@@ -121,6 +135,18 @@ export default {
   text-align: right;
   padding-top: 15px;
   font-weight: normal;
+}
+.tokenlist-section .token .token-roir {
+  font-size: 13px;
+  margin: 0;
+  margin-bottom: 5px;
+  text-align: right;
+  padding-top: 15px;
+  font-weight: normal;
+}
+.tokenlist-section .token .token-has-liquidity {
+  font-weight: bold;
+  color: #1980ff;
 }
 .tokenlist-section .token-name img {
   width: 30px;
@@ -159,6 +185,12 @@ export default {
 }
 @media screen and (max-width: 450px) {
   .tokenlist-section .token .token-price-container {
+    width: 100px;
+    left: 0px;
+    position: relative;
+    text-align: right;
+  }
+  .tokenlist-section .token .token-roir-container {
     width: 100px;
     left: 0px;
     position: relative;

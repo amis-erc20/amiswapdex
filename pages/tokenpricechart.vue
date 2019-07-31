@@ -299,10 +299,9 @@ export default {
             chartObj.chart.updateData(chartObj.volumeSeries._series, lastData);
           }
         } catch (e) {
-          console.log(e);
+          // console.log(e);
           return;
         }
-        // console.log("update success...");
       }, 10000);
     },
     async drawChart() {
