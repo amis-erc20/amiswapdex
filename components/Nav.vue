@@ -307,10 +307,11 @@ export default {
 #main-title-no-connection-container .logo-title-container h4 {
   font-size: 18px;
   font-weight: bold;
+  padding-top: 10px;
 }
 #uniswapdex-logo {
-  width: 40px;
-  height: 29px;
+  width: 50px;
+  height: 40px;
   margin: 0;
   margin-right: 10px;
   position: relative;

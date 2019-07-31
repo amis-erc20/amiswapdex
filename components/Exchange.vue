@@ -125,7 +125,7 @@
               size="1x"
             />
           </div>
-          <div class="title-action">Action</div>
+          <div class="title-action">Swap</div>
         </div>
       </div>
       <b-card style="border-top: 0px; background: red">
@@ -183,7 +183,7 @@
                   variant="outline-primary"
                   @click.stop="onSelectToken(token.name, token.tokenAddress, true)"
                 >
-                  <font-awesome-icon icon="exchange-alt" size="1x" />Swap
+                  <font-awesome-icon icon="exchange-alt" size="1x" />
                 </b-button>
               </div>
             </div>
@@ -1044,6 +1044,13 @@ export default {
   border-radius: 20px !important;
   width: 18px;
   height: 18px;
+}
+
+.exchangelist-title-container {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 128px;
+  z-index: 500;
 }
 
 @media screen and (max-width: 500px) {
