@@ -31,7 +31,7 @@
           <b-col class="description"></b-col>
           <b-col
             v-if="market.volume_uniswapdex"
-            class
+            class="value uniswap-percent-value"
           >({{ market.volume_uniswapdex.toFixed(2) }}% via uniswapDEX.com)</b-col>
         </b-row>
 
@@ -498,11 +498,6 @@ export default {
   display: flex;
   justify-content: center;
 }
-.logo-in-header {
-  margin-right: 15px;
-  width: 30px;
-  height: 30px;
-}
 #token-info-modal .modal-header a,
 #donate_modal .modal-header a {
   padding-top: 10px;
@@ -516,6 +511,9 @@ export default {
 .select-donation-currency label {
   text-align: left;
   width: 100%;
+}
+.uniswap-percent-value {
+  font-weight: normal !important;
 }
 @media screen and (max-width: 500px) {
   .select-donation-currency label {

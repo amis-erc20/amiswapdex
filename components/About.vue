@@ -7,6 +7,7 @@
         The UniswapDEX.com provides an interface to the Uniswap smart contracts developed on the Ethereum network developed by
         <a
           href="https://uniswap.io/"
+          target="_blank"
         >Uniswap.io</a>.
       </p>
       <p>

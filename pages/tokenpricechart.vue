@@ -721,13 +721,16 @@ export default {
   }
   #chart-header-bar {
     padding-right: 15%;
+    /* top: 100px; */
   }
   .buy-or-sell .switch-buy,
   .buy-or-sell .switch-sell {
     font-size: 11px;
+    width: 40%;
   }
   .vue-friendly-iframe > iframe {
     height: 500px;
+    width: 90%;
   }
 }
 </style>

@@ -282,12 +282,8 @@ export default {
       else return null;
     },
     activeTokenAddress() {
-      let self = this;
-      const token = this.getAvailableTokenList.find(
-        t => t.symbol === self.getActiveToken
-      );
-      if (token) return token.tokenAddress;
-      else if (this.getActiveToken === "ETH") return "-";
+      if (this.getActiveToken === "ETH") return "-";
+      else return this.getActiveTokenAddress;
     }
   },
   methods: {
@@ -596,6 +592,8 @@ export default {
   margin-right: 15px;
   width: 30px;
   height: 30px;
+  top: 10px;
+  position: relative;
 }
 #token-info-modal .modal-header a,
 #about_tos_modal .modal-header a {
@@ -681,7 +679,7 @@ export default {
 .copy-button-svg {
   position: relative;
   cursor: pointer;
-  top: 5px;
+  top: 15px;
   left: 10px;
   color: #7f7584;
 }

@@ -129,6 +129,7 @@
         <p id="bad-token-message" v-if="isBadToken">
           Warning not all tokens will work with Uniswap. Read
           <a
+            target="_blank"
             href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
           >this</a> and make sure that your token contract is compatible with Uniswap.
         </p>
@@ -238,6 +239,7 @@
         <p id="bad-token-message" v-if="isBadToken">
           Warning not all tokens will work with Uniswap. Read
           <a
+            target="_blank"
             href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
           >this</a> and make sure that your token contract is compatible with Uniswap.
         </p>
@@ -334,7 +336,8 @@ import {
   getWeb3Metamask,
   metamaskAddLiquidity,
   metamaskRemoveLiquidity,
-  hasTokenUniswap
+  hasTokenUniswap,
+  submitTxIdToServer
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 
@@ -880,6 +883,7 @@ export default {
           }
         ]
       });
+      submitTxIdToServer(txHash);
     },
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();

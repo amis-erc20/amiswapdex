@@ -241,6 +241,7 @@
         <p id="bad-token-message" v-if="isBadToken">
           Warning not all tokens will work with Uniswap. Read
           <a
+            target="_blank"
             href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
           >this</a> and make sure that your token contract is compatible with Uniswap.
         </p>

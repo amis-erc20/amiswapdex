@@ -602,8 +602,7 @@ export default {
         console.log(`BAD TOKEN: ${badToken.tokenAddress}`);
         this.resetMessages();
         this.errorMessage = ` Warning not all tokens will work with Uniswap. Read
-          <a
-            href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
+          <a target="_blank" href="https://www.reddit.com/r/UniSwap/comments/c0k63p/contract_not_working/"
           >this</a> and make sure that your token contract is compatible with Uniswap.`;
         this.form.tokenAddress = "";
         this.loading = false;
@@ -828,15 +827,19 @@ export default {
 }
 
 .exchangelist-title .title-volume {
-  left: 20px;
+  left: 30px;
   position: relative;
 }
 .exchangelist-title .title-price {
-  left: 20px;
+  left: 30px;
   position: relative;
 }
 .exchangelist-title .title-roir {
-  left: 10px;
+  left: 40px;
+  position: relative;
+}
+.exchangelist-title .title-liquidity {
+  left: 30px;
   position: relative;
 }
 .exchangelist-title .title-name {
@@ -1061,7 +1064,7 @@ export default {
   .exchangelist-title .title-roir,
   .exchangelist-title .title-volume,
   .exchangelist-title .title-liquidity {
-    left: 30px;
+    left: 35px;
     position: relative;
   }
   .exchangelist-section .token .token-name {

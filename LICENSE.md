@@ -1,3 +1,7 @@
+# LICENSE
+
+This software is made available under a Creative Commons license: https://creativecommons.org/licenses/by-nc-sa/4.0/. If you host this interface you may not remove or change the ability for users to donate to the Shardus team.
+
 # Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
 
 This is a human-readable summary of (and not a substitute for) the [license](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode). [Disclaimer](#disclaimer).

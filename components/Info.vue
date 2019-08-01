@@ -395,7 +395,8 @@ iframe {
     margin: 20px auto;
   }
   .vue-friendly-iframe > iframe {
-    height: 600px;
+    height: 500px;
+    width: 90%;
   }
   .custom-th-class {
     color: #b14ae2 !important;
