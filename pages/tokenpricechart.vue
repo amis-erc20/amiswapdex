@@ -492,12 +492,19 @@ export default {
     },
     async getChartData(start) {
       let self = this;
+      let genesisTimestamp = 1541203200000; //Saturday, November 3, 2018 0:00:00
       let url;
       let from;
       let now = Math.round(new Date() / 1000);
       // decide starting timestamp
       if (start) from = start;
-      else from = now - 60 * 60 * 24 * 365;
+      else if (!start && this.resolution === "60") {
+        from = now - 60 * 60 * 24 * 120;
+      } else if (!start && this.resolution === "240") {
+        from = now - 60 * 60 * 24 * 180;
+      } else {
+        from = genesisTimestamp;
+      }
 
       if (this.resolution === "60") {
         url = `${config.uniswapDexServer}api/histohour?tokenAddress=${
