@@ -213,8 +213,8 @@
         <b-alert v-if="infoMessage.length > 0" show fade variant="info">{{infoMessage}}</b-alert>
         <b-form-group id="exampleInputGroup1">
           <label>Select Your Token</label>
-          <b-input v-model="form.tokenAddress"></b-input>
-          <!-- <v-select
+          <!-- <b-input v-model="form.tokenAddress"></b-input> -->
+          <v-select
             :options="listabeTokenList"
             label="title"
             placeholder="Please select a token"
@@ -233,7 +233,7 @@
               <img v-else src="../assets/default-token.png" height="20px" width="20px" />
               {{ option.title }}
             </template>
-          </v-select>-->
+          </v-select>
         </b-form-group>
         <b-button type="submit" variant="primary" :disabled="loading">List Token</b-button>
       </b-form>
