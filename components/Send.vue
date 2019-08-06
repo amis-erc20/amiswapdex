@@ -307,15 +307,7 @@ export default {
       this.prepareForDonationSend();
     }
     this.web3 = await getWeb3();
-    let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
-    if (estimatedGasPriceFromNetwork > 0) {
-      this.gasPrice =
-        parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
-    } else {
-      this.gasPrice = 6;
-    }
-    this.defaultGasPrice = this.gasPrice;
-    this.updateGasLimitAndTxFee();
+    this.updateGasPrice();
     // setInterval(() => {
     //   if (self.getCurrentView === "main") {
     //     if (self.form.amount || self.form.targetAddress) {
@@ -332,6 +324,20 @@ export default {
     ...mapActions({
       updateActiveToken: "updateActiveToken"
     }),
+    async updateGasPrice() {
+      let estimatedGasPriceFromNetwork = await estimateGasPrice(this.web3);
+      console.log(
+        `Estimated gas price from network: ${estimatedGasPriceFromNetwork}`
+      );
+      if (estimatedGasPriceFromNetwork > 0) {
+        this.gasPrice =
+          parseInt(estimatedGasPriceFromNetwork / Math.pow(10, 9)) + 3;
+      } else {
+        this.gasPrice = 6;
+      }
+      this.defaultGasPrice = this.gasPrice;
+      this.updateGasLimitAndTxFee();
+    },
     getDecimal(symbol) {
       let token = this.getAvailableTokenList.find(t => t.symbol === symbol);
       if (token) return token.decimal;
@@ -432,7 +438,7 @@ export default {
       console.log(`Estimated gas: ${estimatedGas}`);
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
       this.txFee =
-        (1.6 * this.gasLimit * parseInt(this.gasPrice) * 1000000000) /
+        (this.gasLimit * parseInt(this.gasPrice) * 1000000000) /
         Math.pow(10, 18);
     },
     showSuccessToast(txHash) {

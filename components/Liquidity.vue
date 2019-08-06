@@ -624,11 +624,10 @@ export default {
       else return 18;
     },
     async useAllFunds(tokenName) {
-      let estimatedGas = await this.getEstimatedGas(factoryAddress);
-      if (estimatedGas * 2 > this.gasLimit)
-        this.gasLimit = parseInt(estimatedGas * 2);
-      this.txFee =
-        (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
+      // if (estimatedGas * 2 > this.gasLimit)
+      //   this.gasLimit = parseInt(estimatedGas * 2);
+      // this.txFee =
+      //   (1.6 * estimatedGas * this.gasPrice * 1000000000) / Math.pow(10, 18);
       if (tokenName === "ETH") {
         this.form.inputValue = parseFloat(this.getBalance["ETH"]) - this.txFee;
         this.onInputFocus();
@@ -642,21 +641,61 @@ export default {
         this.onOutputFocus();
         this.onAmountChange();
       }
+      // const contractAddress = this.getAvailableExchangeAddresses[
+      //   this.form.inputCurrency
+      // ];
+      // let estimatedGas = await this.getEstimatedGas(contractAddress);
     },
     async getEstimatedGas(toAddress) {
-      let value = this.form.inputValue || 1;
-      let estimatedGas = await estimateGas(
-        {
-          from: this.getAccount.address,
-          to: toAddress,
-          value:
-            parseFloat(value || 1) *
-            Math.pow(10, this.getDecimal(this.getActiveToken)),
-          gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-          tokenAddress: this.getActiveTokenAddress
-        },
-        this.web3
+      console.log("Estimating gas limit...");
+      let web3 = this.web3;
+      let inputValue = this.form.inputValue;
+      let inputCurrency = this.form.inputCurrency;
+      let outputValue = this.form.outputValue;
+      let outputCurrency = this.activeToken;
+      console.log(inputValue, outputValue, inputCurrency, outputCurrency);
+      let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
+      let type = this.swapType;
+      const blockNumber = await web3.eth.getBlockNumber();
+      const block = await web3.eth.getBlock(blockNumber);
+      const deadline = block.timestamp + 300;
+      const accounts = await web3.eth.getAccounts();
+      let exchangeContract = exchangeContracts[outputCurrency];
+      const contractAddress = this.getAvailableExchangeAddresses[
+        outputCurrency
+      ];
+      let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
+      let tokenAmount = new BigNumber(outputValue).multipliedBy(
+        10 ** this.getDecimal(this.getActiveToken)
       );
+      let ethReserve = await web3.eth.getBalance(contractAddress);
+      const totalLiquidity = await exchangeContract.methods
+        .totalSupply()
+        .call();
+      let liquidityMinted = new BigNumber(totalLiquidity).multipliedBy(
+        ethAmount.dividedBy(ethReserve)
+      );
+      if (Number.isNaN(liquidityMinted) || liquidityMinted == "NaN")
+        liquidityMinted = new BigNumber(0);
+
+      const MAX_LIQUIDITY_SLIPPAGE = 0.025;
+      const minLiquidity = liquidityMinted.multipliedBy(
+        1 - MAX_LIQUIDITY_SLIPPAGE
+      );
+      const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
+
+      let transactionParameters = {
+        from: this.getAccount.address,
+        gasPrice: web3.utils.toHex(this.gasPrice),
+        to: contractAddress,
+        value: web3.utils.toHex(ethAmount.toFixed(0)),
+        data: exchangeContract.methods
+          .addLiquidity(minLiquidity.toFixed(0), maxTokens.toFixed(0), deadline)
+          .encodeABI()
+      };
+
+      let estimatedGas = await estimateGas(transactionParameters, this.web3);
+      console.log(`Estimated gas for add liquidity: ${estimatedGas}`);
       return estimatedGas;
     },
     async updateGasLimitAndTxFee() {
