@@ -196,13 +196,11 @@ export const getTokenBalance = async function (address, currency, web3, ownedTok
     return 0
   }
 }
-export const estimateGas = async function (transaction, web3) {
+export const estimateGas = async function (transactionParameters, web3) {
+  console.log(transactionParameters)
   try {
-    let gas = await web3.eth.estimateGas({
-      from: transaction.from,
-      to: transaction.from,
-      value: transaction.value
-    })
+    let gas = await web3.eth.estimateGas(transactionParameters)
+    console.log(`Estimate Gas: ${gas}`)
     return gas
   } catch (e) {
     return 0
@@ -932,6 +930,9 @@ export const normaliseText = text => {
   return normalised
 }
 export const metamaskSendToken = async function (data) {
+  let web3 = await getWeb3Metamask()
+  await window.ethereum.enable()
+  web3.setProvider(window.ethereum)
   const {
     from,
     to,
@@ -942,11 +943,7 @@ export const metamaskSendToken = async function (data) {
     tokenAddress
   } = data
   console.log(data)
-  const ethereum = window.ethereum
-  let web3 = await getWeb3Metamask()
-  await ethereum.enable()
-  web3.setProvider(ethereum)
-  let selectedAddress = ethereum.selectedAddress
+  let selectedAddress = window.ethereum.selectedAddress
   let amount = web3.utils.toHex(value)
   let count = await web3.eth.getTransactionCount(from)
   // let contractAddress = tokenAddresses[currency]

@@ -391,6 +391,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
+      getActiveTokenAddress: "getActiveTokenAddress",
       getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
@@ -648,7 +649,11 @@ export default {
         {
           from: this.getAccount.address,
           to: toAddress,
-          amount: new BigNumber(value * Math.pow(10, 18))
+          value:
+            parseFloat(value || 1) *
+            Math.pow(10, this.getDecimal(this.getActiveToken)),
+          gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+          tokenAddress: this.getActiveTokenAddress
         },
         this.web3
       );

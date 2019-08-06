@@ -53,23 +53,30 @@
         />
         <div id="main-title-no-connection-container">
           <div class="logo-title-container">
-            <img
-              class="logo-in-header"
-              v-if="getActiveToken==='ETH'"
-              src="../assets/eth-logo.png"
-              alt
-            />
-            <img class="logo-in-header" v-else-if="activeTokenLogo" :src="activeTokenLogo" alt />
-            <img
-              class="logo-in-header"
-              v-else-if="!activeTokenLogo"
-              src="../assets/default-token.png"
-              alt
-            />
-            <div class="token-symbol-name-group">
-              <h4>{{ getActiveToken }}</h4>
-              <span>{{activeTokenName}}</span>
-            </div>
+            <a
+              :href="`https://etherscan.io/token/${activeTokenAddress}`"
+              target="_blank"
+              class="logo-title-container"
+              style="text-decoration: none"
+            >
+              <img
+                class="logo-in-header"
+                v-if="getActiveToken==='ETH'"
+                src="../assets/eth-logo.png"
+                alt
+              />
+              <img class="logo-in-header" v-else-if="activeTokenLogo" :src="activeTokenLogo" alt />
+              <img
+                class="logo-in-header"
+                v-else-if="!activeTokenLogo"
+                src="../assets/default-token.png"
+                alt
+              />
+              <div class="token-symbol-name-group">
+                <h4>{{ getActiveToken }}</h4>
+                <span>{{activeTokenName}}</span>
+              </div>
+            </a>
             <font-awesome-icon
               class="copy-button-svg"
               icon="copy"
@@ -617,6 +624,14 @@ export default {
 .token-symbol-name-group h4 {
   text-align: left;
   margin-bottom: 0px;
+  text-decoration: none !important;
+}
+.token-symbol-name-group h4:hover,
+.token-symbol-name-group span:hover {
+  text-decoration: none !important;
+}
+.logo-title-container {
+  text-decoration: none;
 }
 #menu-button {
   color: #a41de4;

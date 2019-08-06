@@ -48,7 +48,7 @@
           id="metamask-btn"
           @click="onSelectSignInMethod('privatekey')"
         >Private Key</b-button>
-      </div>-->
+      </div> -->
       <!-- Metamask Modal -->
       <b-modal ref="signin_modal" id="signin_modal" :hide-footer="true">
         <template slot="modal-header">

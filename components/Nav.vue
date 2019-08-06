@@ -5,10 +5,12 @@
     </nuxt-link>
     <div class="title">
       <div id="main-title-no-connection-container">
-        <div class="logo-title-container">
-          <img id="uniswapdex-logo" src="../assets/uniswapdex-logo.png" alt />
-          <h4>{{ title }}</h4>
-        </div>
+        <a :href="'https://shardus.com'" target="_blank">
+          <div class="logo-title-container">
+            <img id="uniswapdex-logo" src="../assets/uniswapdex-logo.png" alt />
+            <h4>{{ title }}</h4>
+          </div>
+        </a>
         <no-connection />
       </div>
     </div>

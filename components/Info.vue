@@ -347,7 +347,7 @@ export default {
 }
 .vue-friendly-iframe > iframe {
   width: 100%;
-  height: 700px;
+  height: 630px;
   border: none;
   overflow: hidden;
 }

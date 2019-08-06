@@ -94,7 +94,7 @@
               required
               :placeholder="`Enter amount in ${form.currency}`"
               :state="validateAmount"
-              @keyup="updateUsdAmount"
+              @keyup="updateGasLimitAndTxFee"
             />
             <button type="button" id="erase" @click="form.amount = ''"></button>
           </div>
@@ -186,6 +186,7 @@
 import { mapGetters, mapActions } from "vuex";
 import {
   getWeb3,
+  getWeb3Metamask,
   estimateGas,
   estimateGasPrice,
   sendToken,
@@ -197,6 +198,7 @@ import {
 import Vue from "vue";
 import VueQrcodeReader from "vue-qrcode-reader";
 import BigNumber from "bignumber.js";
+import { exchangeABI, tokenABI, ERC20_ABI, factoryABI } from "../assets/js/abi";
 const defaultCamera = {
   audio: false, // don't request microphone access
   video: {
@@ -243,6 +245,7 @@ export default {
     ...mapGetters({
       getAccount: "account/getAccount",
       getActiveToken: "getActiveToken",
+      getActiveTokenAddress: "getActiveTokenAddress",
       getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getConnection: "getConnection",
@@ -381,20 +384,52 @@ export default {
       this.form.inputValueUsd = parseFloat(inputAmount * tokenToUsd);
     },
     async getEstimatedGas() {
-      let estimatedGas = await estimateGas(
-        {
-          from: this.getAccount.address,
-          to: this.form.targetAddress || this.getAccount.address,
-          amount:
-            parseFloat(this.form.amount || 1) *
-            Math.pow(10, this.getDecimal(this.getActiveToken))
-        },
-        this.web3
-      );
+      let web3 = await getWeb3Metamask();
+      await window.ethereum.enable();
+      web3.setProvider(window.ethereum);
+      let to = this.form.targetAddress || this.getAccount.address;
+      let value =
+        parseFloat(this.form.amount || 1) *
+        Math.pow(10, this.getDecimal(this.getActiveToken));
+      let gasPrice = parseInt(this.gasPrice * Math.pow(10, 9));
+      let tokenAddress = this.getActiveTokenAddress;
+
+      let selectedAddress = window.ethereum.selectedAddress;
+      let from = selectedAddress;
+      let amount = web3.utils.toHex(value);
+      let count = await web3.eth.getTransactionCount(selectedAddress);
+      let transactionParameters;
+
+      if (tokenAddress) {
+        let contract = new web3.eth.Contract(tokenABI, tokenAddress, {
+          from: from
+        });
+
+        transactionParameters = {
+          from: selectedAddress,
+          to: tokenAddress,
+          value: "0x0",
+          data: contract.methods.transfer(to, amount).encodeABI(),
+          nonce: web3.utils.toHex(count),
+          gasPrice: web3.utils.toHex(gasPrice)
+        };
+      } else {
+        transactionParameters = {
+          from: selectedAddress,
+          to: to,
+          value: amount,
+          nonce: web3.utils.toHex(count),
+          gasPrice: web3.utils.toHex(gasPrice)
+        };
+      }
+
+      let estimatedGas = await estimateGas(transactionParameters, web3);
+      console.log(`Estimated gas for send: ${estimatedGas}`);
       return estimatedGas;
     },
     async updateGasLimitAndTxFee() {
       let estimatedGas = await this.getEstimatedGas();
+      console.log(`Estimated gas: ${estimatedGas}`);
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
       this.txFee =
         (1.6 * this.gasLimit * parseInt(this.gasPrice) * 1000000000) /
@@ -441,7 +476,9 @@ export default {
             this.txHash = await metamaskSendEth({
               from: this.getAccount.address,
               to: this.form.targetAddress,
-              value: parseInt(this.form.amount * Math.pow(10, 18)),
+              value: new BigNumber(
+                this.form.amount * Math.pow(10, 18)
+              ).toFixed(),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: this.gasLimit
             });
@@ -452,10 +489,10 @@ export default {
             this.txHash = await metamaskSendToken({
               from: this.getAccount.address,
               to: this.form.targetAddress,
-              value: parseInt(
+              value: new BigNumber(
                 this.form.amount *
                   Math.pow(10, this.getDecimal(this.getActiveToken) || 18)
-              ),
+              ).toFixed(),
               gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
               gasLimit: this.gasLimit,
               currency: this.form.currency,
@@ -468,9 +505,9 @@ export default {
             this.loading = false;
             this.showSuccessToast(this.txHash);
           } else {
-            this.onReset();
-            this.loading = false;
-            alert("Fail to submit transaction");
+            // this.onReset();
+            // this.loading = false;
+            // alert("Fail to submit transaction");
           }
         } catch (e) {
           this.onReset();

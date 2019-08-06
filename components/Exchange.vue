@@ -1,7 +1,7 @@
 <template>
   <section id="exchange-container">
     <Loading v-if="redirecting" message="Redirecting" />
-    <b-form>
+    <b-form @submit.prevent="onSubmitSearch">
       <b-form-group>
         <div class="search-field-container">
           <b-form-input
@@ -213,7 +213,8 @@
         <b-alert v-if="infoMessage.length > 0" show fade variant="info">{{infoMessage}}</b-alert>
         <b-form-group id="exampleInputGroup1">
           <label>Select Your Token</label>
-          <v-select
+          <b-input v-model="form.tokenAddress"></b-input>
+          <!-- <v-select
             :options="listabeTokenList"
             label="title"
             placeholder="Please select a token"
@@ -232,7 +233,7 @@
               <img v-else src="../assets/default-token.png" height="20px" width="20px" />
               {{ option.title }}
             </template>
-          </v-select>
+          </v-select>-->
         </b-form-group>
         <b-button type="submit" variant="primary" :disabled="loading">List Token</b-button>
       </b-form>
@@ -306,6 +307,7 @@ import {
 } from "../assets/js/token";
 import { setTimeout } from "timers";
 import config from "../config";
+
 export default {
   components: {
     Token,
@@ -498,6 +500,7 @@ export default {
         })
         .filter(t => t !== null)
         .filter(t => t.balance > 0 && t.title !== self.form.outputCurrency)
+        .filter(t => t.title.slice(0, 6) !== "UNI-V1")
         .sort((a, b) => b.priceInUsd - a.priceInUsd);
       return list;
     },
@@ -529,6 +532,10 @@ export default {
       updateTokenTransactionListToken:
         "transaction/updateTokenTransactionListToken"
     }),
+    onSubmitSearch(e) {
+      e.preventDefault();
+      console.log(this.form.query);
+    },
     onTokenTabChange(tabName) {
       this.updateAuthRedirectUrl({
         url: "/tokendetail",
@@ -608,6 +615,7 @@ export default {
         this.loading = false;
         return;
       }
+      console.log(`Token address: ${tokenAddress}`);
       let exchangeAddress = await getExchangeAddress(tokenAddress);
       console.log(`Exchange address: ${exchangeAddress}`);
       if (!exchangeAddress) {

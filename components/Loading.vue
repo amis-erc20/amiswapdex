@@ -17,8 +17,8 @@ export default {
 
 <style>
 #loading-background {
-  background: rgb(51, 49, 49);
-  opacity: 0.8;
+  background: #f8f8f8;
+  opacity: 1;
   z-index: 999999;
   position: fixed;
   top: 0px;

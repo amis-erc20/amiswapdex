@@ -2,10 +2,6 @@ importScripts('/_nuxt/workbox.4c4f5ca6.js')
 
 workbox.precaching.precacheAndRoute([
   {
-    "url": "/_nuxt/0287a0871339c44bf2ff.js",
-    "revision": "82fcfe91b8bbb111419667aedf389e53"
-  },
-  {
     "url": "/_nuxt/02b2cfef6ea47b0310b5.js",
     "revision": "9201b137421cb4d846414dbde19de4e3"
   },
@@ -22,6 +18,14 @@ workbox.precaching.precacheAndRoute([
     "revision": "343d31ddc2c30e7841e65d0efea364d3"
   },
   {
+    "url": "/_nuxt/224ec8291df541b7a4f2.js",
+    "revision": "e24184035bf54be79c4be8f9af72ffd0"
+  },
+  {
+    "url": "/_nuxt/25711ac7b17f29982aef.js",
+    "revision": "c0fc921175346351b113183a30f8d032"
+  },
+  {
     "url": "/_nuxt/2cbe28284df2e4217348.js",
     "revision": "13c3ba0944cd54ededd0360921ad4aa7"
   },
@@ -32,6 +36,10 @@ workbox.precaching.precacheAndRoute([
   {
     "url": "/_nuxt/2fe2559f770a097d8c78.js",
     "revision": "3f368795218a0893446f0de17c0467b3"
+  },
+  {
+    "url": "/_nuxt/32d677b7d7c9a8631559.js",
+    "revision": "40ea11b826c636d4c37d7fdb8da6ecac"
   },
   {
     "url": "/_nuxt/4824c9aa48f437c9af3e.js",
@@ -46,12 +54,12 @@ workbox.precaching.precacheAndRoute([
     "revision": "1a8660328a76444b165281d49fe49f56"
   },
   {
-    "url": "/_nuxt/65c9fb8eeefd3ed56d5b.js",
-    "revision": "c9ebc878fcc1feb2ae4a26cc6f12ff85"
+    "url": "/_nuxt/5bffb82fb9ff33b24b7a.js",
+    "revision": "92c0240ebfe9ee885da134ff562a612b"
   },
   {
-    "url": "/_nuxt/7ff0d5fed2f6abc6de76.js",
-    "revision": "c3531f7ead10b884e37add80c35e7e87"
+    "url": "/_nuxt/65c9fb8eeefd3ed56d5b.js",
+    "revision": "c9ebc878fcc1feb2ae4a26cc6f12ff85"
   },
   {
     "url": "/_nuxt/812b246666170818bed8.js",
@@ -66,10 +74,6 @@ workbox.precaching.precacheAndRoute([
     "revision": "64f7095d24852456860525ec82b8327c"
   },
   {
-    "url": "/_nuxt/bf4cf5e0d125c074ac96.js",
-    "revision": "76b106e38f1a358172c5881191c21e10"
-  },
-  {
     "url": "/_nuxt/cc5b94d041205677b7d3.js",
     "revision": "8360ec34a01a51f69e738c3473be9c8d"
   },
@@ -80,10 +84,6 @@ workbox.precaching.precacheAndRoute([
   {
     "url": "/_nuxt/ec36a08f0f6e272f7bec.js",
     "revision": "5611e608b2797bf70bd01954a08b3bb3"
-  },
-  {
-    "url": "/_nuxt/ffbbdacaa3759a4a1243.js",
-    "revision": "468042e14a7b49c5f146760d42aeba74"
   }
 ], {
   "cacheId": "uniswapdex",

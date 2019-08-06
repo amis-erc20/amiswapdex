@@ -1,7 +1,8 @@
 <template>
   <div class="market-section">
     <Loading v-if="redirecting" message="Redirecting" />
-    <div v-if="market && !redirecting">
+    <Loading v-if="market.count < 1 || loadingCharts" message="Loading" />
+    <div v-if="market.count > 1 && !redirecting">
       <div class="market-info-table">
         <b-row class="count">
           <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
@@ -150,7 +151,8 @@ export default {
       },
       donationCurrency: "",
       loadingWallet: false,
-      redirecting: false
+      redirecting: false,
+      loadingCharts: true
     };
   },
   components: {
@@ -275,7 +277,6 @@ export default {
             data.total_usd = todayLiquidity.close * ethToUsd;
             data.total_eth = todayLiquidity.close;
           }
-
           let volumeResponse = await axios.get(
             `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
@@ -331,6 +332,9 @@ export default {
       }, 1500);
     }
     setInterval(self.updateMarketInfo, 60000);
+    setTimeout(() => {
+      self.loadingCharts = false;
+    }, 4000);
   }
 };
 </script>
