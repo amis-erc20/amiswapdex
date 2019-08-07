@@ -2,16 +2,16 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
-const _9bc69e92 = () => interopDefault(import('../pages/chart.vue' /* webpackChunkName: "pages/chart" */))
-const _fb7c0cba = () => interopDefault(import('../pages/liquiditychart.vue' /* webpackChunkName: "pages/liquiditychart" */))
-const _7452642d = () => interopDefault(import('../pages/receivetoken.vue' /* webpackChunkName: "pages/receivetoken" */))
-const _1fbf86cc = () => interopDefault(import('../pages/recovery.vue' /* webpackChunkName: "pages/recovery" */))
-const _b1b11ad2 = () => interopDefault(import('../pages/scanner.vue' /* webpackChunkName: "pages/scanner" */))
-const _5408b4fc = () => interopDefault(import('../pages/tokenchart.vue' /* webpackChunkName: "pages/tokenchart" */))
-const _79e452f2 = () => interopDefault(import('../pages/tokenpricechart.vue' /* webpackChunkName: "pages/tokenpricechart" */))
-const _0ce8721d = () => interopDefault(import('../pages/volumechart.vue' /* webpackChunkName: "pages/volumechart" */))
-const _0d66c5fb = () => interopDefault(import('../pages/welcome.vue' /* webpackChunkName: "pages/welcome" */))
-const _23ba67ab = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
+const _5ef57b1c = () => interopDefault(import('..\\pages\\chart.vue' /* webpackChunkName: "pages_chart" */))
+const _23922a48 = () => interopDefault(import('..\\pages\\liquiditychart.vue' /* webpackChunkName: "pages_liquiditychart" */))
+const _3cd07a12 = () => interopDefault(import('..\\pages\\receivetoken.vue' /* webpackChunkName: "pages_receivetoken" */))
+const _6ad3519e = () => interopDefault(import('..\\pages\\recovery.vue' /* webpackChunkName: "pages_recovery" */))
+const _649afcdc = () => interopDefault(import('..\\pages\\scanner.vue' /* webpackChunkName: "pages_scanner" */))
+const _b725ffbe = () => interopDefault(import('..\\pages\\tokenchart.vue' /* webpackChunkName: "pages_tokenchart" */))
+const _4bc3ba82 = () => interopDefault(import('..\\pages\\tokenpricechart.vue' /* webpackChunkName: "pages_tokenpricechart" */))
+const _6de4e8d0 = () => interopDefault(import('..\\pages\\volumechart.vue' /* webpackChunkName: "pages_volumechart" */))
+const _33f1d4f6 = () => interopDefault(import('..\\pages\\welcome.vue' /* webpackChunkName: "pages_welcome" */))
+const _4222f966 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
 Vue.use(Router)
 
@@ -89,43 +89,43 @@ export function createRouter() {
 
     routes: [{
       path: "/chart",
-      component: _9bc69e92,
+      component: _5ef57b1c,
       name: "chart"
     }, {
       path: "/liquiditychart",
-      component: _fb7c0cba,
+      component: _23922a48,
       name: "liquiditychart"
     }, {
       path: "/receivetoken",
-      component: _7452642d,
+      component: _3cd07a12,
       name: "receivetoken"
     }, {
       path: "/recovery",
-      component: _1fbf86cc,
+      component: _6ad3519e,
       name: "recovery"
     }, {
       path: "/scanner",
-      component: _b1b11ad2,
+      component: _649afcdc,
       name: "scanner"
     }, {
       path: "/tokenchart",
-      component: _5408b4fc,
+      component: _b725ffbe,
       name: "tokenchart"
     }, {
       path: "/tokenpricechart",
-      component: _79e452f2,
+      component: _4bc3ba82,
       name: "tokenpricechart"
     }, {
       path: "/volumechart",
-      component: _0ce8721d,
+      component: _6de4e8d0,
       name: "volumechart"
     }, {
       path: "/welcome",
-      component: _0d66c5fb,
+      component: _33f1d4f6,
       name: "welcome"
     }, {
       path: "/",
-      component: _23ba67ab,
+      component: _4222f966,
       name: "index"
     }],
 
