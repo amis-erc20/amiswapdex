@@ -31,7 +31,7 @@
         <b-row class="volume-uniswap-percent">
           <b-col class="description"></b-col>
           <b-col
-            v-if="market.volume_uniswapdex"
+            v-if="market.volume_uniswapdex || market.volume_uniswapdex === 0"
             class="value uniswap-percent-value"
           >({{ market.volume_uniswapdex.toFixed(2) }}% via uniswapDEX.com)</b-col>
         </b-row>
@@ -278,6 +278,10 @@ export default {
             data.total_eth = todayLiquidity.close;
           }
           let volumeResponse = await axios.get(
+            `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
+              1000 * 60 * 60 * 24 * 3}`
+          );
+          console.log(
             `${config.uniswapDexServer}api/histodayvolume?start=${Date.now() -
               1000 * 60 * 60 * 24 * 3}`
           );

@@ -229,7 +229,10 @@ export default {
           symbol: token.symbol,
           tokenAddress: token.tokenAddress,
           liquidity: foundSummary.liquidity * this.ethToUsd,
-          roir: foundSummary.volume_eth_1W / foundSummary.liquidity,
+          roir:
+            foundSummary.liquidity > 0
+              ? foundSummary.volume_eth_1W / foundSummary.liquidity
+              : 0,
           volume: foundSummary.volume_eth_1D * this.ethToUsd,
           price: foundSummary.price_last_1H * this.ethToUsd,
           src: token.logo,

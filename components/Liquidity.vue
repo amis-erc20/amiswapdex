@@ -349,15 +349,6 @@ let defaultGasLimit = 51000 * 2;
 export default {
   data() {
     return {
-      config: {
-        tokenListUrl: "https://beta.shardus.com/assets/js/tokenDB.json",
-        colorScheme: {
-          mainColor: "red",
-          secondaryColor: "black"
-        },
-        logoUrl: "https://beta.shardus.com/assets/img/logo.svg",
-        widgetTitle: ""
-      },
       web3: null,
       ALLOWED_SLIPPAGE: 0.025,
       account: null,

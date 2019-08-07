@@ -412,19 +412,6 @@ export default {
   },
   data() {
     return {
-      config: {
-        mainToken: {
-          symbol: "ULT",
-          exchangeAddress: "0x28d9353611C5A0d5a026A648c05E5d6523e41CBf"
-        },
-        tokenListUrl: "https://beta.shardus.com/assets/js/tokenDB.json",
-        colorScheme: {
-          mainColor: "red",
-          secondaryColor: "black"
-        },
-        logoUrl: "https://beta.shardus.com/assets/img/logo.svg",
-        widgetTitle: ""
-      },
       web3: null,
       web3Metamask: null,
       ALLOWED_SLIPPAGE: 0,
