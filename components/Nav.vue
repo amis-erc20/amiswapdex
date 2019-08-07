@@ -38,7 +38,7 @@
         <b-list-group-item @click="showPage('about')">About</b-list-group-item>
         <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
         <b-list-group-item>
-          <a href="https://gitlab.com/shardus/uniswapdex/issues/new" target="_blank">Report Issues</a>
+          <a href="https://gitlab.com/shardus/uniswapdex/issues" target="_blank">Report Issues</a>
         </b-list-group-item>
         <b-list-group-item @click="onLogout">Log Out</b-list-group-item>
       </b-list-group>
@@ -46,7 +46,7 @@
         <b-list-group-item @click="showPage('about')">About</b-list-group-item>
         <b-list-group-item @click="showPage('tos')">Terms of Services</b-list-group-item>
         <b-list-group-item>
-          <a href="https://gitlab.com/shardus/uniswapdex/issues/new" target="_blank">Report Issues</a>
+          <a href="https://gitlab.com/shardus/uniswapdex/issues" target="_blank">Report Issues</a>
         </b-list-group-item>
       </b-list-group>
     </b-modal>
@@ -234,6 +234,9 @@ export default {
 }
 .nav-section a {
   padding-top: 10px;
+}
+.nav-section a:hover {
+  text-decoration: none;
 }
 .logo-container img {
   width: 55px;

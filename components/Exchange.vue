@@ -173,6 +173,7 @@
               <!-- <div class="token-volume-container" v-if="$mq !== 'mobile'"> -->
               <div class="token-volume-container">
                 <p class="token-volume">{{ numberWithCommas(token.roir.toFixed(2)) }}%</p>
+                <!-- <p class="token-volume">{{ summaryInfo.volume_eth_1W}} / {{summaryInfo.liquidity }}%</p> -->
               </div>
               <div class="token-liquidity-container">
                 <p class="token-liquidity-usd">${{ numberWithCommas(token.liquidity.toFixed(0)) }}</p>
@@ -419,7 +420,10 @@ export default {
               src: token.logo,
               order: summaryInfo.order || "-",
               change: summaryInfo.price_change_24h || 0,
-              roir: summaryInfo.volume_eth_1W / summaryInfo.liquidity
+              roir:
+                summaryInfo.liquidity > 0
+                  ? summaryInfo.volume_eth_1W / summaryInfo.liquidity
+                  : 0
             };
           }
         })

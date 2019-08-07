@@ -90,7 +90,11 @@ export default {
         if (token) {
           let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
           if (summaryInfo) {
-            roir = summaryInfo.volume_eth_1W / summaryInfo.liquidity;
+            if (summaryInfo.liquidity > 0) {
+              roir = summaryInfo.volume_eth_1W / summaryInfo.liquidity;
+            } else {
+              roir = 0;
+            }
           }
           let tokenWithLiquidity = self.getOwnedTokenList.find(
             t => t.symbol === "UNI-V1_" + symbol
