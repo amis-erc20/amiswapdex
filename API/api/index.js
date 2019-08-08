@@ -3,7 +3,6 @@ import CONFIG from '../../config'
 import axios from 'axios'
 const serverUrl = CONFIG.uniswapDexServer
 
-// https://github.com/tradingview/charting_library/wiki/Resolution
 let supportedResolutions = ['60', '240', '1D']
 const config = {
   supported_resolutions: supportedResolutions
@@ -16,9 +15,7 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
   onReady: cb => {
     setTimeout(() => cb(config), 0)
   },
-  searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {
-    // console.log('====Search Symbols running')
-  },
+  searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {},
   resolveSymbol: (
     symbolName,
     onSymbolResolvedCallback,
@@ -108,40 +105,26 @@ export const createDatafeed = (tokenAddress, tokenName, currency, type) => ({
       _subs.push(newSub)
     }
   },
-  unsubscribeBars: subscriberUID => {
-    // console.log('=====unsubscribeBars running')
-  },
+  unsubscribeBars: subscriberUID => {},
   calculateHistoryDepth: (resolution, resolutionBack, intervalBack) => {
-    // optional
-    // console.log('=====calculateHistoryDepth running')
-    // while optional, this makes sure we request 24 hours of minute data at a time
-    // CryptoCompare's minute data endpoint will throw an error if we request data beyond 7 days in the past, and return no data
     return resolution < 60 ? {
-      resolutionBack: 'D',
-      intervalBack: '1'
-    }
-      : undefined
+        resolutionBack: 'D',
+        intervalBack: '1'
+      } :
+      undefined
   },
-  getMarks: (symbolInfo, startDate, endDate, onDataCallback, resolution) => {
-    // optional
-    // console.log('=====getMarks running')
-  },
+  getMarks: (symbolInfo, startDate, endDate, onDataCallback, resolution) => {},
   getTimeScaleMarks: (
     symbolInfo,
     startDate,
     endDate,
     onDataCallback,
     resolution
-  ) => {
-    // optional
-    // console.log('=====getTimeScaleMarks running')
-  },
-  getServerTime: cb => {
-    // console.log('=====getServerTime running')
-  }
+  ) => {},
+  getServerTime: cb => {}
 })
 
-async function getLatestBar (tokenAddress, resolution, currency) {
+async function getLatestBar(tokenAddress, resolution, currency) {
   let url
   if (resolution === '60') {
     url = `${serverUrl}api/histohour?tokenAddress=${tokenAddress}`
@@ -208,7 +191,7 @@ setInterval(async () => {
   }
 }, 20000)
 
-function updateBar (data, sub) {
+function updateBar(data, sub) {
   var lastBar = sub.lastBar
   if (data.time > lastBar.time) {
     console.log('create new candle')
