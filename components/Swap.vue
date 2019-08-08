@@ -18,13 +18,13 @@
       show
       fade
       variant="danger"
-    >{{form.inputCurrency}} has no liquidity</b-alert>
+    >Input {{form.inputCurrency}} has no liquidity</b-alert>
     <b-alert
       v-if="!validateOutputLiquidity"
       show
       fade
       variant="danger"
-    >{{form.outputCurrency}} has no liquidity</b-alert>
+    >Output {{form.outputCurrency}} has no liquidity</b-alert>
     <div
       id="uniswap-convert-section"
       v-show="!scanning && !isLoadingWallet && validateInputLiquidity && validateOutputLiquidity"
@@ -475,6 +475,7 @@ export default {
     },
     isBadToken: function() {
       let self = this;
+      if (self.getActiveToken === "ETH") return false;
       let token = this.getAvailableTokenList.find(
         t => t.symbol === self.getActiveToken
       );
@@ -550,10 +551,11 @@ export default {
         .map(token => {
           return {
             title: token.symbol,
-            src: token.logo
+            src: token.logo,
+            tokenAddress: token.tokenAddress
           };
         });
-      tokenList.unshift({ title: "ETH", src: null });
+      tokenList.unshift({ title: "ETH", src: null, tokenAddress: null });
       if (this.form.inputCurrency === null) return tokenList;
       else return tokenList.filter(token => token.title !== inputCurrency);
     },
@@ -648,33 +650,63 @@ export default {
       let self = this;
       if (this.form.inputCurrency === "ETH") return true;
       if (this.form.inputCurrency === null) return true;
+      if (
+        !self.form.inputTokenAddress ||
+        self.form.inputCurrency === self.getActiveToken
+      ) {
+        self.form.inputTokenAddress = self.getActiveTokenAddress.toLowerCase();
+      }
+      console.log(self.form.inputTokenAddress);
       let token = this.getAvailableTokenList.find(
         t =>
           t.symbol === this.form.inputCurrency &&
           t.tokenAddress.toLowerCase() ===
-            self.getActiveTokenAddress.toLowerCase()
+            self.form.inputTokenAddress.toLowerCase()
       );
-      if (!token) return false;
+      if (!token) {
+        console.log("No Token found.");
+        return false;
+      }
       let summary = this.getSummary.find(s => s.token_id === token.id);
-      if (!summary) return false;
+      if (!summary) {
+        console.log("No Summary found.");
+        return false;
+      }
       if (summary.liquidity > 0) return true;
-      else return false;
+      else {
+        console.log("Invalid input liquidity");
+        return false;
+      }
     },
     validateOutputLiquidity() {
       let self = this;
+      return true;
       if (this.form.outputCurrency === "ETH") return true;
       if (this.form.outputCurrency === null) return true;
+      if (self.getActiveToken !== "ETH") {
+        self.form.outputTokenAddress = self.getActiveTokenAddress.toLowerCase();
+      }
+      self.form.outputTokenAddress = self.form.outputTokenAddress.toLowerCase();
       let token = this.getAvailableTokenList.find(
         t =>
           t.symbol === this.form.outputCurrency &&
           t.tokenAddress.toLowerCase() ===
-            self.getActiveTokenAddress.toLowerCase()
+            self.form.outputTokenAddress.toLowerCase()
       );
-      if (!token) return false;
+      if (!token) {
+        console.log("No Token found.");
+        return false;
+      }
       let summary = this.getSummary.find(s => s.token_id === token.id);
-      if (!summary) return false;
+      if (!summary) {
+        console.log("No Summary found.");
+        return false;
+      }
       if (summary.liquidity > 0) return true;
-      else return false;
+      else {
+        console.log("Invalid input liquidity");
+        return false;
+      }
     },
     isLoadingWallet: function() {
       if (this.getSignIn && this.getOwnedTokenList.length === 0) return true;

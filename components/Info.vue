@@ -63,13 +63,13 @@
     </div>
 
     <vue-friendly-iframe
-      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42"
+      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42 && getActiveToken !== 'ETH'"
       src="/tokenpricechart"
     ></vue-friendly-iframe>
 
     <h5
       ref="test"
-      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42"
+      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42 && getActiveToken !== 'ETH'"
     >Latest Transactions</h5>
     <vue-good-table
       :columns="columns"
@@ -178,7 +178,7 @@ export default {
       let selectedTokenSymbol;
       let selectedTokenAddress;
       if (this.getActiveToken === "ETH") {
-        selectedTokenSymbol = "WETH";
+        selectedTokenSymbol = "ETH";
         selectedTokenAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
       } else {
         selectedTokenSymbol = this.getActiveToken;

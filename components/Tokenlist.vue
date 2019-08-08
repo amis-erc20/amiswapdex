@@ -116,7 +116,12 @@ export default {
       });
       list = list.filter(t => t.name.slice(0, 7) !== "UNI-V1_");
       let ethToken = list.slice(0, 1);
-      ethToken.fullname = "Ether";
+      if (ethToken.length > 0) {
+        ethToken[0].fullname = "Ether";
+        ethToken[0].symbol = "ETH";
+        // ethToken[0].tokenAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+      }
+
       let otherTokens = list.filter(token => {
         if (token.name === "ETH") return false;
         if (self.hideZeroAmountTokens) {
@@ -140,6 +145,11 @@ export default {
       updateChartInfo: "updateChartInfo"
     }),
     changeTokenTab: function(event, tokenName, tokenAddress) {
+      // if (tokenName === "ETH") {
+      //   tokenName = "WETH";
+      //   tokenAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+      // }
+
       console.log(tokenName, tokenAddress);
       this.updateActiveToken(tokenName);
       this.updateActiveTokenAddress(tokenAddress);

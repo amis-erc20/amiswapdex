@@ -199,6 +199,7 @@
       @click="loadMoreToken"
     >Load More Tokens</b-button>
     <b-button id="listToken" variant="primary" @click="showListToken">+ List ERC-20 Token</b-button>
+    <Donation />
 
     <!-- LIST TOKEN MODAL -->
     <b-modal
@@ -288,6 +289,7 @@ import Liquidity from "~/components/Liquidity.vue";
 import Noaccount from "~/components/Noaccount.vue";
 import Tokeninfo from "~/components/Tokeninfo.vue";
 import Loading from "~/components/Loading.vue";
+import Donation from "~/components/Donation.vue";
 import { mapActions, mapGetters } from "vuex";
 import {
   getWeb3,
@@ -321,7 +323,8 @@ export default {
     Swap,
     Liquidity,
     Tokeninfo,
-    Loading
+    Loading,
+    Donation
   },
   data: function() {
     return {
@@ -1013,6 +1016,7 @@ export default {
 #listToken {
   width: 100%;
   font-weight: bolder;
+  margin-bottom: 25px;
 }
 .exchangelist-title div svg {
   transform: rotateZ(90deg);

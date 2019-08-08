@@ -289,7 +289,8 @@ export default {
       else return null;
     },
     activeTokenAddress() {
-      if (this.getActiveToken === "ETH") return "-";
+      if (this.getActiveToken === "ETH")
+        return "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
       else return this.getActiveTokenAddress;
     }
   },

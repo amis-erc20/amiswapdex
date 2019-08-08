@@ -1,61 +1,67 @@
 <template>
-  <div class="market-section">
-    <Loading v-if="redirecting" message="Redirecting" />
-    <Loading v-if="market.count < 1 || loadingCharts" message="Loading" />
-    <div v-if="market.count > 1 && !redirecting">
-      <div class="market-info-table">
-        <b-row class="count">
-          <b-col class="description" cols="8">Tokens with liquidity > 1 ETH</b-col>
-          <b-col class="value">{{ market.count1 || '...' }}</b-col>
-        </b-row>
-        <b-row class="count-all">
-          <b-col class="description" cols="8"></b-col>
-          <b-col v-if="market.count" class="value">{{ market.count }} Total</b-col>
-        </b-row>
+  <div class="donation-section">
+    <div id="donation-info">
+      <p>The Uniswap contracts charge a 0.3% fee for providing liquidity. We don’t charge any fees for using this site. To keep this site operational please make a donation.</p>
+      <b-button variant="primary" id="donate-button" @click="showModal('donate_modal')">Donate</b-button>
+      <!-- donation modal -->
+      <b-modal ref="donate_modal" id="donate_modal" :hide-footer="true">
+        <template slot="modal-header">
+          <font-awesome-icon
+            class="back-button-svg"
+            icon="chevron-left"
+            size="2x"
+            color="#fff"
+            @click="closeDonationModal"
+          />
+          <div id="main-title-no-connection-container">
+            <h4>Donation</h4>
+          </div>
+        </template>
 
-        <b-row class="volume-eth">
-          <b-col class="description">24H Market Volume</b-col>
-          <b-col
-            v-if="market.volume_eth"
-            class="value"
-          >{{ numberWithCommas(market.volume_eth.toFixed(0))}} ETH</b-col>
-          <b-col v-else class="value">...</b-col>
-        </b-row>
-        <b-row class="volume-usd">
-          <b-col class="description"></b-col>
-          <b-col
-            v-if="market.volume_usd"
-            class="value"
-          >{{ numberWithCommas(market.volume_usd.toFixed(0))}} USD</b-col>
-        </b-row>
-        <b-row class="volume-uniswap-percent">
-          <b-col class="description"></b-col>
-          <b-col
-            v-if="market.volume_uniswapdex || market.volume_uniswapdex === 0"
-            class="value uniswap-percent-value"
-          >({{ market.volume_uniswapdex.toFixed(2) }}% via uniswapDEX.com)</b-col>
-        </b-row>
+        <Loading v-if="isLoadingWallet" message="Loading Wallet" />
 
-        <b-row class="total-eth">
-          <b-col class="description">Total Market Liquidity</b-col>
-          <b-col
-            v-if="market.total_eth"
-            class="value"
-          >{{ numberWithCommas(market.total_eth.toFixed(0))}} ETH</b-col>
-          <b-col v-else class="value">...</b-col>
-        </b-row>
-        <b-row class="total-usd">
-          <b-col class="description"></b-col>
-          <b-col
-            v-if="market.total_usd"
-            class="value"
-          >{{ numberWithCommas(market.total_usd.toFixed(0))}} USD</b-col>
-        </b-row>
-      </div>
-      <Tokenlinechart />
-      <Volumelinechart />
-      <Liquiditylinechart />
-      <Donation />
+        <div v-if="getSignIn && !isLoadingWallet" class="select-donation-currency">
+          <label>Donate with</label>
+          <v-select
+            :options="availableInputTokens"
+            label="title"
+            placeholder="Please select a curreny"
+            :value="donationCurrency"
+            @input="onSelectDonationCurrency"
+            :clearable="false"
+          >
+            <template slot="option" slot-scope="option">
+              <img v-if="option.src" :src="option.src" height="20px" width="20px" />
+              <img
+                v-else-if="option.title==='ETH'"
+                src="../assets/eth-logo.png"
+                height="20px"
+                width="20px"
+              />
+              <img v-else src="../assets/default-token.png" height="20px" width="20px" />
+              {{ option.title }}
+            </template>
+          </v-select>
+        </div>
+        <Send
+          v-if="getSignIn && !loadingWallet && donationCurrency === 'ULT'"
+          sendMode="donation_send"
+        />
+        <Swap
+          v-if="getSignIn  && !loadingWallet && donationCurrency.length > 0 && donationCurrency !== 'ULT'"
+          swapMode="donation_swap"
+          :donationCurrency="donationCurrency"
+        />
+        <Noaccount v-if="!getSignIn && !loadingWallet " />
+      </b-modal>
+    </div>
+    <div class="built-by-message">
+      <img src="../assets/logo.svg" width="30px" height="30px" alt="shardus" />
+      <p>
+        Built by the
+        <a href="https://shardus.com" target="_blank">Shardus</a> team on
+        <a href="https://gitlab.com/shardus/uniswapdex/" target="_blank">Gitlab</a>
+      </p>
     </div>
   </div>
 </template>
@@ -68,7 +74,6 @@ import Swap from "~/components/Swap.vue";
 import Send from "~/components/Send.vue";
 import Noaccount from "~/components/Noaccount.vue";
 import Loading from "~/components/Loading.vue";
-import Donation from "~/components/Donation.vue";
 import axios from "axios";
 import config from "../config";
 import * as R from "ramda";
@@ -97,8 +102,7 @@ export default {
     Swap,
     Send,
     Noaccount,
-    Loading,
-    Donation
+    Loading
   },
   computed: {
     ...mapGetters({
@@ -130,7 +134,8 @@ export default {
               title: symbol,
               balance: self.getBalance[symbol],
               priceInUsd: self.getPrice[symbol],
-              src: token ? token.logo : null
+              src: token ? token.logo : null,
+              tokenAddress: token ? token.tokenAddress : null,
             };
           else return null;
         })
@@ -157,6 +162,9 @@ export default {
     onSelectDonationCurrency(value) {
       if (!value) return;
       this.donationCurrency = value.title;
+      this.updateActiveToken(value.title)
+      this.updateActiveTokenAddress(value.tokenAddress)
+      console.log(value);
     },
     closeDonationModal() {
       this.hideModal("donate_modal");
@@ -236,46 +244,7 @@ export default {
     },
     onSubmitDonation() {}
   },
-  mounted: async function() {
-    let self = this;
-    self.updateMarketInfo(true);
-    if (self.getConnection) {
-      await self.getSummaryFromServer();
-      await self.updateSummary(self.summary);
-    }
-    let redirectTokenAddress = self.$route.query.token;
-    if (redirectTokenAddress) {
-      self.redirecting = true;
-      setTimeout(() => {
-        try {
-          let token = self.getAvailableTokenList.find(
-            t =>
-              t.tokenAddress.toLowerCase() ===
-              redirectTokenAddress.toLowerCase()
-          );
-          self.updateActiveToken(token.symbol);
-          self.updateActiveTokenAddress(token.tokenAddress || "");
-          self.updateActiveTab("exchange");
-          self.updateCurrentView("tokeninfo");
-          self.updateChartInfo({
-            currency: "USD",
-            showChart: true,
-            tokenAddress: redirectTokenAddress,
-            tokenName: token.symbol
-          });
-          self.redirecting = false;
-        } catch (e) {
-          console.log(e);
-          alert("Invalid Token Address !");
-          self.redirecting = false;
-        }
-      }, 1500);
-    }
-    setInterval(self.updateMarketInfo, 60000);
-    setTimeout(() => {
-      self.loadingCharts = false;
-    }, 4000);
-  }
+  mounted: async function() {}
 };
 </script>
 

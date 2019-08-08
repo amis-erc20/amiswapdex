@@ -116,7 +116,6 @@ export default {
     });
 
     this.changeTimeRange("1Y");
-
     this.chart.subscribeCrosshairMove(param => {
       if (param.time) {
         const price = param.seriesPrices.get(lineSeries);
@@ -141,12 +140,13 @@ export default {
   methods: {
     scrollToLatest(timeScale, range) {
       let newScrollPosition;
+      let screenWidth = window.innerWidth;
       if (range === "1Y" || range === "6M") {
-        newScrollPosition = 15;
+        newScrollPosition = screenWidth >= 500 ? 15 : 35;
       } else if (range === "3M") {
-        newScrollPosition = 4;
+        newScrollPosition = screenWidth >= 500 ? 4 : 12;
       } else if (range === "1M") {
-        newScrollPosition = 2;
+        newScrollPosition = screenWidth >= 500 ? 2 : 6;
       } else {
         newScrollPosition = 1;
       }
