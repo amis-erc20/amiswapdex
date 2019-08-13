@@ -19,6 +19,7 @@
             @click="changeSelected('remove_liquidity')"
           >Remove Liquidity</b-button>
         </b-button-group>
+        <Holder />
       </div>
       <b-form
         class="liquidity-form"
@@ -340,6 +341,7 @@ import {
   submitTxIdToServer
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
+import Holder from "./Holder";
 
 let exchangeContracts = {};
 let tokenAddressess = {};
@@ -347,6 +349,9 @@ let tokenContracts = {};
 let defaultGasLimit = 51000 * 2;
 
 export default {
+  components: {
+    Holder
+  },
   data() {
     return {
       web3: null,

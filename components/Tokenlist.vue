@@ -20,7 +20,7 @@
         <b-tooltip target="#roir-explain-btn-wallet" placement="bottom" triggers="hover focus">
           <div
             class="roir-exlplain-text"
-          >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by the current liquidity and multiplied by 100 to show as a percent.</div>
+          >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by maximum liquidity within last 7 days.</div>
         </b-tooltip>
       </div>
       <div class="wallet-title-balance">Balance</div>
@@ -72,6 +72,7 @@ export default {
       getTokenList: "account/getTokenList",
       getPrice: "account/getPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getROIR: "account/getROIR",
       getOwnedTokenList: "account/getOwnedTokenList",
       getTransactionList: "transaction/getTransactionList",
       getBalance: "account/getBalance",
@@ -90,11 +91,7 @@ export default {
         if (token) {
           let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
           if (summaryInfo) {
-            if (summaryInfo.liquidity > 0) {
-              roir = summaryInfo.volume_eth_1W / summaryInfo.liquidity;
-            } else {
-              roir = 0;
-            }
+            roir = self.getROIR[token.id];
           }
           let tokenWithLiquidity = self.getOwnedTokenList.find(
             t => t.symbol === "UNI-V1_" + symbol

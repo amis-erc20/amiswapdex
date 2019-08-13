@@ -43,6 +43,9 @@
           >Sell {{ getActiveToken }}</b-button>
         </b-button-group>
       </div>
+
+      <Holder />
+
       <div v-if="!shouldRender" class="no-exchange-yet">
         <p>
           <strong>{{ getActiveToken }}</strong> does not have an uniswap exchange yet. Go to exchange tab and list the token frist.
@@ -384,6 +387,7 @@ import BigNumber from "bignumber.js";
 import Vue from "vue";
 import VueQrcodeReader from "vue-qrcode-reader";
 import Loading from "~/components/Loading.vue";
+import Holder from "./Holder";
 const defaultCamera = {
   audio: false, // don't request microphone access
   video: {
@@ -398,7 +402,8 @@ let tokenAddressess = {};
 let tokenContracts = {};
 export default {
   components: {
-    Loading
+    Loading,
+    Holder
   },
   props: {
     swapMode: {

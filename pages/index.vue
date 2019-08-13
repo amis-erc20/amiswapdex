@@ -154,7 +154,8 @@ import {
   getBalance,
   getTokenBalance,
   getAllListedToken,
-  getAllBadToken
+  getAllBadToken,
+  getAllROIR
 } from "../assets/js/utils";
 import { setTimeout } from "timers";
 import config from "../config";
@@ -214,6 +215,7 @@ export default {
       updatePrice: "account/updatePrice",
       updateEthPrice: "account/updateEthPrice",
       setAvailableTokenList: "account/setAvailableTokenList",
+      setROIR: "account/setROIR",
       updateBalance: "account/updateBalance",
       setRefresher: "account/setRefresher",
       updateTransactionList: "transaction/updateTransactionList",
@@ -364,13 +366,8 @@ export default {
       else return false;
     },
     async refreshTokenPrices() {
-      if (
-        !this.isExchangeTabActive() ||
-        this.getActiveTab !== "exchange" ||
-        !this.getConnection
-      )
-        return;
-      // console.log(`Refreshing EXCHANGE TOKEN PRICES`);
+      if (!this.isExchangeTabActive() || !this.getConnection) return;
+      // console.log(`Refreshing TOKEN prices`);
       try {
         let self = this;
         let ethPrice = await getETHToUSDPrice();
@@ -387,11 +384,12 @@ export default {
               symbol: token.symbol,
               price: 0.0
             });
-          else
+          else {
             self.updatePrice({
               symbol: token.symbol,
               price: summaryInfo.price_last_1H * ethPrice
             });
+          }
         });
         return ethPrice;
       } catch (e) {
@@ -434,9 +432,11 @@ export default {
     let web3 = await getWeb3();
     let metamaskWeb3 = await getWeb3Metamask();
     let availableTokens = await getAllListedToken();
+    let allROIR = await getAllROIR();
 
     localStorage.removeItem("chartInfo");
     this.setAvailableTokenList(availableTokens);
+    this.setROIR(allROIR);
     await initContracts(web3, availableTokens);
     this.refreshServerStatus();
     this.refreshTokenList(web3);
@@ -466,10 +466,7 @@ export default {
     let remoteBackupChecker = setTimeout(() => {
       self.checkRemoteBackup(web3);
     }, this.backupCheckInterval);
-    let tokenPriceUpdater = setInterval(
-      self.refreshTokenPrices,
-      config.refreshInterval
-    );
+    let tokenPriceUpdater = setInterval(self.refreshTokenPrices, 30000);
     let tokenListUpdater = setInterval(() => {
       self.refreshTokenList(web3);
     }, config.refreshInterval);

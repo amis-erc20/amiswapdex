@@ -99,7 +99,7 @@
             <b-tooltip target="#roir-explain-btn" placement="top" triggers="hover focus">
               <div
                 class="roir-exlplain-text"
-              >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by the current liquidity and multiplied by 100 to show as a percent.</div>
+              >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by maximum liquidity within last 7 days.</div>
             </b-tooltip>
             <font-awesome-icon
               v-if="orderBy[0] === 'roir' && orderBy[1] === 'desc'"
@@ -366,6 +366,7 @@ export default {
       getTokenList: "account/getTokenList",
       getOwnedTokenList: "account/getOwnedTokenList",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getROIR: "account/getROIR",
       getBadTokenList: "account/getBadTokenList",
       getAuthRedirectUrl: "getAuthRedirectUrl",
       getActiveTab: "getActiveTab",
@@ -410,7 +411,7 @@ export default {
               src: token.logo,
               order: "-",
               change: 0,
-              roir: 0
+              roir: self.getROIR[token.id]
             };
           } else {
             return {
@@ -423,10 +424,7 @@ export default {
               src: token.logo,
               order: summaryInfo.order || "-",
               change: summaryInfo.price_change_24h || 0,
-              roir:
-                summaryInfo.liquidity > 0
-                  ? summaryInfo.volume_eth_1W / summaryInfo.liquidity
-                  : 0
+              roir: self.getROIR[token.id]
             };
           }
         })
