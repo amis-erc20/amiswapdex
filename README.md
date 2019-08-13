@@ -9,26 +9,26 @@ This front-end interface is a SPA (Single Page Application) developed using vue.
 - Developer team: https://shardus.com/#team
 - Report Issue: https://gitlab.com/shardus/uniswapdex/issues
 
-# To Start Development
+## To Start Development
 
-## Get an API key from etherscan.io
+### Get an API key from etherscan.io
 
 - Go to https://etherscan.io and get your API key
 - Replace `etherscanApiKey` value in `config.js` file
 
-## Clone the repo
+### Clone the repo
 
 ```bash
 $ git clone https://gitlab.com/shardus/uniswapdex.git
 ```
 
-## Install Dependencies
+### Install Dependencies
 
 ```bash
 $ npm install
 ```
 
-## Serve with hot reload
+### Serve with hot reload
 
 ```bash
 $ npm run dev
@@ -36,9 +36,9 @@ $ npm run dev
 
 Go to http://localhost:3000 to test the app
 
-# To Deploy App to your own Remote server
+## To Deploy App to your own Remote server
 
-## Method 1 (Build Project Locally)
+### Method 1 (Build Project Locally)
 
 build for production locally
 
@@ -46,7 +46,7 @@ build for production locally
 $ npm run build
 ```
 
-### Upload generated `dist/` folder to your remote server
+#### Upload generated `dist/` folder to your remote server
 
 To copy `dist/` folder to remote server,
 
@@ -54,7 +54,7 @@ To copy `dist/` folder to remote server,
 $ scp -r dist USERNAME@IP_ADDRESS:REMOTE_DIRECTORY
 ```
 
-## Method 2 (Build Project on Remote Server)
+### Method 2 (Build Project on Remote Server)
 
 Follow these steps on your remote server and run build command
 
@@ -68,7 +68,7 @@ And then
 $ npm run build
 ```
 
-## Serve Static files on remote server
+### Serve Static files on remote server
 
 On your remote server, setup an http or https server to serve `dist/index.html` file.
 
