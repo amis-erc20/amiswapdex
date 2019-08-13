@@ -62,6 +62,8 @@
       </b-row>
     </div>
 
+    <Holder />
+
     <vue-friendly-iframe
       v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42 && getActiveToken !== 'ETH'"
       src="/tokenpricechart"
@@ -103,8 +105,9 @@ import {
   metamaskCreateNewExchange,
   getEvents
 } from "../assets/js/utils";
+import Holder from "./Holder";
 export default {
-  components: {},
+  components: { Holder },
   data: function() {
     return {
       summary: null,
@@ -169,6 +172,7 @@ export default {
       getSummary: "getSummary",
       getChartInfo: "getChartInfo",
       getAvailableTokenList: "account/getAvailableTokenList",
+      getROIR: "account/getROIR",
       getOwnedTokenList: "account/getOwnedTokenList",
       getPrice: "account/getPrice",
       getEthPrice: "account/getEthPrice"
@@ -197,7 +201,7 @@ export default {
           name: this.getActiveToken,
           symbol: this.getActiveToken,
           liquidity: 0,
-          roir: 0,
+          roir: self.getROIR[token.id],
           volume: 0,
           price: 0,
           src: "/_nuxt/assets/default-token.png",
@@ -229,10 +233,7 @@ export default {
           symbol: token.symbol,
           tokenAddress: token.tokenAddress,
           liquidity: foundSummary.liquidity * this.ethToUsd,
-          roir:
-            foundSummary.liquidity > 0
-              ? foundSummary.volume_eth_1W / foundSummary.liquidity
-              : 0,
+          roir: self.getROIR[token.id],
           volume: foundSummary.volume_eth_1D * this.ethToUsd,
           price: foundSummary.price_last_1H * this.ethToUsd,
           src: token.logo,

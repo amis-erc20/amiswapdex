@@ -1015,6 +1015,11 @@ export const getAllListedToken = async () => {
   })
   return tokens
 }
+export const getAllROIR = async () => {
+  let response = await axios.get(`${CONFIG.uniswapDexServer}api/roir/all`)
+  let roir = response.data.result
+  return roir
+}
 export const getAllBadToken = async () => {
   let response = await axios.get(`${CONFIG.uniswapDexServer}api/badtoken`)
   let tokens = response.data.result

@@ -154,7 +154,8 @@ import {
   getBalance,
   getTokenBalance,
   getAllListedToken,
-  getAllBadToken
+  getAllBadToken,
+  getAllROIR
 } from "../assets/js/utils";
 import { setTimeout } from "timers";
 import config from "../config";
@@ -214,6 +215,7 @@ export default {
       updatePrice: "account/updatePrice",
       updateEthPrice: "account/updateEthPrice",
       setAvailableTokenList: "account/setAvailableTokenList",
+      setROIR: "account/setROIR",
       updateBalance: "account/updateBalance",
       setRefresher: "account/setRefresher",
       updateTransactionList: "transaction/updateTransactionList",
@@ -434,9 +436,11 @@ export default {
     let web3 = await getWeb3();
     let metamaskWeb3 = await getWeb3Metamask();
     let availableTokens = await getAllListedToken();
+    let allROIR = await getAllROIR();
 
     localStorage.removeItem("chartInfo");
     this.setAvailableTokenList(availableTokens);
+    this.setROIR(allROIR);
     await initContracts(web3, availableTokens);
     this.refreshServerStatus();
     this.refreshTokenList(web3);

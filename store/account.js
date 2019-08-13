@@ -8,7 +8,8 @@ export const state = () => ({
   ownedTokenList: [],
   availableTokenList: [],
   badTokenList: [],
-  refresher: false
+  refresher: false,
+  roir: {}
 })
 
 export const getters = {
@@ -20,6 +21,7 @@ export const getters = {
   getOwnedTokenList: state => state.ownedTokenList,
   getTotalValue: state => state.totalValue,
   getAvailableTokenList: state => state.availableTokenList,
+  getROIR: state => state.roir,
   getAvailableTokenAddresses: state => {
     let tokenAddressess = {}
     state.availableTokenList.forEach(t => {
@@ -96,6 +98,9 @@ export const mutations = {
   setAvailableTokenList(state, payload) {
     state.availableTokenList = payload
   },
+  setROIR(state, payload) {
+    state.roir = payload
+  },
   setRefresher(state, payload) {
     state.refresher = payload
   },
@@ -123,6 +128,9 @@ export const actions = {
   },
   async setAvailableTokenList(store, payload) {
     store.commit('setAvailableTokenList', payload)
+  },
+  async setROIR(store, payload) {
+    store.commit('setROIR', payload)
   },
   async updateBalance(store, payload) {
     store.commit('updateBalance', payload)
