@@ -235,7 +235,7 @@ export default {
           liquidity: foundSummary.liquidity * this.ethToUsd,
           roir: self.getROIR[token.id],
           volume: foundSummary.volume_eth_1D * this.ethToUsd,
-          price: foundSummary.price_last_1H * this.ethToUsd,
+          price: self.getPrice[token.symbol],
           src: token.logo,
           order: foundSummary.order || "-",
           change: foundSummary.price_change_24h || 0,
