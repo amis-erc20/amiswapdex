@@ -338,7 +338,8 @@ import {
   metamaskAddLiquidity,
   metamaskRemoveLiquidity,
   hasTokenUniswap,
-  submitTxIdToServer
+  submitTxIdToServer,
+  convertLiquidityToToken
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Holder from "./Holder";

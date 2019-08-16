@@ -18,13 +18,15 @@
           </b-tab>
           <b-tab title="Wallet" :active="getActiveTab === `wallet`" @click="onTabChange">
             <b-card-text v-if="getSignIn">
-              <div id="total-summary">
-                <h5>TOTAL VALUE</h5>
-                <h2 v-if="getTotalValue >= 1">$ {{ getTotalValue.toFixed(2) }}</h2>
-                <h2 v-else>$ {{ getTotalValue.toFixed(4) }}</h2>
+              <div class="wallet-tab-container">
+                <div id="total-summary">
+                  <h5>TOTAL VALUE</h5>
+                  <h2 v-if="getTotalValue >= 1">$ {{ getTotalValue.toFixed(2) }}</h2>
+                  <h2 v-else>$ {{ getTotalValue.toFixed(4) }}</h2>
+                </div>
+                <Tokenlist :balance="tokenBalance" />
+                <periodic-backup :backupStatus="getBackupStatus()" />
               </div>
-              <Tokenlist :balance="tokenBalance" />
-              <periodic-backup :backupStatus="getBackupStatus()" />
               <b-modal
                 ref="backup_advice_modal"
                 id="backup_advice_modal"
@@ -312,6 +314,7 @@ export default {
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
+              console.log(token.symbol);
               if (token.symbol === "UNI-V1") {
                 let tokenDetail = self.getAvailableTokenList.find(
                   t =>
@@ -320,7 +323,9 @@ export default {
                 );
                 if (tokenDetail) {
                   // console.log(tokenDetail);
-                  token.symbol = token.symbol + "_" + tokenDetail.symbol;
+                  // token.symbol = token.symbol + "_" + tokenDetail.symbol;
+                  token.symbol = tokenDetail.symbol + "_LIQUIDITY";
+                  token.name = tokenDetail.symbol + " Liquidity Share";
                 }
               }
               self.addToken(token);
@@ -632,6 +637,9 @@ div {
     height: 64px;
     padding: 25px;
     font-size: 13px;
+  }
+  .wallet-tab-container {
+    overflow-x: hidden;
   }
 }
 </style>

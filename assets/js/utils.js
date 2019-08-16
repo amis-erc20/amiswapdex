@@ -14,6 +14,7 @@ import BigNumber from 'bignumber.js'
 import CONFIG from '../../config.js'
 import * as R from 'ramda'
 import config from '../../config.js'
+let metamaskWeb3 = null
 
 let exchangeAddresses = {}
 let tokenAddresses = {}
@@ -88,14 +89,18 @@ export const getWeb3 = function () {
 export const getWeb3Metamask = function () {
   return new Promise(function (resolve, reject) {
     try {
-      if (!Web3.givenProvider._metamask) {
-        console.warn('Metamask web3 is overwritten by an another extension')
-        resolve(null)
-      }
+      // if (!Web3.givenProvider._metamask) {
+      //   console.warn('Metamask web3 is overwritten by an another extension')
+      //   resolve(null)
+      // }
       // web3.currentProvider.guardaWeb3
-      let web3 = new Web3(Web3.givenProvider)
-      web3.currentProvider.setMaxListeners(300)
-      resolve(web3)
+      if (!metamaskWeb3) {
+        metamaskWeb3 = new Web3(Web3.givenProvider)
+        metamaskWeb3.currentProvider.setMaxListeners(300)
+        resolve(metamaskWeb3)
+      } else {
+        resolve(metamaskWeb3)
+      }
     } catch (e) {
       console.log(e)
       console.log('Cannot get web3 instance for metamask')
@@ -1098,6 +1103,29 @@ export const getEvents = async (tokenAddress, limit = 50) => {
     return response.data.result
   } catch (e) {
     return []
+  }
+}
+export const convertLiquidityToToken = async (liquidityToken, outputCurrency, web3) => {
+  const exchangeContract = exchangeContracts[outputCurrency]
+  const tokenContract = tokenContracts[outputCurrency]
+  const exchangeAddress = exchangeAddresses[outputCurrency]
+  const ethReserve = await web3.eth.getBalance(exchangeAddress)
+  const tokenReserve = await tokenContract.methods
+    .balanceOf(exchangeAddress)
+    .call()
+
+  const totalSupply = await exchangeContract.methods.totalSupply().call()
+  const amount = new BigNumber(liquidityToken * Math.pow(10, 18))
+  const ownership = amount.dividedBy(totalSupply)
+  const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership)
+  const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
+    ownership
+  )
+  return {
+    ethWithdrawn: ethWithdrawn.dividedBy(Math.pow(10, 18)).toNumber(3),
+    tokenWithdrawn: tokenWithdrawn.dividedBy(Math.pow(10, 18)).toNumber(3),
+    tokenReserve: new BigNumber(tokenReserve).dividedBy(Math.pow(10, 18)).toNumber(3),
+    ownership: ownership.multipliedBy(100).toNumber(3)
   }
 }
 export const submitTxIdToServer = async (txId) => {
