@@ -7,25 +7,44 @@
         switch
       >Hide tokens with zero token amount</b-form-checkbox>
     </div>
-    <div class="walletlist-title">
-      <div class="wallet-title-name">Token</div>
-      <div class="wallet-title-price">Price</div>
-      <div class="wallet-title-roir">
-        ROIR
-        <b-button
-          ref="roir-explain-btn-wallet"
-          id="roir-explain-btn-wallet"
-          variant="outline-success"
-        >?</b-button>
-        <b-tooltip target="#roir-explain-btn-wallet" placement="bottom" triggers="hover focus">
-          <div
-            class="roir-exlplain-text"
-          >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by the current liquidity and multiplied by 100 to show as a percent.</div>
-        </b-tooltip>
+    <div class="walletlist-title-container" ref="walletlist-title-container">
+      <div class="walletlist-title">
+        <div class="wallet-title-name">Token</div>
+        <div class="wallet-title-price">Price</div>
+        <div class="wallet-title-roir">
+          ROIR
+          <b-button
+            ref="roir-explain-btn-wallet"
+            id="roir-explain-btn-wallet"
+            variant="outline-success"
+          >?</b-button>
+          <b-tooltip target="#roir-explain-btn-wallet" placement="bottom" triggers="hover focus">
+            <div
+              class="roir-exlplain-text"
+            >Return On Investment Rank (ROIR) is approximately the Annual Percentage Rate of return for liquidity providers based only on the 0.3% fee. It is calculated as the average of the 24 hour trading volume over the last 7 days divided by the current liquidity and multiplied by 100 to show as a percent.</div>
+          </b-tooltip>
+        </div>
+        <div class="wallet-title-pool">
+          Pooled
+          <b-button
+            ref="pooled-explain-btn-wallet"
+            id="pooled-explain-btn-wallet"
+            variant="outline-success"
+          >?</b-button>
+          <b-tooltip target="#pooled-explain-btn-wallet" placement="below" triggers="hover focus">
+            <div
+              class="roir-exlplain-text"
+            >Amount of ETH and Token contributed to Uniswap Liquidity Pools</div>
+          </b-tooltip>
+        </div>
+        <div class="wallet-title-balance">Balance</div>
       </div>
-      <div class="wallet-title-balance">Balance</div>
     </div>
-    <b-card style="border-top: 0px; background: red">
+    <b-card
+      class="token-list-card"
+      style="border-top: 0px; background: red"
+      v-on:scroll.passive="onScroll"
+    >
       <b-list-group flush>
         <b-list-group-item
           v-for="token in tokenList"
@@ -33,7 +52,7 @@
           button
           v-on:click="changeTokenTab($event, token.name, token.tokenAddress)"
         >
-          <token :token="token" />
+          <token :token="token" :web3="web3" />
         </b-list-group-item>
       </b-list-group>
     </b-card>
@@ -51,7 +70,7 @@
 import Token from "~/components/Token.vue";
 import Tokeninfo from "~/components/Tokeninfo.vue";
 import { mapActions, mapGetters } from "vuex";
-import { getAllListedToken } from "../assets/js/utils";
+import { getAllListedToken, getWeb3Metamask } from "../assets/js/utils";
 import * as R from "ramda";
 export default {
   components: { Token, Tokeninfo },
@@ -59,7 +78,8 @@ export default {
     return {
       tokenAddresses: [],
       hideZeroAmountTokens: true,
-      showTokenInfoModal: false
+      showTokenInfoModal: false,
+      web3: null
     };
   },
   props: ["balance"],
@@ -87,6 +107,7 @@ export default {
         token = self.getAvailableTokenList.find(t => t.symbol === symbol);
         let roir = null;
         let isLiquidityAdded = false;
+        let liquidityPoolShare = 0;
         if (token) {
           let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
           if (summaryInfo) {
@@ -97,12 +118,17 @@ export default {
             }
           }
           let tokenWithLiquidity = self.getOwnedTokenList.find(
-            t => t.symbol === "UNI-V1_" + symbol
+            t => t.symbol === token.symbol + "_LIQUIDITY"
           );
-          if (tokenWithLiquidity) isLiquidityAdded = true;
+          if (tokenWithLiquidity) {
+            isLiquidityAdded = true;
+            liquidityPoolShare = tokenWithLiquidity.balance;
+          }
         } else {
           token = self.getOwnedTokenList.find(t => t.symbol === symbol);
         }
+        // for instance symbol of a liquidity token is: DAI_LIQUIDITY
+        let isLiquidityToken = token.symbol.split("_")[1] === "LIQUIDITY";
         return {
           name: symbol,
           fullname: token ? token.name : "-",
@@ -111,10 +137,12 @@ export default {
           src: token ? token.logo : null,
           tokenAddress: token ? token.tokenAddress : null,
           roir: roir,
-          isLiquidityAdded
+          isLiquidityAdded,
+          liquidityPoolShare,
+          isLiquidityToken
         };
       });
-      list = list.filter(t => t.name.slice(0, 7) !== "UNI-V1_");
+      list = list.filter(t => t.name.split("_")[1] !== "LIQUIDITY");
       let ethToken = list.slice(0, 1);
       if (ethToken.length > 0) {
         ethToken[0].fullname = "Ether";
@@ -151,6 +179,7 @@ export default {
       // }
 
       console.log(tokenName, tokenAddress);
+      if (tokenName.split("_")[1] === "LIQUIDITY") return; // since it is a liquidity token
       this.updateActiveToken(tokenName);
       this.updateActiveTokenAddress(tokenAddress);
       this.updateCurrentView("tokeninfo");
@@ -169,7 +198,14 @@ export default {
     closeTokenInfo() {
       this.showTokenInfoModal = false;
       this.updateCurrentView("main");
+    },
+    onScroll(e) {
+      const scrollX = e.target.scrollLeft;
+      this.$refs["walletlist-title-container"].scrollLeft = scrollX;
     }
+  },
+  created: async function() {
+    this.web3 = await getWeb3Metamask();
   }
 };
 </script>
@@ -189,7 +225,7 @@ export default {
 }
 .tokenlist-section {
   width: 100%;
-  max-width: 700px;
+  max-width: 650px;
   margin: 30px auto;
   margin-bottom: 0px;
 }
@@ -207,11 +243,15 @@ export default {
   padding-left: 5px;
 }
 .tokenlist-section .wallet-title-price {
-  left: -15px;
+  left: 35px;
   position: relative;
 }
 .tokenlist-section .wallet-title-roir {
-  left: -35px;
+  left: 20px;
+  position: relative;
+}
+.tokenlist-section .wallet-title-pool {
+  left: 10px;
   position: relative;
 }
 .show-zero-balance-tokens {
@@ -237,7 +277,8 @@ export default {
   top: 126px;
   z-index: 500;
 }
-#roir-explain-btn-wallet {
+#roir-explain-btn-wallet,
+#pooled-explain-btn-wallet {
   padding: 0px;
   font-weight: normal;
   font-size: 12px;
@@ -250,12 +291,24 @@ export default {
 }
 @media screen and (max-width: 450px) {
   .tokenlist-section .wallet-title-price {
-    left: 10px;
+    left: 30px;
     position: relative;
   }
   .tokenlist-section .wallet-title-roir {
-    left: 0px;
+    left: 30px;
     position: relative;
+  }
+  .token-list-card {
+    overflow-x: scroll;
+  }
+  .token-list-card .list-group-item {
+    width: 650px;
+  }
+  .walletlist-title {
+    width: 650px;
+  }
+  .walletlist-title-container {
+    overflow-x: scroll;
   }
 }
 </style>
