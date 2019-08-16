@@ -312,7 +312,6 @@ export default {
             this.updateTransactionList(txList);
             this.updateTokenTransactionList(tokenTxList);
             newTokenHolding.forEach(token => {
-              console.log(token.symbol);
               if (token.symbol === "UNI-V1") {
                 let tokenDetail = self.getAvailableTokenList.find(
                   t =>

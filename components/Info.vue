@@ -277,7 +277,10 @@ export default {
       updateChartInfo: "updateChartInfo"
     }),
     rowStyleClassFn(row) {
-      return "row-style";
+      if (row.action === "buyToken") return "row-style-buy";
+      if (row.action === "sellToken") return "row-style-sell";
+      if (row.action === "addLiq") return "row-style-add";
+      if (row.action === "remLiq") return "row-style-remove";
     },
     async setRows() {
       let token = this.selectedToken;
@@ -364,9 +367,25 @@ iframe {
   width: 90%;
   margin: 20px auto;
 }
-.row-style {
+.row-style-buy {
   font-size: 12px;
   padding-top: 10px;
+  background: #f2dede;
+}
+.row-style-sell {
+  font-size: 12px;
+  padding-top: 10px;
+  background: #ddf6dd;
+}
+.row-style-add {
+  font-size: 12px;
+  padding-top: 10px;
+  background: #ffffdb;
+}
+.row-style-remove {
+  font-size: 12px;
+  padding-top: 10px;
+  background: #d5edff;
 }
 .custom-th-class {
   color: #b14ae2 !important;
