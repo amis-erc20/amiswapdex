@@ -115,7 +115,6 @@ export default {
           this.token.name,
           this.web3
         );
-        console.log(outputValue);
         this.ethWithdrawn = outputValue.ethWithdrawn;
         this.tokenWithdrawn = outputValue.tokenWithdrawn;
         this.ownership = outputValue.ownership;

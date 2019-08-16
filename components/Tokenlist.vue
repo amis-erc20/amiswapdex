@@ -31,10 +31,10 @@
             id="pooled-explain-btn-wallet"
             variant="outline-success"
           >?</b-button>
-          <b-tooltip target="#pooled-explain-btn-wallet" placement="below" triggers="hover focus">
+          <b-tooltip target="#pooled-explain-btn-wallet" placement="bottom" triggers="hover focus">
             <div
               class="roir-exlplain-text"
-            >Amount of ETH and Token contributed to Uniswap Liquidity Pools</div>
+            >Amount of ETH and Token you own in the liquidity pool and percent of the pool you own.</div>
           </b-tooltip>
         </div>
         <div class="wallet-title-balance">Balance</div>
