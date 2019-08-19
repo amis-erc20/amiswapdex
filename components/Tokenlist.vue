@@ -91,7 +91,9 @@ export default {
         if (token) {
           let summaryInfo = self.getSummary.find(s => s.token_id === token.id);
           if (summaryInfo) {
-            roir = self.getROIR[token.id];
+            roir = self.getROIR[token.id] || 0;
+          } else {
+            roir = 0;
           }
           let tokenWithLiquidity = self.getOwnedTokenList.find(
             t => t.symbol === "UNI-V1_" + symbol

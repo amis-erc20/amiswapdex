@@ -40,7 +40,8 @@
       </b-row>
       <b-row>
         <b-col>ROIR</b-col>
-        <b-col>{{ numberWithCommas(selectedToken.roir.toFixed(2)) }}%</b-col>
+        <b-col v-if="selectedToken.roir">{{ numberWithCommas(selectedToken.roir.toFixed(2)) }}%</b-col>
+        <b-col v-else>-</b-col>
       </b-row>
       <b-row v-if="getActiveToken !== 'ETH'">
         <b-col>Token Address</b-col>
@@ -201,7 +202,7 @@ export default {
           name: this.getActiveToken,
           symbol: this.getActiveToken,
           liquidity: 0,
-          roir: self.getROIR[token.id],
+          roir: self.getROIR[token.id] || 0,
           volume: 0,
           price: 0,
           src: "/_nuxt/assets/default-token.png",
@@ -233,7 +234,7 @@ export default {
           symbol: token.symbol,
           tokenAddress: token.tokenAddress,
           liquidity: foundSummary.liquidity * this.ethToUsd,
-          roir: self.getROIR[token.id],
+          roir: self.getROIR[token.id] || 0,
           volume: foundSummary.volume_eth_1D * this.ethToUsd,
           price: self.getPrice[token.symbol],
           src: token.logo,

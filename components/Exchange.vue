@@ -172,8 +172,11 @@
               </div>
               <!-- <div class="token-volume-container" v-if="$mq !== 'mobile'"> -->
               <div class="token-volume-container">
-                <p class="token-volume">{{ numberWithCommas(token.roir.toFixed(2)) }}%</p>
-                <!-- <p class="token-volume">{{ summaryInfo.volume_eth_1W}} / {{summaryInfo.liquidity }}%</p> -->
+                <p
+                  class="token-volume"
+                  v-if="token.roir"
+                >{{ numberWithCommas(token.roir.toFixed(2)) }}%</p>
+                <p class="token-volume" v-else>-</p>
               </div>
               <div class="token-liquidity-container">
                 <p class="token-liquidity-usd">${{ numberWithCommas(token.liquidity.toFixed(0)) }}</p>
@@ -215,7 +218,7 @@
         <b-alert v-if="infoMessage.length > 0" show fade variant="info">{{infoMessage}}</b-alert>
         <b-form-group id="exampleInputGroup1">
           <label>Select Your Token</label>
-          <!-- <b-input v-model="form.tokenAddress"></b-input> -->
+          <b-input v-model="form.tokenAddress"></b-input>
           <v-select
             :options="listabeTokenList"
             label="title"
