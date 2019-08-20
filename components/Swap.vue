@@ -334,24 +334,29 @@
       >
         <b-form @submit="onUnlock" v-if="approvedStatus === false">
           <b-form-group id="exampleInputGroup1">
-            <label>Amount to Unlock</label>
+            <p>Please unlock your token to allow Wallet to spend. Recommended allowance is {{ getActiveToken }} amount to swap + extra 10% . If you intend to spend more {{ getActiveToken }} in the future, please fill in higer allowance so that you can avoid extra gas fees caused by future approval transactions</p>
+            <label>{{ getActiveToken }} Amount to Unlock</label>
             <b-form-input type="text" v-model="form.approvedAmount" />
           </b-form-group>
-          <b-button type="submit" variant="outline-danger">Approve</b-button>
+          <b-button type="submit" variant="outline-primary">Approve</b-button>
         </b-form>
-        <p v-else-if="approvedStatus === `waiting`">Approving...pls wait a few moments</p>
-        <p v-else-if="approvedStatus === `waiting` && unlockTxHash">
-          See your approval tx on
-          <a
-            id="txUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            :href="`https://etherscan.io/tx/${unlockTxHash}`"
-          >etherscan.io</a>
+        <p v-else-if="approvedStatus === `waiting`">
+          Confirming your approval to spend {{ getActiveToken }} token on Ethereum network. Please wait a few moments. It may take 1 to 3 minutes depending on network traffic and your transaction fee.
+          <span
+            v-if="approvedStatus === `waiting` && unlockTxHash"
+          >
+            See status of your approval tx on
+            <a
+              id="txUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              :href="`https://etherscan.io/tx/${unlockTxHash}`"
+            >etherscan.io</a>
+          </span>
         </p>
         <p
           v-else-if="approvedStatus === true"
-        >Your approval is confirmed on Ethereum Network!. You can submit the transaction now.</p>
+        >Your approval is confirmed on Ethereum Network!. You can now submit your original transaction to spend {{ form.inputValue }} {{ getActiveToken }} token.</p>
       </b-modal>
     </div>
   </div>
@@ -1139,41 +1144,56 @@ export default {
         Math.pow(10, this.getDecimal(this.form.inputCurrency));
       this.approvedStatus = "waiting";
       if (this.getAccount.type === "metamask") {
-        this.unlockTxHash = await unlockTokenMetamask(
-          {
-            from: this.getAccount.address,
-            approvedAmount: parseInt(approvedAmount),
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit)
-          },
-          this.form.inputCurrency,
-          {
-            web3: this.web3Metamask,
-            exchangeAddress: this.getAvailableExchangeAddresses[
-              this.form.inputCurrency
-            ],
-            privateKey: this.getAccount.privateKey
-          }
-        );
+        try {
+          this.unlockTxHash = await unlockTokenMetamask(
+            {
+              from: this.getAccount.address,
+              approvedAmount: parseInt(approvedAmount),
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit)
+            },
+            this.form.inputCurrency,
+            {
+              web3: this.web3Metamask,
+              exchangeAddress: this.getAvailableExchangeAddresses[
+                this.form.inputCurrency
+              ],
+              privateKey: this.getAccount.privateKey
+            }
+          );
+          console.log(`Unlock Tx Hash: ${this.unlockTxHash}`);
+        } catch (e) {
+          alert(
+            "Your approval transaction has failed. Please try again to approve token to spend."
+          );
+          this.hideModal("unlock_request_modal_ref");
+        }
       } else {
-        this.unlockTxHash = await unlockToken(
-          {
-            from: this.getAccount.address,
-            approvedAmount: parseInt(approvedAmount),
-            gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-            gasLimit: parseInt(this.gasLimit)
-          },
-          this.form.inputCurrency,
-          {
-            web3: this.web3,
-            exchangeAddress: this.getAvailableExchangeAddresses[
-              this.form.inputCurrency
-            ],
-            privateKey: this.getAccount.privateKey
-          }
-        );
+        try {
+          this.unlockTxHash = await unlockToken(
+            {
+              from: this.getAccount.address,
+              approvedAmount: parseInt(approvedAmount),
+              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+              gasLimit: parseInt(this.gasLimit)
+            },
+            this.form.inputCurrency,
+            {
+              web3: this.web3,
+              exchangeAddress: this.getAvailableExchangeAddresses[
+                this.form.inputCurrency
+              ],
+              privateKey: this.getAccount.privateKey
+            }
+          );
+          console.log(`Unlock Tx Hash: ${this.unlockTxHash}`);
+        } catch (e) {
+          alert(
+            "Your approval transaction has failed. Please try again to approve token to spend."
+          );
+          this.hideModal("unlock_request_modal_ref");
+        }
       }
-
       // checking allowance
       let self = this;
       const check = setInterval(async () => {
@@ -1188,8 +1208,9 @@ export default {
         ) {
           clearInterval(check);
           self.approvedStatus = true;
+          self.onSubmit();
         }
-      }, 1000);
+      }, 2000);
     },
     async onUsdInputChange() {
       let usdAmount = this.form.inputValueUsd;
@@ -1234,6 +1255,7 @@ export default {
       }
     },
     async onSubmit(evt) {
+      console.log(`Preparing to submit swap tx:`);
       let self = this;
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
@@ -1243,7 +1265,7 @@ export default {
         alert("Connection Issue to Server !");
         return;
       }
-      evt.preventDefault();
+      if (evt) evt.preventDefault();
       this.loading = true;
       let web3 = this.web3;
       let inputValue = this.form.inputValue;
@@ -1259,6 +1281,8 @@ export default {
         try {
           if (inputCurrency !== "ETH") {
             const allowance = await this.getAllowance(this.form.inputCurrency);
+            // const allowance =
+            // 1 * Math.pow(10, this.getDecimal(this.form.inputCurrency));
             const input =
               inputValue *
               Math.pow(10, this.getDecimal(this.form.inputCurrency));
@@ -1295,10 +1319,12 @@ export default {
           this.updateActiveTokenAddress(outputTokenAddress);
           this.onReset();
           this.loading = false;
+          this.hideModal("unlock_request_modal_ref");
           this.showSuccessToast(this.txHash);
         } else {
           this.onReset();
           this.loading = false;
+          this.hideModal("unlock_request_modal_ref");
           this.showModal("failed_modal_ref");
           return;
         }
@@ -1629,6 +1655,9 @@ export default {
   flex-grow: 1;
   margin: 20px 5px;
 }
+#uniswap-convert-section form button:hover {
+  color: #fff;
+}
 #unlock_request_modal {
   position: fixed;
   top: 150px;
@@ -1662,6 +1691,10 @@ form label {
 }
 #unlock_request_modal button[type="submit"] {
   width: 100%;
+}
+#unlock_request_modal .modal-body p {
+  font-size: 13px;
+  line-height: 1.5;
 }
 #currency-swap-button svg {
   transform: rotateZ(90deg);

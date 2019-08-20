@@ -288,26 +288,29 @@
       >
         <b-form @submit="onUnlock" v-if="approvedStatus === false">
           <b-form-group id="exampleInputGroup1">
-            <p>Please unlock your token before using it to add liquidity.</p>
-            <label>Amount to Unlock ({{activeToken}})</label>
+            <p>Please unlock your token to allow Wallet to spend. Recommended allowance is {{ getActiveToken }} amount to swap + extra 10% . If you intend to spend more {{ getActiveToken }} in the future, please fill in higer allowance so that you can avoid extra gas fees caused by future approval transactions</p>
+            <label>{{ getActiveToken }} Amount to Unlock</label>
             <b-form-input type="text" v-model="form.approvedAmount" />
           </b-form-group>
-          <b-button type="submit" variant="primary">Approve</b-button>
+          <b-button type="submit" variant="outline-primary">Approve</b-button>
         </b-form>
-
-        <p v-else-if="approvedStatus === `waiting`">Approving...pls wait a few moments</p>
-        <p v-else-if="approvedStatus === `waiting` && unlockTxHash">
-          See your approval tx on
-          <a
-            id="txUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            :href="`https://etherscan.io/tx/${unlockTxHash}`"
-          >etherscan.io</a>
+        <p v-else-if="approvedStatus === `waiting`">
+          Confirming your approval to spend {{ getActiveToken }} token on Ethereum network. Please wait a few moments. It may take 1 to 3 minutes depending on network traffic and your transaction fee.
+          <span
+            v-if="approvedStatus === `waiting` && unlockTxHash"
+          >
+            See status of your approval tx on
+            <a
+              id="txUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              :href="`https://etherscan.io/tx/${unlockTxHash}`"
+            >etherscan.io</a>
+          </span>
         </p>
         <p
           v-else-if="approvedStatus === true"
-        >Your approval is confirmed on Ethereum Network!. You can submit the transaction now.</p>
+        >Your approval is confirmed on Ethereum Network!. You can now submit your original transaction to spend {{ form.outputValue }} {{ getActiveToken }} token.</p>
       </b-modal>
     </div>
   </div>
@@ -801,7 +804,7 @@ export default {
         .toFixed(6);
     },
     async onUnlock(evt) {
-      evt.preventDefault();
+      if (evt) evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -817,24 +820,32 @@ export default {
           : this.form.inputCurrency;
 
         if (this.getAccount.type === "metamask") {
-          this.unlockTxHash = await unlockTokenMetamask(
-            {
-              from: this.getAccount.address,
-              approvedAmount:
-                this.form.approvedAmount *
-                Math.pow(10, this.getDecimal(this.getActiveToken)),
-              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-              gasLimit: parseInt(this.gasLimit)
-            },
-            currencyToCheck,
-            {
-              web3: this.web3,
-              exchangeAddress: this.getAvailableExchangeAddresses[
-                currencyToCheck
-              ],
-              privateKey: this.getAccount.privateKey
-            }
-          );
+          try {
+            this.unlockTxHash = await unlockTokenMetamask(
+              {
+                from: this.getAccount.address,
+                approvedAmount:
+                  this.form.approvedAmount *
+                  Math.pow(10, this.getDecimal(this.getActiveToken)),
+                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                gasLimit: parseInt(this.gasLimit)
+              },
+              currencyToCheck,
+              {
+                web3: this.web3,
+                exchangeAddress: this.getAvailableExchangeAddresses[
+                  currencyToCheck
+                ],
+                privateKey: this.getAccount.privateKey
+              }
+            );
+            console.log(`Unlock Tx Hash: ${this.unlockTxHash}`);
+          } catch (e) {
+            alert(
+              "Your approval transaction has failed. Please try again to approve token to spend."
+            );
+            this.hideModal("unlock_request_modal_ref");
+          }
         } else {
           this.unlockTxHash = await unlockToken(
             {
@@ -871,8 +882,9 @@ export default {
             clearInterval(check);
             self.approvedStatus = true;
             self.form.approvedCurrency = "";
+            if (self.liquidity === "add") self.onAddLiquidity();
           }
-        }, 1000);
+        }, 2000);
       } catch (e) {
         alert("Unable to Unlock your token.");
         console.log("Unable to Unlock your token.");
@@ -961,7 +973,7 @@ export default {
     },
     async onAddLiquidity(evt) {
       let self = this;
-      evt.preventDefault();
+      if (evt) evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -1072,16 +1084,18 @@ export default {
       if (this.txHash) console.log(this.txHash);
       if (!this.txHash) {
         this.loading = false;
+        this.hideModal("unlock_request_modal_ref");
         this.showModal("failed_model_ref");
         return;
       }
       this.updateActiveToken(outputCurrency);
       this.onReset();
       this.loading = false;
+      this.hideModal("unlock_request_modal_ref");
       this.showSuccessToast(this.txHash);
     },
     async onRemoveLiquidity(evt) {
-      evt.preventDefault();
+      if (evt) evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;

@@ -364,36 +364,40 @@ export const unlockToken = async (tx, tokenSymbol, data) => {
   },
     data.privateKey
   )
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     web3.eth
       .sendSignedTransaction(transaction.rawTransaction)
-      .on('transactionHash', function (hash) {
-        console.log('Tx hash: ', hash)
+      .once('transactionHash', function (hash) {
+        console.log('Unlock Tx hash: ', hash)
         resolve(hash)
+      })
+      .on('error', function (err) {
+        console.error(err)
+        reject(err)
       })
   })
 }
-export const unlockTokenMetamask = async (tx, tokenSymbol, data) => {
+export const unlockTokenMetamask = (tx, tokenSymbol, data) => {
   const web3 = data.web3
-  const count = await web3.eth.getTransactionCount(tx.from)
   const amount = new BigNumber(tx.approvedAmount)
   const tokenAddress = tokenAddresses[tokenSymbol]
   const contract = new web3.eth.Contract(ERC20_ABI, tokenAddress)
   const exchangeAddress = exchangeAddresses[tokenSymbol]
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     contract.methods.approve(exchangeAddress, amount).send({
       from: tx.from,
       gasPrice: tx.gasPrice,
       gasLimit: tx.gasLimit
-    }).on('transactionHash', function (hash) {
-      console.log('Tx hash: ', hash)
-      resolve(hash)
-    }).on('error', function (e) {
-      console.log(e)
-      console.log('Error while trying to transfer using metamask extension')
-      resolve(false)
     })
+      .once('transactionHash', function (hash) {
+        resolve(hash)
+        console.log('Unlock Tx hash: ', hash)
+      })
+      .on('error', function (err) {
+        console.error(err)
+        reject(err)
+      })
   })
 }
 export const swapTokenToEth = async function (
