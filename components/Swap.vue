@@ -381,7 +381,8 @@ import {
   getCurrentReserve,
   getEthToUsdcPrice,
   getETHToUSDPrice,
-  submitTxIdToServer
+  submitTxIdToServer,
+  getLatestBlock
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Vue from "vue";
@@ -1233,6 +1234,7 @@ export default {
       }
     },
     async onSubmit(evt) {
+      let self = this;
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -1278,6 +1280,7 @@ export default {
             outputCurrency,
             gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
             gasLimit: parseInt(this.gasLimit),
+            from: self.getAccount.address,
             recipient,
             type,
             exchangeContract
@@ -1301,8 +1304,7 @@ export default {
         }
       } else {
         try {
-          const blockNumber = await web3.eth.getBlockNumber();
-          const block = await web3.eth.getBlock(blockNumber);
+          const block = await getLatestBlock(web3);
           const deadline = block.timestamp + 300;
           const accounts = await web3.eth.getAccounts();
           let exchangeContract;
@@ -1522,6 +1524,7 @@ export default {
       this.form.inputValue = "";
       this.form.outputValue = "";
       if (this.swapMode === "donation_swap") this.prepareForDonationSwap();
+      this.loading = false;
     },
     showModal(ref) {
       if (this.$refs[ref]) this.$refs[ref].show();

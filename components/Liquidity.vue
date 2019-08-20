@@ -339,7 +339,7 @@ import {
   metamaskRemoveLiquidity,
   hasTokenUniswap,
   submitTxIdToServer,
-  convertLiquidityToToken
+  getLatestBlock
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Holder from "./Holder";
@@ -653,8 +653,7 @@ export default {
       console.log(inputValue, outputValue, inputCurrency, outputCurrency);
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
@@ -692,7 +691,6 @@ export default {
       };
 
       let estimatedGas = await estimateGas(transactionParameters, this.web3);
-      console.log(`Estimated gas for add liquidity: ${estimatedGas}`);
       return estimatedGas;
     },
     async updateGasLimitAndTxFee() {
@@ -764,8 +762,7 @@ export default {
       let outputCurrency = this.form.outputCurrency;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
@@ -905,6 +902,7 @@ export default {
       this.form.outputCurrency = null;
       this.form.inputValue = "";
       this.form.outputValue = "";
+      this.loading = false;
     },
     showSuccessToast(txHash) {
       let successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
@@ -962,6 +960,7 @@ export default {
       }
     },
     async onAddLiquidity(evt) {
+      let self = this;
       evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
@@ -981,8 +980,11 @@ export default {
       let type = this.swapType;
 
       const allowance = await this.getAllowance(outputCurrency);
-      const input = this.form.outputValue * Math.pow(10, 18);
+      const input =
+        this.form.outputValue *
+        Math.pow(10, this.getDecimal(this.getActiveToken));
       console.log(`Current token allowance is: ${allowance} ${outputCurrency}`);
+      console.log(`Required token allowance is: ${input} ${outputCurrency}`);
       if (input > allowance) {
         this.loading = false;
         this.approvedStatus = false;
@@ -991,15 +993,20 @@ export default {
         this.showModal("unlock_request_modal_ref");
         return;
       }
-
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
+      if (!exchangeContract) {
+        exchangeContract = new this.web3.eth.Contract(
+          exchangeABI,
+          self.getAvailableExchangeAddresses[outputCurrency]
+        );
+      }
       const contractAddress = this.getAvailableExchangeAddresses[
         outputCurrency
       ];
+      console.log(exchangeContract);
       let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
       let tokenAmount = new BigNumber(outputValue).multipliedBy(
         10 ** this.getDecimal(this.getActiveToken)
@@ -1092,11 +1099,16 @@ export default {
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
 
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
 
       let exchangeContract = exchangeContracts[outputCurrency];
+      if (!exchangeContract) {
+        exchangeContract = new this.web3.eth.Contract(
+          exchangeABI,
+          self.getAvailableExchangeAddresses[outputCurrency]
+        );
+      }
       const contractAddress = this.getAvailableExchangeAddresses[
         outputCurrency
       ];
@@ -1249,6 +1261,13 @@ export default {
 }
 #unlock_request_modal form {
   margin-bottom: 15px !important;
+}
+#unlock_request_modal .modal-header {
+  position: relative !important;
+}
+#unlock_request_modal .modal-body {
+  position: relative !important;
+  top: 0px !important;
 }
 label {
   font-weight: bolder;

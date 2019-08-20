@@ -153,7 +153,7 @@ export default {
     },
     async initiateMetamsk() {
       try {
-        await window.ethereum.enable();
+        if (window.ethereum) await window.ethereum.enable();
         return true;
       } catch (error) {
         console.log(error);
