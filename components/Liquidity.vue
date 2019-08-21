@@ -257,7 +257,7 @@
       <!-- Success Modal -->
       <b-modal
         ref="success_modal_ref"
-        id="success_modal"
+        id="unlock_request_modal"
         title="Transaction Submitted"
         :hide-footer="true"
       >
@@ -272,11 +272,13 @@
       <!-- Fail Modal -->
       <b-modal
         ref="failed_model_ref"
-        id="success_modal"
+        id="unlock_request_modal"
         title="Transaction Failed"
         :hide-footer="true"
       >
-        <p>Error occour while trying to submit transaction</p>
+        <p>
+          <span v-html="failedErrorMessage"></span>
+        </p>
       </b-modal>
 
       <!-- Unlock Request -->
@@ -295,7 +297,10 @@
           <b-button type="submit" variant="outline-primary">Approve</b-button>
         </b-form>
         <p v-else-if="approvedStatus === `waiting`">
-          Confirming your approval to spend {{ getActiveToken }} token on Ethereum network. Please wait a few moments. It may take 1 to 3 minutes depending on network traffic and your transaction fee.
+          <span>
+            <scale-loader :color="`#a41de4`" :height="`15px`" :width="`5px`"></scale-loader>
+          </span>
+          Waiting for the approval transaction to be confirmed on Ethereum, before submitting swap transaction. It may take 1 to 3 minutes depending on network traffic and your transaction fee.
           <span
             v-if="approvedStatus === `waiting` && unlockTxHash"
           >
@@ -346,6 +351,8 @@ import {
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Holder from "./Holder";
+import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
+import config from "../config";
 
 let exchangeContracts = {};
 let tokenAddressess = {};
@@ -354,7 +361,8 @@ let defaultGasLimit = 51000 * 2;
 
 export default {
   components: {
-    Holder
+    Holder,
+    ScaleLoader
   },
   data() {
     return {
@@ -382,6 +390,7 @@ export default {
       unlockTxHash: "",
       inputErrorMessage: "Please input a valid amount",
       outputErrorMessage: "Please input a valid amount",
+      failedErrorMessage: "Your transaction has failed.",
       slippage: null,
       liquidity: "",
       liquidityBalance: 0.0
@@ -805,6 +814,7 @@ export default {
     },
     async onUnlock(evt) {
       if (evt) evt.preventDefault();
+      let txHash;
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -869,7 +879,7 @@ export default {
 
         // checking allowance
         let self = this;
-        const check = setInterval(async () => {
+        let check = setInterval(async () => {
           console.log(`Checking allowance for ${currencyToCheck} token`);
           const allowance = await self.getAllowance(currencyToCheck);
           if (
@@ -883,6 +893,14 @@ export default {
             self.approvedStatus = true;
             self.form.approvedCurrency = "";
             if (self.liquidity === "add") self.onAddLiquidity();
+          }
+          if (!txHash) txHash = self.unlockTxHash;
+          let isFailed = await self.isTxFailed(txHash);
+          console.log(`is Tx Failed: ${isFailed}`);
+          if (isFailed) {
+            clearInterval(check);
+            self.hideModal("unlock_request_modal_ref");
+            self.showFailedUnlock(txHash);
           }
         }, 2000);
       } catch (e) {
@@ -910,8 +928,9 @@ export default {
     },
     onReset(evt) {
       if (evt) evt.preventDefault();
-      this.form.inputCurrency = null;
-      this.form.outputCurrency = null;
+      console.log("Reset");
+      this.liquidity = "add";
+      this.form.outputCurrency = this.getActiveToken;
       this.form.inputValue = "";
       this.form.outputValue = "";
       this.loading = false;
@@ -1231,6 +1250,19 @@ export default {
         this.liquidity = "remove";
         this.updateLiquidityBalance();
       }
+    },
+    async isTxFailed(txHash) {
+      let url = `https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}&apikey=${
+        config.etherscanApiKey
+      }`;
+      let response = await axios.get(url);
+      if (response.data.result.isError == "1") return true;
+      return false;
+    },
+    async showFailedUnlock(txHash) {
+      // cancel allowance checker after 5min
+      this.failedErrorMessage = `The swap transaction was canceled since the approval transaction has failed on Ethereum network ! Please see transaction detail on <a href="https://etherscan.io/tx/${txHash}" target="_blank">etherscan.io</a>`;
+      this.showModal("failed_model_ref");
     }
   }
 };

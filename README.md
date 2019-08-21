@@ -9,6 +9,29 @@ This front-end interface is a SPA (Single Page Application) developed using vue.
 - Developer team: https://shardus.com/#team
 - Report Issue: https://gitlab.com/shardus/uniswapdex/issues
 
+## Prerequisites
+### Install C compiler
+For example, on Ubuntu Linux you can do this:
+```
+sudo apt-get update
+sudo apt-get install build-essential
+ ```
+
+### Install Python (Ver 2.x)
+For example, on Ubuntu Linux you can do this:
+```
+sudo apt install software-properties-common
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt install python2.7
+sudo ln -s /usr/bin/python2.7 /usr/bin/python
+```
+
+### Install nvm, node, npm
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+nvm install 10
+```
+
 ## To Start Development
 
 ### Get an API key from etherscan.io
@@ -77,3 +100,6 @@ Easiest way to setup a http server is to use `serve` npm package.
 - Install `serve` package globally by running `npm install serve -g`
 - Navigate to `dist/` directory
 - Run `serve`
+
+## To enable private key based wallet access
+Edit `components/Noaccount.vue` and uncomments lines 40-51. Then run `npm run build` again
