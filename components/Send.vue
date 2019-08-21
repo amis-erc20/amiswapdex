@@ -391,8 +391,10 @@ export default {
     },
     async getEstimatedGas() {
       let web3 = await getWeb3Metamask();
-      await window.ethereum.enable();
-      web3.setProvider(window.ethereum);
+      if (window.ethereum) {
+        await window.ethereum.enable();
+        web3.setProvider(window.ethereum);
+      }
       let to = this.form.targetAddress || this.getAccount.address;
       let value =
         parseFloat(this.form.amount || 1) *
@@ -400,7 +402,9 @@ export default {
       let gasPrice = parseInt(this.gasPrice * Math.pow(10, 9));
       let tokenAddress = this.getActiveTokenAddress;
 
-      let selectedAddress = window.ethereum.selectedAddress;
+      let selectedAddress = window.ethereum
+        ? window.ethereum.selectedAddress
+        : this.getAccount.address;
       let from = selectedAddress;
       let amount = web3.utils.toHex(value);
       let count = await web3.eth.getTransactionCount(selectedAddress);
@@ -428,14 +432,11 @@ export default {
           gasPrice: web3.utils.toHex(gasPrice)
         };
       }
-
       let estimatedGas = await estimateGas(transactionParameters, web3);
-      console.log(`Estimated gas for send: ${estimatedGas}`);
       return estimatedGas;
     },
     async updateGasLimitAndTxFee() {
       let estimatedGas = await this.getEstimatedGas();
-      console.log(`Estimated gas: ${estimatedGas}`);
       if (estimatedGas * 2 > this.gasLimit) this.gasLimit = estimatedGas * 2;
       this.txFee =
         (this.gasLimit * parseInt(this.gasPrice) * 1000000000) /

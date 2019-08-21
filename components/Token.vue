@@ -1,6 +1,6 @@
 <template>
   <b-row class="token row">
-    <b-col class="token-name">
+    <b-col cols="3" class="token-name">
       <img v-if="token.name === 'ULT'" src="../assets/logo.svg" alt />
       <img v-else-if="token.name === 'ETH'" src="../assets/eth-logo.png" alt />
       <img v-else-if="token.src" :src="token.src" alt />
@@ -9,9 +9,10 @@
         <div class="token-symbol">{{token.name}}</div>
         <div class="token-fullname" v-if="token.name === 'ETH'">Ether</div>
         <div class="token-fullname" v-else>{{token.fullname}}</div>
+        <!-- {{ token }} -->
       </div>
     </b-col>
-    <b-col class="token-price-container">
+    <b-col cols="2" class="token-price-container">
       <div v-if="token.priceInUsd">
         <p class="token-price-in-usd" v-if="token.priceInUsd < 1">${{ token.priceInUsd.toFixed(4) }}</p>
         <p
@@ -23,7 +24,7 @@
         <p class="token-price-in-usd">-</p>
       </div>
     </b-col>
-    <b-col class="token-roir-container">
+    <b-col cols="1" class="token-roir-container">
       <div>
         <p
           v-bind:class="{ 'token-roir': true, 'token-has-liquidity': token.isLiquidityAdded }"
@@ -32,9 +33,29 @@
         <p class="token-roir" v-else>-</p>
       </div>
     </b-col>
-    <b-col class="token-amount-container">
+
+    <b-col cols="3" class="token-pool-container">
+      <div v-if="token.isLiquidityAdded">
+        <p class="pool-amount-eth" v-if="ethWithdrawn > 0">{{ ethWithdrawn.toFixed(4) }} ETH</p>
+        <p
+          class="pool-amount-token"
+          v-if="tokenWithdrawn > 0"
+        >{{ tokenWithdrawn.toFixed(4) }} {{token.name}}</p>
+        <p
+          class="pool-share token-amount"
+          v-if="ownership && ownership >= 0.01"
+        >{{ ownership.toFixed(6) }} %</p>
+        <p
+          class="pool-share token-amount"
+          v-if="ownership && ownership < 0.01"
+        >{{ (ownership * 100).toFixed(6) }} %%</p>
+      </div>
+      <p class="token-amount" v-else>-</p>
+    </b-col>
+
+    <b-col cols="2" class="token-amount-container">
       <div v-if="token.balance !== `NaN`">
-        <p class="token-amount-usd" v-if="balanceInUsd !== '-'">${{ balanceInUsd }}</p>
+        <p class="token-amount-usd" v-if="balanceInUsd !== '-'">$ {{ balanceInUsd }}</p>
         <p class="token-amount-usd" v-else>-</p>
         <p class="token-amount">{{getBalance[token.name].toFixed(4)}} {{token.name}}</p>
       </div>
@@ -45,11 +66,23 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import { convertLiquidityToToken } from "../assets/js/utils";
+import { async } from "q";
 export default {
   props: {
     token: {
       type: Object
+    },
+    web3: {
+      type: Object
     }
+  },
+  data: function() {
+    return {
+      ethWithdrawn: null,
+      tokenWithdrawn: null,
+      ownership: null
+    };
   },
   computed: {
     ...mapGetters({
@@ -75,6 +108,18 @@ export default {
       if (tokenName === "ULT") return `../assets/logo.svg`;
       if (tokenName === "DAI") return `../assets/dai-logo.png`;
     },
+    outputFromLiquidity: async function() {
+      if (this.token.isLiquidityAdded) {
+        let outputValue = await convertLiquidityToToken(
+          this.token.liquidityPoolShare,
+          this.token.name,
+          this.web3
+        );
+        this.ethWithdrawn = outputValue.ethWithdrawn;
+        this.tokenWithdrawn = outputValue.tokenWithdrawn;
+        this.ownership = outputValue.ownership;
+      }
+    },
     wait(ms) {
       return new Promise(resolve => {
         setTimeout(() => {
@@ -83,7 +128,12 @@ export default {
       });
     }
   },
-  mounted: async function() {}
+  mounted: async function() {
+    this.outputFromLiquidity();
+  },
+  updated: async function() {
+    this.outputFromLiquidity();
+  }
 };
 </script>
 
@@ -116,17 +166,28 @@ export default {
   margin-bottom: 5px;
   text-align: right;
 }
-.tokenlist-section .token .token-price-container {
-  width: 100px;
-  left: -90px;
-  position: relative;
+.tokenlist-section .token .pool-amount-eth,
+.tokenlist-section .token .pool-amount-token {
+  font-size: 13px;
+  font-weight: bolder;
+  color: #464646;
+  margin: 0;
+  margin-bottom: 5px;
   text-align: right;
 }
-.tokenlist-section .token .token-roir-container {
-  width: 100px;
-  left: -90px;
+.tokenlist-section .token .token-price-container {
+  /* width: 100px;
+  left: -90px; */
   position: relative;
   text-align: right;
+  left: -30px;
+}
+.tokenlist-section .token .token-roir-container {
+  /* width: 100px;
+  left: -90px; */
+  position: relative;
+  text-align: right;
+  padding: 0;
 }
 .tokenlist-section .token .token-price-in-usd {
   font-size: 13px;
@@ -146,7 +207,7 @@ export default {
 }
 .tokenlist-section .token .token-has-liquidity {
   font-weight: bold;
-  color: #1980ff;
+  color: #464646;
 }
 .tokenlist-section .token-name img {
   width: 30px;
@@ -170,7 +231,8 @@ export default {
 .tokenlist-section .tokenlist-section a {
   text-decoration: none !important;
 }
-.tokenlist-section .token-amount-container {
+.tokenlist-section .token-amount-container,
+.tokenlist-section .token-pool-container {
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -184,7 +246,7 @@ export default {
   transform: scale(1.03);
 }
 @media screen and (max-width: 450px) {
-  .tokenlist-section .token .token-price-container {
+  /* .tokenlist-section .token .token-price-container {
     width: 100px;
     left: 0px;
     position: relative;
@@ -195,6 +257,6 @@ export default {
     left: 0px;
     position: relative;
     text-align: right;
-  }
+  } */
 }
 </style>

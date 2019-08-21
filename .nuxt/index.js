@@ -11,9 +11,9 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
-import nuxt_plugin_nuxticons_b427c6d8 from 'nuxt_plugin_nuxticons_b427c6d8' // Source: ./nuxt-icons.js (mode: 'all')
-import nuxt_plugin_bootstrapvue_7a019763 from 'nuxt_plugin_bootstrapvue_7a019763' // Source: ./bootstrap-vue.js (mode: 'all')
-import nuxt_plugin_axios_c801a598 from 'nuxt_plugin_axios_c801a598' // Source: ./axios.js (mode: 'all')
+import nuxt_plugin_nuxticons_3cdc5295 from 'nuxt_plugin_nuxticons_3cdc5295' // Source: ./nuxt-icons.js (mode: 'all')
+import nuxt_plugin_bootstrapvue_559e15c2 from 'nuxt_plugin_bootstrapvue_559e15c2' // Source: ./bootstrap-vue.js (mode: 'all')
+import nuxt_plugin_axios_1e590ada from 'nuxt_plugin_axios_1e590ada' // Source: ./axios.js (mode: 'all')
 
 // Component: <NoSsr>
 Vue.component(NoSsr.name, NoSsr)
@@ -35,7 +35,7 @@ Vue.use(Meta, {
   tagIDKeyName: 'hid' // the property name that vue-meta uses to determine whether to overwrite or append a tag
 })
 
-const defaultTransition = {"name":"page","mode":"out-in","appear":true,"appearClass":"appear","appearActiveClass":"appear-active","appearToClass":"appear-to"}
+const defaultTransition = { "name": "page", "mode": "out-in", "appear": true, "appearClass": "appear", "appearActiveClass": "appear-active", "appearToClass": "appear-to" }
 
 async function createApp(ssrContext) {
   const router = await createRouter(ssrContext)
@@ -53,10 +53,10 @@ async function createApp(ssrContext) {
     store,
     nuxt: {
       defaultTransition,
-      transitions: [ defaultTransition ],
+      transitions: [defaultTransition],
       setTransitions(transitions) {
         if (!Array.isArray(transitions)) {
-          transitions = [ transitions ]
+          transitions = [transitions]
         }
         transitions = transitions.map((transition) => {
           if (!transition) {
@@ -148,9 +148,15 @@ async function createApp(ssrContext) {
 
   // Plugin execution
 
+<<<<<<< HEAD
+  if (typeof nuxt_plugin_nuxticons_3cdc5295 === 'function') await nuxt_plugin_nuxticons_3cdc5295(app.context, inject)
+  if (typeof nuxt_plugin_bootstrapvue_559e15c2 === 'function') await nuxt_plugin_bootstrapvue_559e15c2(app.context, inject)
+  if (typeof nuxt_plugin_axios_1e590ada === 'function') await nuxt_plugin_axios_1e590ada(app.context, inject)
+=======
   if (typeof nuxt_plugin_nuxticons_b427c6d8 === 'function') await nuxt_plugin_nuxticons_b427c6d8(app.context, inject)
   if (typeof nuxt_plugin_bootstrapvue_7a019763 === 'function') await nuxt_plugin_bootstrapvue_7a019763(app.context, inject)
   if (typeof nuxt_plugin_axios_c801a598 === 'function') await nuxt_plugin_axios_c801a598(app.context, inject)
+>>>>>>> 08b8af4e605eb8c7e58a87ee350e33c20f093014
 
   // If server-side, wait for async component to be resolved first
   if (process.server && ssrContext && ssrContext.url) {

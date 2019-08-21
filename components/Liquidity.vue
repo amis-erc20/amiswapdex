@@ -257,7 +257,7 @@
       <!-- Success Modal -->
       <b-modal
         ref="success_modal_ref"
-        id="success_modal"
+        id="unlock_request_modal"
         title="Transaction Submitted"
         :hide-footer="true"
       >
@@ -272,11 +272,13 @@
       <!-- Fail Modal -->
       <b-modal
         ref="failed_model_ref"
-        id="success_modal"
+        id="unlock_request_modal"
         title="Transaction Failed"
         :hide-footer="true"
       >
-        <p>Error occour while trying to submit transaction</p>
+        <p>
+          <span v-html="failedErrorMessage"></span>
+        </p>
       </b-modal>
 
       <!-- Unlock Request -->
@@ -288,26 +290,32 @@
       >
         <b-form @submit="onUnlock" v-if="approvedStatus === false">
           <b-form-group id="exampleInputGroup1">
-            <p>Please unlock your token before using it to add liquidity.</p>
-            <label>Amount to Unlock ({{activeToken}})</label>
+            <p>Please unlock your token to allow Wallet to spend. Recommended allowance is {{ getActiveToken }} amount to swap + extra 10% . If you intend to spend more {{ getActiveToken }} in the future, please fill in higer allowance so that you can avoid extra gas fees caused by future approval transactions</p>
+            <label>{{ getActiveToken }} Amount to Unlock</label>
             <b-form-input type="text" v-model="form.approvedAmount" />
           </b-form-group>
-          <b-button type="submit" variant="primary">Approve</b-button>
+          <b-button type="submit" variant="outline-primary">Approve</b-button>
         </b-form>
-
-        <p v-else-if="approvedStatus === `waiting`">Approving...pls wait a few moments</p>
-        <p v-else-if="approvedStatus === `waiting` && unlockTxHash">
-          See your approval tx on
-          <a
-            id="txUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            :href="`https://etherscan.io/tx/${unlockTxHash}`"
-          >etherscan.io</a>
+        <p v-else-if="approvedStatus === `waiting`">
+          <span>
+            <scale-loader :color="`#a41de4`" :height="`15px`" :width="`5px`"></scale-loader>
+          </span>
+          Waiting for the approval transaction to be confirmed on Ethereum, before submitting swap transaction. It may take 1 to 3 minutes depending on network traffic and your transaction fee.
+          <span
+            v-if="approvedStatus === `waiting` && unlockTxHash"
+          >
+            See status of your approval tx on
+            <a
+              id="txUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              :href="`https://etherscan.io/tx/${unlockTxHash}`"
+            >etherscan.io</a>
+          </span>
         </p>
         <p
           v-else-if="approvedStatus === true"
-        >Your approval is confirmed on Ethereum Network!. You can submit the transaction now.</p>
+        >Your approval is confirmed on Ethereum Network!. You can now submit your original transaction to spend {{ form.outputValue }} {{ getActiveToken }} token.</p>
       </b-modal>
     </div>
   </div>
@@ -338,10 +346,13 @@ import {
   metamaskAddLiquidity,
   metamaskRemoveLiquidity,
   hasTokenUniswap,
-  submitTxIdToServer
+  submitTxIdToServer,
+  getLatestBlock
 } from "../assets/js/utils";
 import BigNumber from "bignumber.js";
 import Holder from "./Holder";
+import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
+import config from "../config";
 
 let exchangeContracts = {};
 let tokenAddressess = {};
@@ -350,7 +361,8 @@ let defaultGasLimit = 51000 * 2;
 
 export default {
   components: {
-    Holder
+    Holder,
+    ScaleLoader
   },
   data() {
     return {
@@ -378,6 +390,7 @@ export default {
       unlockTxHash: "",
       inputErrorMessage: "Please input a valid amount",
       outputErrorMessage: "Please input a valid amount",
+      failedErrorMessage: "Your transaction has failed.",
       slippage: null,
       liquidity: "",
       liquidityBalance: 0.0
@@ -652,8 +665,7 @@ export default {
       console.log(inputValue, outputValue, inputCurrency, outputCurrency);
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
@@ -691,7 +703,6 @@ export default {
       };
 
       let estimatedGas = await estimateGas(transactionParameters, this.web3);
-      console.log(`Estimated gas for add liquidity: ${estimatedGas}`);
       return estimatedGas;
     },
     async updateGasLimitAndTxFee() {
@@ -763,8 +774,7 @@ export default {
       let outputCurrency = this.form.outputCurrency;
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
@@ -803,7 +813,8 @@ export default {
         .toFixed(6);
     },
     async onUnlock(evt) {
-      evt.preventDefault();
+      if (evt) evt.preventDefault();
+      let txHash;
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -819,24 +830,32 @@ export default {
           : this.form.inputCurrency;
 
         if (this.getAccount.type === "metamask") {
-          this.unlockTxHash = await unlockTokenMetamask(
-            {
-              from: this.getAccount.address,
-              approvedAmount:
-                this.form.approvedAmount *
-                Math.pow(10, this.getDecimal(this.getActiveToken)),
-              gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
-              gasLimit: parseInt(this.gasLimit)
-            },
-            currencyToCheck,
-            {
-              web3: this.web3,
-              exchangeAddress: this.getAvailableExchangeAddresses[
-                currencyToCheck
-              ],
-              privateKey: this.getAccount.privateKey
-            }
-          );
+          try {
+            this.unlockTxHash = await unlockTokenMetamask(
+              {
+                from: this.getAccount.address,
+                approvedAmount:
+                  this.form.approvedAmount *
+                  Math.pow(10, this.getDecimal(this.getActiveToken)),
+                gasPrice: parseInt(this.gasPrice * Math.pow(10, 9)),
+                gasLimit: parseInt(this.gasLimit)
+              },
+              currencyToCheck,
+              {
+                web3: this.web3,
+                exchangeAddress: this.getAvailableExchangeAddresses[
+                  currencyToCheck
+                ],
+                privateKey: this.getAccount.privateKey
+              }
+            );
+            console.log(`Unlock Tx Hash: ${this.unlockTxHash}`);
+          } catch (e) {
+            alert(
+              "Your approval transaction has failed. Please try again to approve token to spend."
+            );
+            this.hideModal("unlock_request_modal_ref");
+          }
         } else {
           this.unlockTxHash = await unlockToken(
             {
@@ -860,7 +879,7 @@ export default {
 
         // checking allowance
         let self = this;
-        const check = setInterval(async () => {
+        let check = setInterval(async () => {
           console.log(`Checking allowance for ${currencyToCheck} token`);
           const allowance = await self.getAllowance(currencyToCheck);
           if (
@@ -873,8 +892,17 @@ export default {
             clearInterval(check);
             self.approvedStatus = true;
             self.form.approvedCurrency = "";
+            if (self.liquidity === "add") self.onAddLiquidity();
           }
-        }, 1000);
+          if (!txHash) txHash = self.unlockTxHash;
+          let isFailed = await self.isTxFailed(txHash);
+          console.log(`is Tx Failed: ${isFailed}`);
+          if (isFailed) {
+            clearInterval(check);
+            self.hideModal("unlock_request_modal_ref");
+            self.showFailedUnlock(txHash);
+          }
+        }, 2000);
       } catch (e) {
         alert("Unable to Unlock your token.");
         console.log("Unable to Unlock your token.");
@@ -900,10 +928,12 @@ export default {
     },
     onReset(evt) {
       if (evt) evt.preventDefault();
-      this.form.inputCurrency = null;
-      this.form.outputCurrency = null;
+      console.log("Reset");
+      this.liquidity = "add";
+      this.form.outputCurrency = this.getActiveToken;
       this.form.inputValue = "";
       this.form.outputValue = "";
+      this.loading = false;
     },
     showSuccessToast(txHash) {
       let successHTML = `<p>Your transaction is submitted to Ethereum Network.</p>`;
@@ -961,7 +991,8 @@ export default {
       }
     },
     async onAddLiquidity(evt) {
-      evt.preventDefault();
+      let self = this;
+      if (evt) evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -980,8 +1011,11 @@ export default {
       let type = this.swapType;
 
       const allowance = await this.getAllowance(outputCurrency);
-      const input = this.form.outputValue * Math.pow(10, 18);
+      const input =
+        this.form.outputValue *
+        Math.pow(10, this.getDecimal(this.getActiveToken));
       console.log(`Current token allowance is: ${allowance} ${outputCurrency}`);
+      console.log(`Required token allowance is: ${input} ${outputCurrency}`);
       if (input > allowance) {
         this.loading = false;
         this.approvedStatus = false;
@@ -990,15 +1024,20 @@ export default {
         this.showModal("unlock_request_modal_ref");
         return;
       }
-
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
       const accounts = await web3.eth.getAccounts();
       let exchangeContract = exchangeContracts[outputCurrency];
+      if (!exchangeContract) {
+        exchangeContract = new this.web3.eth.Contract(
+          exchangeABI,
+          self.getAvailableExchangeAddresses[outputCurrency]
+        );
+      }
       const contractAddress = this.getAvailableExchangeAddresses[
         outputCurrency
       ];
+      console.log(exchangeContract);
       let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
       let tokenAmount = new BigNumber(outputValue).multipliedBy(
         10 ** this.getDecimal(this.getActiveToken)
@@ -1064,16 +1103,18 @@ export default {
       if (this.txHash) console.log(this.txHash);
       if (!this.txHash) {
         this.loading = false;
+        this.hideModal("unlock_request_modal_ref");
         this.showModal("failed_model_ref");
         return;
       }
       this.updateActiveToken(outputCurrency);
       this.onReset();
       this.loading = false;
+      this.hideModal("unlock_request_modal_ref");
       this.showSuccessToast(this.txHash);
     },
     async onRemoveLiquidity(evt) {
-      evt.preventDefault();
+      if (evt) evt.preventDefault();
       if (!this.getConnection) {
         alert("No Internet Connection Detected !");
         return;
@@ -1091,11 +1132,16 @@ export default {
       let ALLOWED_SLIPPAGE = this.ALLOWED_SLIPPAGE;
       let type = this.swapType;
 
-      const blockNumber = await web3.eth.getBlockNumber();
-      const block = await web3.eth.getBlock(blockNumber);
+      const block = await getLatestBlock(web3);
       const deadline = block.timestamp + 300;
 
       let exchangeContract = exchangeContracts[outputCurrency];
+      if (!exchangeContract) {
+        exchangeContract = new this.web3.eth.Contract(
+          exchangeABI,
+          self.getAvailableExchangeAddresses[outputCurrency]
+        );
+      }
       const contractAddress = this.getAvailableExchangeAddresses[
         outputCurrency
       ];
@@ -1204,6 +1250,19 @@ export default {
         this.liquidity = "remove";
         this.updateLiquidityBalance();
       }
+    },
+    async isTxFailed(txHash) {
+      let url = `https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}&apikey=${
+        config.etherscanApiKey
+      }`;
+      let response = await axios.get(url);
+      if (response.data.result.isError == "1") return true;
+      return false;
+    },
+    async showFailedUnlock(txHash) {
+      // cancel allowance checker after 5min
+      this.failedErrorMessage = `The swap transaction was canceled since the approval transaction has failed on Ethereum network ! Please see transaction detail on <a href="https://etherscan.io/tx/${txHash}" target="_blank">etherscan.io</a>`;
+      this.showModal("failed_model_ref");
     }
   }
 };
@@ -1248,6 +1307,13 @@ export default {
 }
 #unlock_request_modal form {
   margin-bottom: 15px !important;
+}
+#unlock_request_modal .modal-header {
+  position: relative !important;
+}
+#unlock_request_modal .modal-body {
+  position: relative !important;
+  top: 0px !important;
 }
 label {
   font-weight: bolder;
