@@ -34,16 +34,16 @@ nvm install 10
 
 ## To Start Development
 
-### Get an API key from etherscan.io
-
-- Go to https://etherscan.io and get your API key
-- Replace `etherscanApiKey` value in `config.js` file
-
 ### Clone the repo
 
 ```bash
 $ git clone https://gitlab.com/shardus/uniswapdex.git
 ```
+
+### Get an API key from etherscan.io
+
+- Go to https://etherscan.io and get your API key
+- Replace `etherscanApiKey` value in `config.js` file
 
 ### Install Dependencies
 
