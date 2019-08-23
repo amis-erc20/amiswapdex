@@ -152,9 +152,16 @@ export const getTokenToUSDPrice = async (symbol) => {
 export const getHistory = async function (address) {
   if (!address) return
   try {
-    const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&sort=asc&apikey=YourApiKeyToken`
+    let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&sort=asc&apikey=${config.etherscanApiKey}`
     let response = await axios.get(url)
-    return response.data.result
+    let txList = response.data.result
+    let internalUrl = `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${address}&sort=asc&apikey=${config.etherscanApiKey}`
+    let internalResponse = await axios.get(internalUrl)
+    let txListInternal = internalResponse.data.result
+    let completeHistory = R.concat(txList, txListInternal).sort((a, b) => {
+      return parseInt(a.timeStamp) - parseInt(b.timeStamp)
+    })
+    return completeHistory
   } catch (e) {
     // console.log(`ERROR - getHistory`)
     // console.log(e)

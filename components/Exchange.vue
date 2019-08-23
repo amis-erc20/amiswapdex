@@ -414,7 +414,8 @@ export default {
               src: token.logo,
               order: "-",
               change: 0,
-              roir: self.getROIR[token.id]
+              roir: self.getROIR[token.id],
+              holderCount: 0
             };
           } else {
             return {
@@ -427,15 +428,18 @@ export default {
               src: token.logo,
               order: summaryInfo.order || "-",
               change: summaryInfo.price_change_24h || 0,
-              roir: self.getROIR[token.id]
+              roir: self.getROIR[token.id],
+              holderCount: summaryInfo.holderCount || 0
             };
           }
         })
         .filter(token => {
           if (!this.hideLowLiquidityToken) {
+            // show all tokens
             return true;
           } else {
-            return token.liquidity / ethToUsd > 1;
+            // hide low liquidity tokens & zero holder tokens
+            return token.liquidity / ethToUsd > 1 && token.holderCount > 0;
           }
         });
       let symbol;

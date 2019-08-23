@@ -1,7 +1,10 @@
 <template>
   <div class="donation-section">
     <div id="donation-info">
-      <p>The Uniswap contracts charge a 0.3% fee for providing liquidity. We don’t charge any fees for using this site. To keep this site operational please make a donation.</p>
+      <p>
+        The
+        <a href="https://uniswap.io" target="_blank">Uniswap contracts</a> charge a 0.3% fee for providing liquidity. We don’t charge any fees for using this site. To keep this site operational please make a donation.
+      </p>
       <b-button variant="primary" id="donate-button" @click="showModal('donate_modal')">Donate</b-button>
       <!-- donation modal -->
       <b-modal ref="donate_modal" id="donate_modal" :hide-footer="true">
@@ -135,7 +138,7 @@ export default {
               balance: self.getBalance[symbol],
               priceInUsd: self.getPrice[symbol],
               src: token ? token.logo : null,
-              tokenAddress: token ? token.tokenAddress : null,
+              tokenAddress: token ? token.tokenAddress : null
             };
           else return null;
         })
@@ -162,8 +165,8 @@ export default {
     onSelectDonationCurrency(value) {
       if (!value) return;
       this.donationCurrency = value.title;
-      this.updateActiveToken(value.title)
-      this.updateActiveTokenAddress(value.tokenAddress)
+      this.updateActiveToken(value.title);
+      this.updateActiveTokenAddress(value.tokenAddress);
       console.log(value);
     },
     closeDonationModal() {
@@ -331,6 +334,9 @@ export default {
   text-align: center;
   margin: 10px auto;
   line-height: 1.5;
+}
+#donation-info a:hover {
+  text-decoration: none;
 }
 #donate-button {
   width: 160px;

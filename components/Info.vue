@@ -372,22 +372,22 @@ iframe {
 .row-style-buy {
   font-size: 12px;
   padding-top: 10px;
-  background: #f2dede;
+  background: #ddf6dd;
 }
 .row-style-sell {
   font-size: 12px;
   padding-top: 10px;
-  background: #ddf6dd;
+  background: #f2dede;
 }
 .row-style-add {
   font-size: 12px;
   padding-top: 10px;
-  background: #ffffdb;
+  background: #d5edff;
 }
 .row-style-remove {
   font-size: 12px;
   padding-top: 10px;
-  background: #d5edff;
+  background: #ffffdb;
 }
 .custom-th-class {
   color: #b14ae2 !important;

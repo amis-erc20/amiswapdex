@@ -5,7 +5,7 @@
     </nuxt-link>
     <div class="title">
       <div id="main-title-no-connection-container">
-        <a :href="'https://uniswap.io/'" target="_blank">
+        <a :href="'https://uniswapdex.com'" target="_blank">
           <div class="logo-title-container">
             <img id="uniswapdex-logo" src="../assets/uniswapdex-logo.png" alt />
             <h4>{{ title }}</h4>

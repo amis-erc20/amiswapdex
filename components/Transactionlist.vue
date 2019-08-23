@@ -4,9 +4,9 @@
       <b-list-group flush v-if="getTxList.length > 0">
         <b-list-group-item
           v-for="transaction in getTxList"
-          :key="transaction.hash+parseInt(Math.random() * 100) "
+          :key="transaction.hash+parseInt(Math.random() * 1000) "
         >
-          <transaction :transaction="transaction"/>
+          <transaction :transaction="transaction" />
         </b-list-group-item>
       </b-list-group>
       <b-button
