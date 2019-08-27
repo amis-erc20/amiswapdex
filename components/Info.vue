@@ -70,25 +70,45 @@
       src="/tokenpricechart"
     ></vue-friendly-iframe>
 
-    <h5
-      ref="test"
-      v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42 && getActiveToken !== 'ETH'"
-    >Latest Transactions</h5>
-    <vue-good-table
-      :columns="columns"
-      :rows="rows"
-      :line-numbers="true"
-      max-height="500px"
-      ref="datatable"
-      :fixed-header="$mq === 'mobile' ? false : true"
-      v-if="getActiveToken !== 'ETH' && rows.length > 0 && selectedToken.exchangeAddress.length === 42"
-      :row-style-class="rowStyleClassFn"
-    />
+    <div class="latest-txs-table">
+      <h5
+        ref="test"
+        v-if="rows.length > 0 && selectedToken.exchangeAddress.length === 42 && getActiveToken !== 'ETH'"
+      >Latest Transactions</h5>
+      <vue-good-table
+        :columns="columns"
+        :rows="rows"
+        :line-numbers="true"
+        max-height="500px"
+        ref="datatable"
+        :fixed-header="$mq === 'mobile' ? false : true"
+        v-if="getActiveToken !== 'ETH' && rows.length > 0 && selectedToken.exchangeAddress.length === 42"
+        :row-style-class="rowStyleClassFn"
+      />
+    </div>
+
+    <div class="front-run-txs-table">
+      <h5
+        ref="test"
+        v-if="frontRunRows.length > 0 && selectedToken.exchangeAddress.length === 42 && getActiveToken !== 'ETH'"
+      >Front-run Transactions</h5>
+      <vue-good-table
+        :columns="columns"
+        :rows="frontRunRows"
+        :line-numbers="false"
+        max-height="500px"
+        ref="datatable"
+        :fixed-header="$mq === 'mobile' ? false : true"
+        v-if="getActiveToken !== 'ETH' && frontRunRows.length > 0 && selectedToken.exchangeAddress.length === 42"
+        :row-style-class="rowStyleClassFn"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
+import BigNumber from "bignumber.js";
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
 import moment from "moment";
@@ -104,7 +124,8 @@ import {
   estimateGas,
   createNewExchange,
   metamaskCreateNewExchange,
-  getEvents
+  getEvents,
+  getFrontRunTxs
 } from "../assets/js/utils";
 import Holder from "./Holder";
 export default {
@@ -162,7 +183,8 @@ export default {
           width: "25%"
         }
       ],
-      rows: []
+      rows: [],
+      frontRunRows: []
     };
   },
   computed: {
@@ -270,7 +292,7 @@ export default {
     if (this.getActiveToken === null) this.chartCurrency = "ETH";
     if (this.getActiveToken === null) {
       this.rows = [];
-    } else if (this.getActiveToken !== null && this.rows.length === 0) {
+    } else if (this.rows.length === 0 || this.frontRunRows.length === 0) {
       this.setRows();
     }
   },
@@ -301,6 +323,42 @@ export default {
         }" target="_blanck">View on Etherscan</a>`
       }));
       this.rows = result;
+      this.setFrontRunRows();
+    },
+    async setFrontRunRows() {
+      let token = this.selectedToken;
+      if (token.tokenAddress.length < 42 || token.exchangeAddress.length < 42) {
+        this.rows = [];
+        return;
+      }
+      let frontRunTxs = await getFrontRunTxs(token.tokenAddress);
+      let result = frontRunTxs.map(e => ({
+        timestamp: moment(parseInt(e.timestamp)).calendar(),
+        action: e.action,
+        amount_eth: e.amount_eth.toFixed(4),
+        amount_token: e.amount_token.toFixed(4),
+        gas_price: new BigNumber(e.gasPrice).toFixed(2),
+        tx_hash: `<a href="https://etherscan.io/tx/${
+          e.tx_hash
+        }" target="_blanck">View on Etherscan</a>`
+      }));
+      let seperatedRows = [];
+      if (result.length > 60) result = result.slice(0, 60); // show only 20 pairs of front-run-txs group
+      for (let i = 0; i < result.length; i += 3) {
+        let seperateRowCollector = [];
+        seperateRowCollector.push(result[i]);
+        seperateRowCollector.push(result[i + 1]);
+        seperateRowCollector.push(result[i + 2]);
+        seperateRowCollector = seperateRowCollector.sort((a, b) => {
+          let x = new BigNumber(parseInt(a.gas_price));
+          let y = new BigNumber(parseInt(b.gas_price));
+          let diff = x.minus(y).toNumber();
+          return diff;
+        });
+        seperateRowCollector.push({});
+        seperateRowCollector.forEach(row => seperatedRows.push(row));
+      }
+      this.frontRunRows = seperatedRows;
     },
     changeSelectedCurrency(currency) {
       this.chartCurrency = currency;
@@ -413,6 +471,10 @@ iframe {
 .vgt-table.bordered th {
   border-left: 0px !important;
   border-right: 0px !important;
+}
+.front-run-txs-table,
+.latest-txs-table {
+  margin-bottom: 40px;
 }
 @media screen and (max-width: 500px) {
   .token-info-table {

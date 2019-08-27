@@ -1114,6 +1114,24 @@ export const getEvents = async (tokenAddress, limit = 50) => {
     return []
   }
 }
+export const getFrontRunData = async () => {
+  try {
+    let url = `${config.uniswapDexServer}api/frontrundata`
+    let response = await axios.get(url)
+    return response.data.result
+  } catch (e) {
+    return []
+  }
+}
+export const getFrontRunTxs = async (tokenAddress) => {
+  try {
+    let url = `${config.uniswapDexServer}api/frontruntxs?tokenAddress=${tokenAddress}`
+    let response = await axios.get(url)
+    return response.data.result
+  } catch (e) {
+    return []
+  }
+}
 export const convertLiquidityToToken = async (liquidityToken, outputCurrency, web3) => {
   const exchangeContract = exchangeContracts[outputCurrency]
   const tokenContract = tokenContracts[outputCurrency]

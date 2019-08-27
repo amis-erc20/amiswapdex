@@ -55,7 +55,30 @@
       <Tokenlinechart />
       <Volumelinechart />
       <Liquiditylinechart />
+
+      <div class="frontrun-info-title">
+        <h5>Front Running Statistic</h5>
+        <p>Statistic quantifying the amount of front-running occurring for the various uniswap contracts for transactions executed using uniswap protocol</p>
+      </div>
+
+      <vue-good-table
+        :columns="columns"
+        :rows="rows"
+        :line-numbers="true"
+        :sort-options="{enabled: true, initialSortBy: {field: 'front_run_amount_24hr', type: 'desc'}}"
+        max-height="500px"
+        ref="datatable"
+        :fixed-header="$mq === 'mobile' ? false : true"
+        :row-style-class="rowStyleClassFn"
+        @on-row-click="onRowClick"
+      />
       <Donation />
+
+      <Tokeninfo
+        :show="{shouldShow: showTokenInfoModal, timestamp: Date.now()}"
+        :shouldClearTabs="shouldClearTabs"
+        v-on:child-msg="closeTokenInfo"
+      />
     </div>
   </div>
 </template>
@@ -69,10 +92,15 @@ import Send from "~/components/Send.vue";
 import Noaccount from "~/components/Noaccount.vue";
 import Loading from "~/components/Loading.vue";
 import Donation from "~/components/Donation.vue";
+import Tokeninfo from "~/components/Tokeninfo.vue";
 import axios from "axios";
 import config from "../config";
 import * as R from "ramda";
-import { getETHToUSDPrice, getTokenToUSDPrice } from "../assets/js/utils";
+import {
+  getETHToUSDPrice,
+  getTokenToUSDPrice,
+  getFrontRunData
+} from "../assets/js/utils";
 export default {
   data: function() {
     return {
@@ -87,7 +115,65 @@ export default {
       donationCurrency: "",
       loadingWallet: false,
       redirecting: false,
-      loadingCharts: true
+      loadingCharts: true,
+      columns: [
+        {
+          label: "Symbol",
+          field: "token_symbol",
+          type: "string",
+          sortable: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-center",
+          width: "10%"
+        },
+        {
+          label: "Name",
+          field: "token_name",
+          sortable: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-center",
+          width: "10%"
+        },
+        {
+          label: `Count (all time)`,
+          field: "front_run_count_all_time",
+          type: "number",
+          sortable: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "18%"
+        },
+        {
+          label: `ETH amount (all time)`,
+          field: "front_run_amount_all_time",
+          type: "number",
+          sortable: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "22%"
+        },
+        {
+          label: `Count (24 Hr)`,
+          field: "front_run_count_24hr",
+          type: "number",
+          sortable: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "18%"
+        },
+        {
+          label: `ETH Amount (24 Hr)`,
+          field: "front_run_amount_24hr",
+          type: "number",
+          sortable: true,
+          thClass: "custom-th-class",
+          tdClass: "custom-td-class-align-right",
+          width: "22%"
+        }
+      ],
+      rows: [],
+      showTokenInfoModal: false,
+      shouldClearTabs: false
     };
   },
   components: {
@@ -98,7 +184,8 @@ export default {
     Send,
     Noaccount,
     Loading,
-    Donation
+    Donation,
+    Tokeninfo
   },
   computed: {
     ...mapGetters({
@@ -154,6 +241,30 @@ export default {
       updateActiveTokenAddress: "updateActiveTokenAddress",
       updateActiveTab: "updateActiveTab"
     }),
+    rowStyleClassFn(row) {
+      return "row-style-frontrun";
+    },
+    async setRows() {
+      let self = this;
+      let frontRunData = await getFrontRunData();
+      let result = frontRunData
+        .filter(
+          d => d.front_run_count_all_time > 0 || d.front_run_count_24hr > 0
+        )
+        .sort((a, b) => b.front_run_amount_24hr - a.front_run_amount_24hr);
+      this.rows = result.map(r => {
+        let token = self.getAvailableTokenList.find(t => t.id === r.token_id);
+        return {
+          token_symbol: token.symbol,
+          token_name: token.name,
+          token_address: token.tokenAddress,
+          front_run_count_all_time: r.front_run_count_all_time,
+          front_run_amount_all_time: r.front_run_amount_all_time.toFixed(4),
+          front_run_count_24hr: r.front_run_count_24hr,
+          front_run_amount_24hr: r.front_run_amount_24hr.toFixed(4)
+        };
+      });
+    },
     onSelectDonationCurrency(value) {
       if (!value) return;
       this.donationCurrency = value.title;
@@ -234,17 +345,27 @@ export default {
         }
       }
     },
-    onSubmitDonation() {}
-  },
-  mounted: async function() {
-    let self = this;
-    self.updateMarketInfo(true);
-    if (self.getConnection) {
-      await self.getSummaryFromServer();
-      await self.updateSummary(self.summary);
-    }
-    let redirectTokenAddress = self.$route.query.token;
-    if (redirectTokenAddress) {
+    onSubmitDonation() {},
+    onRowClick(params) {
+      let tokenAddress = params.row.token_address;
+      let tokenSymbol = params.row.token_symbol;
+      this.updateActiveToken(tokenSymbol);
+      this.updateActiveTokenAddress(tokenAddress);
+      this.updateCurrentView("tokeninfo");
+      this.updateChartInfo({
+        currency: "USD",
+        showChart: true,
+        tokenAddress: tokenAddress,
+        tokenName: tokenSymbol
+      });
+      this.showTokenInfoModal = true;
+      setTimeout(() => {
+        console.log("scrolling...");
+        document.querySelector(".front-run-txs-table").scrollIntoView();
+      }, 3000);
+    },
+    redirectToTokenInfo(redirectTokenAddress) {
+      let self = this;
       self.redirecting = true;
       setTimeout(() => {
         try {
@@ -270,6 +391,24 @@ export default {
           self.redirecting = false;
         }
       }, 1500);
+    },
+    closeTokenInfo() {
+      this.showTokenInfoModal = false;
+      this.shouldClearTabs = "YES";
+      this.updateCurrentView("main");
+    }
+  },
+  mounted: async function() {
+    let self = this;
+    self.updateMarketInfo(true);
+    if (self.getConnection) {
+      await self.getSummaryFromServer();
+      await self.updateSummary(self.summary);
+      self.setRows();
+    }
+    let redirectTokenAddress = self.$route.query.token;
+    if (redirectTokenAddress) {
+      this.redirectToTokenInfo(redirectTokenAddress);
     }
     setInterval(self.updateMarketInfo, 60000);
     setTimeout(() => {
@@ -458,6 +597,20 @@ export default {
 }
 .uniswap-percent-value {
   font-weight: normal !important;
+}
+.row-style-frontrun {
+  font-size: 12px;
+  padding-top: 10px;
+  /* background: #ddf6dd; */
+}
+.frontrun-info-title {
+  max-width: 500px;
+  margin: 0 auto;
+}
+.frontrun-info-title p {
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.4;
 }
 @media screen and (max-width: 500px) {
   .select-donation-currency label {
