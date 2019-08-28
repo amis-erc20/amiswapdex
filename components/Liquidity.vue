@@ -743,7 +743,7 @@ export default {
         let token_usd = this.getPrice[this.activeToken];
         let absPrice = new BigNumber(eth_usd / token_usd);
         console.log(`Abs Price: ${absPrice.toFixed(6)}`);
-        if (absPrice.toFixed(0) == "NaN") return;
+        if (absPrice.toFixed(0) == "NaN" || absPrice == "Infinity") return;
         if (!Number.isNaN(absPrice.toNumber()))
           this.form.outputValue = absPrice
             .multipliedBy(this.form.inputValue)
@@ -896,7 +896,6 @@ export default {
           }
           if (!txHash) txHash = self.unlockTxHash;
           let isFailed = await self.isTxFailed(txHash);
-          console.log(`is Tx Failed: ${isFailed}`);
           if (isFailed) {
             clearInterval(check);
             self.hideModal("unlock_request_modal_ref");
@@ -1020,6 +1019,9 @@ export default {
         this.loading = false;
         this.approvedStatus = false;
         this.form.approvedAmount = this.form.outputValue * 1.5;
+        if (this.form.approvedAmount > this.getBalance[outputCurrency]) {
+          this.form.approvedAmount = this.getBalance[outputCurrency];
+        }
         this.form.approvedCurrency = outputCurrency;
         this.showModal("unlock_request_modal_ref");
         return;
@@ -1037,13 +1039,11 @@ export default {
       const contractAddress = this.getAvailableExchangeAddresses[
         outputCurrency
       ];
-      console.log(exchangeContract);
       let ethAmount = new BigNumber(inputValue * Math.pow(10, 18));
       let tokenAmount = new BigNumber(outputValue).multipliedBy(
         10 ** this.getDecimal(this.getActiveToken)
       );
       let ethReserve = await web3.eth.getBalance(contractAddress);
-
       const totalLiquidity = await exchangeContract.methods
         .totalSupply()
         .call();
@@ -1051,17 +1051,18 @@ export default {
         ethAmount.dividedBy(ethReserve)
       );
       if (Number.isNaN(liquidityMinted) || liquidityMinted == "NaN")
-        liquidityMinted = new BigNumber(0);
+        liquidityMinted = ethAmount.dividedBy(tokenAmount).multipliedBy(10 ** 18);
 
       console.log(`total liquidity: ${totalLiquidity}`);
       console.log(`eth reserve: ${ethReserve}`);
       console.log(`minted liquidity: ${liquidityMinted}`);
 
-      const MAX_LIQUIDITY_SLIPPAGE = 0.025;
-      const minLiquidity = liquidityMinted.multipliedBy(
+      let MAX_LIQUIDITY_SLIPPAGE = 0.025;
+      let minLiquidity = liquidityMinted.multipliedBy(
         1 - MAX_LIQUIDITY_SLIPPAGE
       );
-      const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
+      console.log(`Min Liquidity: ${minLiquidity}`);
+      let maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
       try {
         if (this.getAccount.type === "metamask") {
           this.txHash = await metamaskAddLiquidity(
@@ -1103,14 +1104,23 @@ export default {
       if (this.txHash) console.log(this.txHash);
       if (!this.txHash) {
         this.loading = false;
-        this.hideModal("unlock_request_modal_ref");
-        this.showModal("failed_model_ref");
+        try {
+          this.hideModal("unlock_request_modal_ref");
+          this.showModal("failed_model_ref");
+        } catch (e) {
+          console.log(`Unable to hide modals`);
+        }
         return;
       }
       this.updateActiveToken(outputCurrency);
       this.onReset();
       this.loading = false;
-      this.hideModal("unlock_request_modal_ref");
+      try {
+        this.hideModal("unlock_request_modal_ref");
+        this.showModal("failed_model_ref");
+      } catch (e) {
+        console.log(`Unable to hide modals`);
+      }
       this.showSuccessToast(this.txHash);
     },
     async onRemoveLiquidity(evt) {

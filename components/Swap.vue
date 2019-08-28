@@ -1152,6 +1152,9 @@ export default {
       let approvedAmount =
         parseFloat(this.form.approvedAmount) *
         Math.pow(10, this.getDecimal(this.form.inputCurrency));
+      if (approvedAmount > this.getBalance[this.form.inputCurrency]) {
+        approvedAmount = this.getBalance[this.form.inputCurrency];
+      }
       this.approvedStatus = "waiting";
       if (this.getAccount.type === "metamask") {
         try {
@@ -1222,7 +1225,6 @@ export default {
         }
         if (!txHash) txHash = self.unlockTxHash;
         let isFailed = await self.isTxFailed(txHash);
-        console.log(`is Tx Failed: ${isFailed}`);
         if (isFailed) {
           clearInterval(check);
           self.hideModal("unlock_request_modal_ref");
@@ -1309,6 +1311,14 @@ export default {
               this.loading = false;
               this.approvedStatus = false;
               this.form.approvedAmount = this.form.inputValue * 1.5;
+              if (
+                this.form.approvedAmount >
+                this.getBalance[this.form.inputCurrency]
+              ) {
+                this.form.approvedAmount = this.getBalance[
+                  this.form.inputCurrency
+                ];
+              }
               this.showModal("unlock_request_modal_ref");
               return;
             }
@@ -1433,6 +1443,14 @@ export default {
               this.loading = false;
               this.approvedStatus = false;
               this.form.approvedAmount = this.form.inputValue * 1.5;
+              if (
+                this.form.approvedAmount >
+                this.getBalance[this.form.inputCurrency]
+              ) {
+                this.form.approvedAmount = this.getBalance[
+                  this.form.inputCurrency
+                ];
+              }
               this.showModal("unlock_request_modal_ref");
               return;
             }
@@ -1495,6 +1513,14 @@ export default {
               this.loading = false;
               this.approvedStatus = false;
               this.form.approvedAmount = this.form.inputValue * 1.5;
+              if (
+                this.form.approvedAmount >
+                this.getBalance[this.form.inputCurrency]
+              ) {
+                this.form.approvedAmount = this.getBalance[
+                  this.form.inputCurrency
+                ];
+              }
               this.showModal("unlock_request_modal_ref");
               return;
             }

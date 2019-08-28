@@ -179,7 +179,14 @@
                 <p class="token-volume" v-else>-</p>
               </div>
               <div class="token-liquidity-container">
-                <p class="token-liquidity-usd">${{ numberWithCommas(token.liquidity.toFixed(0)) }}</p>
+                <p
+                  v-if="token.liquidity > 0 && token.liquidity < 1"
+                  class="token-liquidity-usd"
+                >${{ numberWithCommas(token.liquidity.toFixed(2)) }}</p>
+                <p
+                  v-else
+                  class="token-liquidity-usd"
+                >${{ numberWithCommas(token.liquidity.toFixed(0)) }}</p>
               </div>
               <div class="swap-button-container">
                 <b-button

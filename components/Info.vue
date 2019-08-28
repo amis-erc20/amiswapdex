@@ -36,7 +36,10 @@
       </b-row>
       <b-row>
         <b-col>Liquidity</b-col>
-        <b-col>${{ numberWithCommas(selectedToken.liquidity.toFixed(0)) }}</b-col>
+        <b-col
+          v-if="selectedToken.liquidity > 0 && selectedToken.liquidity < 1"
+        >${{ numberWithCommas(selectedToken.liquidity.toFixed(2)) }}</b-col>
+        <b-col v-else>${{ numberWithCommas(selectedToken.liquidity.toFixed(0)) }}</b-col>
       </b-row>
       <b-row>
         <b-col>ROIR</b-col>
@@ -255,7 +258,7 @@ export default {
           name: token.name,
           symbol: token.symbol,
           tokenAddress: token.tokenAddress,
-          liquidity: foundSummary.liquidity * this.ethToUsd,
+          liquidity: parseFloat(foundSummary.liquidity * this.ethToUsd),
           roir: self.getROIR[token.id] || 0,
           volume: foundSummary.volume_eth_1D * this.ethToUsd,
           price: self.getPrice[token.symbol],
