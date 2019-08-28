@@ -91,6 +91,7 @@ export default {
       getAccount: "account/getAccount",
       getTokenList: "account/getTokenList",
       getPrice: "account/getPrice",
+      getEthPrice: "account/getEthPrice",
       getAvailableTokenList: "account/getAvailableTokenList",
       getROIR: "account/getROIR",
       getOwnedTokenList: "account/getOwnedTokenList",
@@ -132,7 +133,8 @@ export default {
           name: symbol,
           fullname: token ? token.name : "-",
           balance: self.getBalance[symbol],
-          priceInUsd: self.getPrice[symbol],
+          priceInUsd:
+            symbol === "ETH" ? self.getEthPrice : self.getPrice[symbol],
           src: token ? token.logo : null,
           tokenAddress: token ? token.tokenAddress : null,
           roir: roir,

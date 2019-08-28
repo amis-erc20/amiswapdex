@@ -404,6 +404,7 @@ export default {
       getCurrentView: "getCurrentView",
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
+      getEthPrice: "account/getEthPrice",
       getConnection: "getConnection",
       getServerStatus: "getServerStatus",
       getAvailableTokenList: "account/getAvailableTokenList",
@@ -739,7 +740,7 @@ export default {
           // this.form.outputValue = "";
           return;
         }
-        let eth_usd = this.getPrice["ETH"];
+        let eth_usd = this.getEthPrice;
         let token_usd = this.getPrice[this.activeToken];
         let absPrice = new BigNumber(eth_usd / token_usd);
         console.log(`Abs Price: ${absPrice.toFixed(6)}`);
@@ -753,7 +754,7 @@ export default {
           // this.form.inputValue = "";
           return;
         }
-        let eth_usd = this.getPrice["ETH"];
+        let eth_usd = this.getEthPrice;
         let token_usd = this.getPrice[this.activeToken];
         let absPrice = new BigNumber(eth_usd / token_usd);
         console.log(`Abs Price: ${absPrice.toFixed(6)}`);
