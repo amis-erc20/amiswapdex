@@ -365,6 +365,7 @@ export default {
       getAccount: "account/getAccount",
       getBalance: "account/getBalance",
       getPrice: "account/getPrice",
+      getEthPrice: "account/getEthPrice",
       getRefresher: "account/getRefresher",
       getWeb3: "getWeb3",
       getSignIn: "getSignIn",
@@ -775,7 +776,7 @@ export default {
     // } else {
     //   this.summary = this.getSummary;
     // }
-    let ethPrice = this.getPrice["ETH"];
+    let ethPrice = this.getEthPrice;
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
     }

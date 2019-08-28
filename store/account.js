@@ -51,12 +51,16 @@ export const mutations = {
     if (state.tokenList.indexOf(newToken.symbol) === -1) {
       state.tokenList.push(newToken.symbol)
     }
-    if (!state.price[newToken.symbol]) state.price[newToken.symbol] = newToken.priceInUsd
+    if (!state.price[newToken.symbol]) {
+      state.price[newToken.symbol] = newToken.priceInUsd
+    }
     state.balance[newToken.symbol] = newToken.balance
 
     state.totalValue = 0
     for (let key in state.balance) {
-      state.totalValue += (state.balance[key]) * state.price[key] || 0.0
+      let price = state.price[key]
+      if (key === 'ETH') price = state.ethPrice
+      state.totalValue += (state.balance[key]) * price || 0.0
     }
   },
   resetTokenList(state) {

@@ -375,6 +375,9 @@ export default {
       try {
         let self = this;
         let ethPrice = await getETHToUSDPrice();
+        console.log(`ETH to usdc price: ${ethPrice}`);
+        console.log("updating eth price");
+        await self.updateEthPrice(ethPrice);
         await self.updatePrice({
           symbol: "ETH",
           price: ethPrice

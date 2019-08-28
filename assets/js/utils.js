@@ -1046,11 +1046,13 @@ export const getTokenHoldingByAnAccount = async (address) => {
 }
 
 export const getEthToUsdcPrice = async () => {
+  console.log(`GETTING ETH PRICE`)
   let url = `${CONFIG.uniswapDexServer}api/event?tokenAddress=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&limit=10`
   let response = await axios.get(url)
   let events = response.data.result
   for (let i = 0; i < events.length; i++) {
     let event = events[i]
+    console.log(`ETH PRICE: ${parseFloat(1 / event.price)}`)
     if (event.price > 0) return parseFloat(1 / event.price)
   }
 }
@@ -1133,32 +1135,26 @@ export const getFrontRunTxs = async (tokenAddress) => {
   }
 }
 export const convertLiquidityToToken = async (liquidityToken, outputCurrency, web3) => {
-  // const exchangeContract = exchangeContracts[outputCurrency]
-  // const tokenContract = tokenContracts[outputCurrency]
-  // const exchangeAddress = exchangeAddresses[outputCurrency]
-  // const ethReserve = await web3.eth.getBalance(exchangeAddress)
-  // const tokenReserve = await tokenContract.methods
-  //   .balanceOf(exchangeAddress)
-  //   .call()
+  const exchangeContract = exchangeContracts[outputCurrency]
+  const tokenContract = tokenContracts[outputCurrency]
+  const exchangeAddress = exchangeAddresses[outputCurrency]
+  const ethReserve = await web3.eth.getBalance(exchangeAddress)
+  const tokenReserve = await tokenContract.methods
+    .balanceOf(exchangeAddress)
+    .call()
 
-  // const totalSupply = await exchangeContract.methods.totalSupply().call()
-  // const amount = new BigNumber(liquidityToken * Math.pow(10, 18))
-  // const ownership = amount.dividedBy(totalSupply)
-  // const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership)
-  // const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
-  //   ownership
-  // )
-  // return {
-  //   ethWithdrawn: ethWithdrawn.dividedBy(Math.pow(10, 18)).toNumber(3),
-  //   tokenWithdrawn: tokenWithdrawn.dividedBy(Math.pow(10, 18)).toNumber(3),
-  //   tokenReserve: new BigNumber(tokenReserve).dividedBy(Math.pow(10, 18)).toNumber(3),
-  //   ownership: ownership.multipliedBy(100).toNumber(3)
-  // }
+  const totalSupply = await exchangeContract.methods.totalSupply().call()
+  const amount = new BigNumber(liquidityToken * Math.pow(10, 18))
+  const ownership = amount.dividedBy(totalSupply)
+  const ethWithdrawn = new BigNumber(ethReserve).multipliedBy(ownership)
+  const tokenWithdrawn = new BigNumber(tokenReserve).multipliedBy(
+    ownership
+  )
   return {
-    ethWithdrawn: 1,
-    tokenWithdrawn: 1,
-    tokenReserve: 1,
-    ownership: 1
+    ethWithdrawn: ethWithdrawn.dividedBy(Math.pow(10, 18)).toNumber(3),
+    tokenWithdrawn: tokenWithdrawn.dividedBy(Math.pow(10, 18)).toNumber(3),
+    tokenReserve: new BigNumber(tokenReserve).dividedBy(Math.pow(10, 18)).toNumber(3),
+    ownership: ownership.multipliedBy(100).toNumber(3)
   }
 }
 export const submitTxIdToServer = async (txId) => {

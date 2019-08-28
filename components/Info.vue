@@ -279,7 +279,7 @@ export default {
     if (token) {
       this.summary = this.getSummary.find(s => s.token_id === token.id);
     }
-    let ethPrice = this.getPrice["ETH"];
+    let ethPrice = this.getETHPrice;
     if (!ethPrice) {
       ethPrice = await getETHToUSDPrice();
     }

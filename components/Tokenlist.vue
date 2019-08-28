@@ -97,7 +97,8 @@ export default {
       getTransactionList: "transaction/getTransactionList",
       getBalance: "account/getBalance",
       getActiveToken: "getActiveToken",
-      getSummary: "getSummary"
+      getSummary: "getSummary",
+      getEthPrice: "account/getEthPrice"
     }),
     tokenList: function() {
       let self = this;
@@ -132,7 +133,8 @@ export default {
           name: symbol,
           fullname: token ? token.name : "-",
           balance: self.getBalance[symbol],
-          priceInUsd: self.getPrice[symbol],
+          priceInUsd:
+            symbol === "ETH" ? self.getEthPrice : self.getPrice[symbol],
           src: token ? token.logo : null,
           tokenAddress: token ? token.tokenAddress : null,
           roir: roir,
@@ -159,6 +161,7 @@ export default {
       otherTokens = otherTokens.sort(
         (a, b) => b.priceInUsd * b.balance - a.priceInUsd * a.balance
       );
+
       let sorted = R.concat(ethToken, otherTokens);
       return sorted;
     }
