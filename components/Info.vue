@@ -289,6 +289,7 @@ export default {
     let self = this;
     let previousTokenName = this.getActiveToken;
     this.setRows();
+    this.setFrontRunRows();
     setInterval(self.setRows, 15000);
   },
   beforeUpdate: function() {
@@ -298,6 +299,7 @@ export default {
     } else if (this.rows.length === 0 || this.frontRunRows.length === 0) {
       this.setRows();
     }
+    this.setFrontRunRows();
   },
   methods: {
     ...mapActions({
@@ -326,16 +328,28 @@ export default {
         }" target="_blanck">View on Etherscan</a>`
       }));
       this.rows = result;
-      this.setFrontRunRows();
     },
     async setFrontRunRows() {
+      let self = this;
       let token = this.selectedToken;
       if (token.tokenAddress.length < 42 || token.exchangeAddress.length < 42) {
-        this.rows = [];
+        this.frontRunRows = [];
         return;
+      }
+      if (self.frontRunRows.length > 0) {
+        let tokenInTable = this.getAvailableTokenList.find(
+          t =>
+            t.tokenAddress.toLowerCase() ===
+            self.frontRunRows[0].tokenAddress.toLowerCase()
+        );
+        if (!tokenInTable) return;
+        if (tokenInTable.tokenAddress === token.tokenAddress) {
+          return;
+        }
       }
       let frontRunTxs = await getFrontRunTxs(token.tokenAddress);
       let result = frontRunTxs.map(e => ({
+        tokenAddress: token.tokenAddress,
         timestamp: moment(parseInt(e.timestamp)).calendar(),
         action: e.action,
         amount_eth: e.amount_eth.toFixed(4),
