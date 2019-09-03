@@ -5,18 +5,27 @@
   "author": "thantsintoe",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev1": "nuxt",
+    "start": "MINIMAL=1 CSB=1 nuxt",
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start1": "nuxt start",
+    "start2": "yarn install --ignore-engines",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "precommit": "npm run lint"
   },
   "dependencies": {
+    "@0xcert/cert": "1.0.1",
+    "@0xcert/ethereum-asset-ledger": "1.0.1",
+    "@0xcert/ethereum-generic-provider": "1.0.1",
+    "@0xcert/ethereum-metamask-provider": "1.0.1",
+    "@0xcert/ethereum-order-gateway": "1.0.1",
+    "@0xcert/ethereum-value-ledger": "1.1.0-alpha0",
+    "@0xcert/vue-plugin": "1.0.1",
+    "@nuxtjs/axios": "^5.4.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.15",
     "@fortawesome/free-solid-svg-icons": "^5.7.2",
     "@fortawesome/vue-fontawesome": "^0.1.5",
-    "@nuxtjs/axios": "^5.3.6",
     "@nuxtjs/pwa": "^2.6.0",
     "aws-sdk": "^2.419.0",
     "bcrypt": "^3.0.4",
@@ -37,8 +46,8 @@
     "lightweight-charts": "^1.0.0-rc.5",
     "moment": "^2.24.0",
     "net": "^1.0.2",
-    "npm": "^6.8.0",
-    "nuxt": "^2.4.0",
+    "npm": "^6.11.0",
+    "nuxt": "^2.5.1",
     "ramda": "^0.26.1",
     "request-promise": "^4.2.4",
     "shardus-crypto-web": "gitlab:shardus/shardus-crypto-web",
@@ -51,7 +60,9 @@
     "vue-select": "^3.0.2",
     "vue-spinner": "^1.0.3",
     "vue-toasted": "^1.1.27",
-    "web3": "^1.0.0-beta.33"
+    "web3": "^1.0.0-beta.33",
+    "@nuxt/http": "^0.3.0",
+    "reqlim": "^0.0.0"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^0.0.1",
@@ -70,5 +81,8 @@
     "nodemon": "^1.18.9",
     "prettier": "1.14.3",
     "vue-friendly-iframe": "^0.12.0"
+  },
+  "engines": {
+    "node": "10.16.0"
   }
 }

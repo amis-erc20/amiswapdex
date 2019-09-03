@@ -1,32 +1,36 @@
-const pkg = require('./package')
+// const pkg = require("./package");
+import pkg from "./package.json";
 
 module.exports = {
-  mode: 'spa',
+  mode: "spa",
 
   /*
    ** Headers of the page
    */
   head: {
     // title: pkg.name,
-    title: 'UniswapDEX',
-    meta: [{
-        charset: 'utf-8'
+    title: "AmiswapDEX",
+    meta: [
+      {
+        charset: "utf-8"
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1'
+        name: "viewport",
+        content: "width=device-width, initial-scale=1"
       },
       {
-        hid: 'description',
-        name: 'description',
+        hid: "description",
+        name: "description",
         content: pkg.description
       }
     ],
-    link: [{
-      rel: 'icon',
-      type: 'image/x-icon',
-      href: '/favicon.ico'
-    }],
+    link: [
+      {
+        rel: "icon",
+        type: "image/x-icon",
+        href: "/favicon.ico"
+      }
+    ],
     script: []
   },
 
@@ -34,13 +38,13 @@ module.exports = {
    ** Customize the progress-bar color
    */
   loading: {
-    color: '#fff'
+    color: "#fff"
   },
 
   /*
    ** Global CSS
    */
-  css: ['~/assets/css/main.css'],
+  css: ["~/assets/css/main.css"],
 
   /*
    ** Plugins to load before mounting the App
@@ -52,18 +56,19 @@ module.exports = {
    */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios',
+    "@nuxtjs/axios",
     // Doc: https://bootstrap-vue.js.org/docs/
-    'bootstrap-vue/nuxt',
-    '@nuxtjs/pwa'
+    "bootstrap-vue/nuxt",
+    "@nuxtjs/pwa",
+    "./codesandbox"
   ],
   // workbox: {},
   manifest: {
-    name: 'UniswapDEX',
-    short_name: 'UniDEX',
-    lang: 'en',
-    display: 'standalone',
-    start_url: '/'
+    name: "UniswapDEX",
+    short_name: "UniDEX",
+    lang: "en",
+    display: "standalone",
+    start_url: "/"
     // icons: [
     // 	{
     // 		src: '/192px.png',
@@ -102,10 +107,10 @@ module.exports = {
     //     prettify: true
     //   }
     // },
-    bable: {
+    babel: {
       babelrc: false,
       cacheDirectory: undefined,
-      presets: ['@nuxt/babel-preset-app'],
+      presets: ["@nuxt/babel-preset-app"],
       minified: false
     },
     html: {
@@ -136,8 +141,8 @@ module.exports = {
   // dev: true,
   optimization: {
     minimize: false
-  },
+  }
   // generate: {
   //   minify: false
   // }
-}
+};
