@@ -4,6 +4,7 @@ UniswapDEX is an an open source front-end interface for Uniswap protocol. The ma
 
 This front-end interface is a SPA (Single Page Application) developed using vue.js and nuxt.js. Metamask wallet extension is required to submit the transactions.
 
+- [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/amis-erc20/amiswapdex/master)
 - Website: https://uniswapdex.com
 - Uniswap Protocol: uniswap.io
 - Developer team: https://shardus.com/#team
