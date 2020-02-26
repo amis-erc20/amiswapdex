@@ -2,5 +2,4 @@
 build-essential
 software-properties-common
 python2.7
-nvm
-npm
+node
