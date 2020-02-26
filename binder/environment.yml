@@ -6,6 +6,4 @@ dependencies:
   - pip
   - pytest
   - pip:
-      - nvm
       - node
-      - npm
