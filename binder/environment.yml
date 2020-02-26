@@ -3,7 +3,8 @@ name: amiswapdex
 #  - conda-forge
 dependencies:
   - python =3.7
+  - node
+  - nvm
+  - npm
   - pip
   - pytest
-  - pip:
-      - node
