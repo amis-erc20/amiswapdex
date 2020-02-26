@@ -4,4 +4,5 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 nvm ls-remote
 # npm config delete prefix
+npm config delete prefix
 bash; nvm install v12.16.1  use --delete-prefix v12.16.1
