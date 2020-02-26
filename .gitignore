@@ -12,6 +12,6 @@ pids
 *.seed
 *.pid.lock
 node_modules/
-dist/
+#dist/
 api-keys.js
 #.nuxt/
