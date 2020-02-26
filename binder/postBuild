@@ -11,5 +11,9 @@ nvm install 12.16
 node -v
 npm -v
 npm install
+npm run build
+npm install serve -g
+cd dist
+serve
 # npm run dev1
 # cd dist
