@@ -14,4 +14,4 @@ pids
 node_modules/
 dist/
 api-keys.js
-.nuxt/
+#.nuxt/
