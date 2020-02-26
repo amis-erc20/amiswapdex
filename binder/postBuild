@@ -10,4 +10,5 @@ nvm --version
 nvm install 12.16
 node -v
 npm -v
-npm install
+npm run dev
+cd dist
